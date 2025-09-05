@@ -1,121 +1,18 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yash Raj Pandey | Coming Soon</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0a0a0a;
-            color: #e2e8f0;
-            overflow: hidden;
-        }
-        #starfield {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-        }
-        .content-wrapper {
-            position: relative;
-            z-index: 1;
-        }
-        .glow-text {
-            text-shadow: 0 0 10px rgba(79, 70, 229, 0.5), 0 0 20px rgba(79, 70, 229, 0.3);
-        }
-    </style>
-</head>
-<body class="antialiased">
-
-    <canvas id="starfield"></canvas>
-
-    <div class="relative min-h-screen flex items-center justify-center p-4">
-        <div class="text-center space-y-4 content-wrapper">
-            <h1 class="text-5xl md:text-7xl font-extrabold text-white tracking-tight">
-                Yash Raj Pandey
-            </h1>
-            <p class="text-xl md:text-2xl text-slate-300">
-                Software & Data Engineer
-            </p>
-            <div class="pt-8">
-                <p class="text-3xl md:text-5xl font-bold text-indigo-400 animate-pulse glow-text">
-                    Coming Soon
-                </p>
-                <p class="text-slate-400 mt-4 max-w-md mx-auto">
-                    My new portfolio is under construction. I'm excited to share my work with you shortly!
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const canvas = document.getElementById('starfield');
-        const ctx = canvas.getContext('2d');
-
-        let stars = [];
-        let numStars = 500;
-
-        function setCanvasSize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            numStars = Math.floor((canvas.width * canvas.height) / 4000);
-        }
-
-        class Star {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 2 + 0.5;
-                this.speed = Math.random() * 0.5 + 0.1;
-                this.opacity = Math.random() * 0.5 + 0.5;
-            }
-
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(226, 232, 240, ${this.opacity})`;
-                ctx.fill();
-            }
-
-            update() {
-                this.y += this.speed;
-                if (this.y > canvas.height) {
-                    this.y = 0 - this.size;
-                    this.x = Math.random() * canvas.width;
-                }
-                this.draw();
-            }
-        }
-
-        function init() {
-            stars = [];
-            for (let i = 0; i < numStars; i++) {
-                stars.push(new Star());
-            }
-        }
-
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            stars.forEach(star => star.update());
-            requestAnimationFrame(animate);
-        }
-
-        window.addEventListener('resize', () => {
-            setCanvasSize();
-            init();
-        });
-
-        setCanvasSize();
-        init();
-        animate();
-    </script>
-
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="YashRajPandey" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Yash Raj Pandey | Portfolio</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
