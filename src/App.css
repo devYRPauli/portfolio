@@ -1,0 +1,97 @@
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  background-color: #0a0a0a;
+  color: #e2e8f0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes big-bang-effect {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(30);
+    opacity: 0;
+  }
+}
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 10px rgba(79, 70, 229, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(79, 70, 229, 0.8);
+  }
+}
+
+@keyframes countdown-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.7;
+  }
+}
+
+.button-glow {
+  position: relative;
+}
+
+.button-glow::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle at center,
+    rgba(79, 70, 229, 0.5),
+    transparent 70%
+  );
+  filter: blur(20px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.button-glow:hover::before {
+  opacity: 1;
+}
+
+.button-primary.button-glow:hover {
+  background-color: #4338ca;
+  transform: translateY(-2px);
+}
+
+.button-outline.button-glow:hover {
+  border-color: #4f46e5;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.init-button-hover:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 0 35px rgba(79, 70, 229, 0.9), 0 0 15px rgba(100, 100, 255, 0.7);
+}
