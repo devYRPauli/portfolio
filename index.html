@@ -4,36 +4,110 @@
   <meta charset="utf-8" />
   <title>Yash Raj Pandey — Coming Soon</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Personal site launching soon." />
-  <link rel="icon" href="/favicon.ico" />
+  <meta name="description" content="Yash Raj Pandey — new portfolio launching soon." />
+
   <style>
-    :root{color-scheme:dark light}
+    :root{
+      --cyan:#06b6d4;       /* signature cyan */
+      --blue:#3b82f6;       /* electric blue */
+      --mint:#10b981;       /* mint */
+      --deep:#0f172a;       /* deep space */
+      --soft:#1e293b;       /* soft blue */
+      --text:#e5e7eb;       /* light text */
+      --muted:#94a3b8;      /* muted text */
+
+      --github:#24292f;
+      --linkedin:#0A66C2;
+      --email:var(--cyan);
+    }
+
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0; display:grid; place-items:center; gap:1rem; text-align:center;
+      margin:0;
+      color:var(--text);
       font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif;
+      
       background:
-        radial-gradient(1200px 600px at 10% -10%, #4f46e5 0, transparent 60%),
-        radial-gradient(1000px 500px at 110% 10%, #06b6d4 0, transparent 55%),
-        #0b0b12; color:#e5e7eb;
+        radial-gradient(circle at 20% 15%, rgba(59,130,246,0.40), transparent 48%),
+        radial-gradient(circle at 80% 20%, rgba(6,182,212,0.40), transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(16,185,129,0.30), transparent 52%),
+        radial-gradient(circle at 90% 60%, rgba(30,41,59,0.45), transparent 48%),
+        linear-gradient(180deg, var(--deep) 0%, var(--soft) 50%, var(--deep) 100%);
+      animation:bgShift 22s ease-in-out infinite alternate;
+      overflow:hidden;
     }
-    h1{margin:0; font-size:clamp(2rem,5vw,3.5rem); letter-spacing:.3px}
-    p{margin:0; opacity:.8}
-    .pill{display:inline-block; margin-top:1rem; padding:.6rem 1rem; border:1px solid #3b3b4a; border-radius:999px}
-    a{color:#a5b4fc; text-decoration:none}
-    a:hover{text-decoration:underline}
+    @keyframes bgShift{
+      from { background-position: 0% 0%, 100% 0%, 50% 100%, 0% 0%, 0% 0%; }
+      to   { background-position: 30% 10%, 70% 20%, 50% 90%, 0% 0%, 0% 0%; }
+    }
+
+    .center{
+      min-height:100vh;
+      min-height:100svh;
+      display:grid;
+      place-items:center;
+      padding:24px;
+    }
+
+    .wrap{
+      text-align:center;
+      max-width:720px; width:100%;
+      margin-inline:auto;
+    }
+    h1{
+      margin:0 0 .25rem 0;
+      font-weight:800; letter-spacing:.3px;
+      font-size:clamp(2rem,5vw,3.25rem);
+    }
+    .tag{margin:0 0 1.25rem 0; color:var(--muted); font-size:clamp(1rem,2.5vw,1.125rem)}
+    .soon{
+      font-weight:800;
+      font-size:clamp(2rem,6vw,3.5rem);
+      background:linear-gradient(90deg, var(--cyan), var(--blue), #a78bfa);
+      -webkit-background-clip:text; background-clip:text; color:transparent;
+      margin:.25rem 0 1.25rem 0;
+    }
+
+    .links{
+      display:flex; gap:.75rem; justify-content:center; flex-wrap:wrap;
+      margin-top:.5rem;
+    }
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:.65rem 1.1rem; border-radius:999px; font-weight:700;
+      text-decoration:none; color:#fff; min-width:110px;
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:0 6px 20px rgba(0,0,0,.25);
+      transition:transform .15s ease, filter .15s ease;
+    }
+    .btn:hover{ transform:translateY(-1px); filter:brightness(1.05) }
+
+    .btn-gh   { background:var(--github) }
+    .btn-li   { background:var(--linkedin) }
+    .btn-mail { background:var(--email); color:#0b1220 }
+
+    .glass{
+      padding:38px 28px; border-radius:22px;
+      background:rgba(0,0,0,.20);
+      border:1px solid rgba(255,255,255,.10);
+      backdrop-filter:blur(10px);
+    }
   </style>
 </head>
 <body>
-  <main>
-    <h1>Yash Raj Pandey</h1>
-    <p>New portfolio is under construction. Launching soon.</p>
-    <div class="pill">
-      <a href="mailto:yashrajpandey.dev@gmail.com">Contact</a> ·
-      <a href="https://www.linkedin.com/in/yashrajpandey7/" rel="me">LinkedIn</a> ·
-      <a href="https://github.com/devYRPauli" rel="me">GitHub</a>
-    </div>
-  </main>
+  <div class="center">
+    <main class="wrap glass" aria-live="polite">
+      <h1>Yash Raj Pandey</h1>
+      <p class="tag">Software &amp; Data Engineer</p>
+      <div class="soon">Coming Soon</div>
+
+      <div class="links">
+        <a class="btn btn-gh"   href="https://github.com/devYRPauli"              target="_blank" rel="noopener">GitHub</a>
+        <a class="btn btn-li"   href="https://www.linkedin.com/in/yashrajpandeyy/" target="_blank" rel="noopener">LinkedIn</a>
+        <a class="btn btn-mail" href="mailto:yashpn62@gmail.com">Email</a>
+      </div>
+    </main>
+  </div>
 </body>
 </html>
