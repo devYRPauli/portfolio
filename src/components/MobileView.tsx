@@ -15,7 +15,12 @@ const MIN_HEIGHT: Record<string, number> = {
 function MobileCard({ item }: { item: Item }) {
   const setOpened = useStore((s) => s.setOpened);
   const expandable = isExpandable(item.kind);
-  const fullWidth = item.size === '2x2' || item.size === '2x1' || item.kind === 'timeline' || item.kind === 'module';
+  // Content-heavy cards (projects, playbooks) get the full row on mobile so their
+  // text isn't crushed into a half-width column.
+  const fullWidth =
+    item.size === '2x2' || item.size === '2x1' ||
+    item.kind === 'timeline' || item.kind === 'module' ||
+    item.kind === 'project' || item.kind === 'playbook';
 
   const style: CSSProperties = {
     gridColumn: fullWidth ? '1 / -1' : 'auto',

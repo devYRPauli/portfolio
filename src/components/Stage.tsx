@@ -234,6 +234,8 @@ function StatCard({ item, settled }: { item: Item; settled: boolean }) {
   const [val, setVal] = useState(0);
   useEffect(() => {
     if (!isNum || !settled) return;
+    // Respect reduced-motion: skip the animation, show the final number immediately.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setVal(target); return; }
     let raf = 0;
     const dur = 900;
     const start = performance.now();
