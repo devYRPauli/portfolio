@@ -59,10 +59,11 @@
   --stage-bottom: 56px;
   --stage-x: 56px;
 
-  /* Capped bento canvas — keeps boxes a sane size on large monitors instead of
-     stretching to fill the whole screen (which made cards huge + text tiny). */
-  --stage-max-w: 1180px;
-  --stage-max-h: 660px;
+  /* Capped bento canvas — clean side gutters (width cap) while filling most of the
+     vertical space so it doesn't float in a void. Boxes stay a sane size; text now
+     fills them since type was bumped up. */
+  --stage-max-w: 1320px;
+  --stage-max-h: 840px;
 }
 
 @media (max-width: 1200px) {
