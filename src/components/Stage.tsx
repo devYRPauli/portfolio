@@ -29,11 +29,10 @@ const LAYOUTS: Record<IslandId, Layout> = {
     cols: 4, rows: 3,
     cells: {
       'home-hero': '1 / 1 / 3 / 3',
-      'home-flow': '1 / 3 / 3 / 4',
-      'home-github': '1 / 4 / 2 / 5',
-      'home-email': '2 / 4 / 3 / 5',
-      'home-clock': '3 / 1 / 4 / 3',
-      'home-visitor': '3 / 3 / 4 / 5',
+      'home-facets': '1 / 3 / 3 / 4',
+      'home-visitor': '1 / 4 / 2 / 5',
+      'home-clock': '2 / 4 / 3 / 5',
+      'home-github': '3 / 1 / 4 / 5',
     },
   },
   work: {
@@ -114,6 +113,23 @@ function HomeHero({ item }: { item: Item }) {
         <div className="mono" style={{ fontSize: 10, color: 'var(--ink-dim)', letterSpacing: '0.12em', display: 'flex', alignItems: 'center', gap: 6 }}>
           <LiveDot color="var(--amber)" /> AVAILABLE
         </div>
+      </div>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 0, padding: 'var(--s-2) 0' }}>
+        <img
+          src="/memoji.png"
+          alt="Yash waving hello"
+          draggable={false}
+          style={{
+            height: 'clamp(116px, 17vh, 188px)',
+            width: 'auto',
+            objectFit: 'contain',
+            transformOrigin: '52% 88%',
+            animation: 'wave 3.6s var(--ease-cine) infinite',
+            filter: 'drop-shadow(0 16px 36px rgba(0,0,0,0.45))',
+            userSelect: 'none',
+            pointerEvents: 'none',
+          }}
+        />
       </div>
       <div>
         <div style={{ fontSize: 'clamp(34px, 4vw, 56px)', lineHeight: 1, fontWeight: 500, letterSpacing: '-0.03em', marginBottom: 'var(--s-3)' }}>
@@ -333,20 +349,49 @@ function FactCard({ item }: { item: Item }) {
   return inner;
 }
 
+const TIMELINE_HUES = ['var(--amber)', 'var(--cyan)', 'var(--green)', 'var(--violet)', 'var(--amber)'];
+
 function TimelineCard({ item }: { item: Item }) {
   const entries = item.timeline ?? [];
   return (
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
       <div className="eyebrow">{item.title}</div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'stretch', position: 'relative', padding: 'var(--s-3) 0' }}>
+        {/* base track */}
         <div style={{ position: 'absolute', left: 0, right: 0, top: '50%', height: 1, background: 'var(--line-2)' }} />
-        {entries.map((it, i) => (
-          <div key={it.year} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--s-2)', zIndex: 1, position: 'relative' }}>
-            <div className="mono" style={{ fontSize: 10, color: 'var(--ink-dim)', letterSpacing: '0.1em' }}>{it.year}</div>
-            <div style={{ width: 8, height: 8, borderRadius: '50%', background: i === entries.length - 1 ? 'var(--ink)' : 'var(--ink-mute)' }} />
-            <div style={{ fontSize: 11, fontWeight: 500, color: i === entries.length - 1 ? 'var(--ink)' : 'var(--ink-dim)' }}>{it.title}</div>
-          </div>
-        ))}
+        {/* animated colored track drawing left → right */}
+        <div
+          style={{
+            position: 'absolute', left: 0, right: 0, top: '50%', height: 2, borderRadius: 2,
+            background: 'linear-gradient(90deg, var(--amber), var(--cyan), var(--green), var(--violet), var(--amber))',
+            transformOrigin: 'left center',
+            animation: 'draw-line 1100ms var(--ease-cine) both',
+          }}
+        />
+        {entries.map((it, i) => {
+          const last = i === entries.length - 1;
+          const hue = TIMELINE_HUES[i % TIMELINE_HUES.length];
+          return (
+            <div
+              key={it.year}
+              style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--s-2)', zIndex: 1, position: 'relative',
+                animation: `rise-fade 420ms var(--ease-swift) both`, animationDelay: `${250 + i * 150}ms`,
+              }}
+            >
+              <div className="mono" style={{ fontSize: 10, color: 'var(--ink-dim)', letterSpacing: '0.1em' }}>{it.year}</div>
+              <div
+                style={{
+                  width: last ? 11 : 9, height: last ? 11 : 9, borderRadius: '50%',
+                  background: hue, boxShadow: `0 0 10px ${hue}`,
+                  animation: last ? 'ring 2.4s ease-in-out infinite' : undefined,
+                  animationDelay: last ? '1400ms' : undefined,
+                }}
+              />
+              <div style={{ fontSize: 11, fontWeight: 500, color: last ? 'var(--ink)' : 'var(--ink-dim)' }}>{it.title}</div>
+            </div>
+          );
+        })}
       </div>
       <div className="mono" style={{ fontSize: 10, color: 'var(--ink-mute)', letterSpacing: '0.1em' }}>FULL STORY IN ABOUT</div>
     </div>

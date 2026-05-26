@@ -1,5 +1,6 @@
-// Live aesthetic modules. Visitor uses real ipapi geolocation; the rest are decorative.
-import { useEffect, useState } from 'react';
+// Live aesthetic modules. Visitor uses real ipapi geolocation; GitHub uses real
+// contribution data; the rest are decorative.
+import { useEffect, useMemo, useState } from 'react';
 import type { Item } from '@/data/content';
 import { LiveDot } from './primitives';
 
@@ -35,42 +36,122 @@ function ClockModule() {
   );
 }
 
-function FlowModule() {
-  const [bars, setBars] = useState<number[]>(() => Array(14).fill(0).map(() => Math.random()));
+// The home centerpiece: cycles through the facets of who Yash is, each with its own
+// accent. Not "RAG guy" — range.
+const FACETS = [
+  { label: 'Architect.', sub: 'AI agents in production', color: 'var(--amber)' },
+  { label: 'Researcher.', sub: 'quantization on Apple Silicon', color: 'var(--cyan)' },
+  { label: 'Builder.', sub: '0 → 5M+ records shipped', color: 'var(--green)' },
+  { label: 'Football nerd.', sub: 'off the clock, always', color: 'var(--rose)' },
+];
+
+function FacetsModule() {
+  const [i, setI] = useState(0);
   useEffect(() => {
-    const id = setInterval(() => {
-      setBars((prev) =>
-        prev.map((_, i) => {
-          const target = 0.2 + Math.sin(Date.now() / 200 + i * 0.7) * 0.4 + Math.random() * 0.3;
-          return Math.max(0.08, Math.min(1, target));
-        }),
-      );
-    }, 120);
+    const id = setInterval(() => setI((x) => (x + 1) % FACETS.length), 2800);
     return () => clearInterval(id);
   }, []);
+  const f = FACETS[i];
   return (
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
-      <div className="eyebrow">Flow // Available</div>
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 'clamp(70px, 12vh, 120px)' }}>
-        {bars.map((v, i) => (
-          <div
-            key={i}
-            style={{
-              flex: 1,
-              height: `${v * 100}%`,
-              background: 'linear-gradient(180deg, var(--amber) 0%, var(--amber-soft) 100%)',
-              borderRadius: 2,
-              transition: 'height 180ms var(--ease-cine)',
-              boxShadow: '0 0 12px var(--amber-glow)',
-            }}
-          />
+      <div className="eyebrow">I am //</div>
+      <div style={{ minHeight: 0 }}>
+        <div key={i} style={{ animation: 'facet-in 520ms var(--ease-swift) both' }}>
+          <div style={{ fontSize: 'clamp(26px, 3vw, 40px)', fontWeight: 600, letterSpacing: '-0.02em', lineHeight: 1, color: f.color }}>{f.label}</div>
+          <div className="serif" style={{ fontSize: 'clamp(14px, 1.3vw, 18px)', fontStyle: 'italic', color: 'var(--ink-dim)', marginTop: 'var(--s-2)' }}>{f.sub}</div>
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 5 }}>
+        {FACETS.map((ff, k) => (
+          <div key={k} style={{ width: 22, height: 2, borderRadius: 2, background: k === i ? ff.color : 'var(--line-2)', transition: 'background 300ms' }} />
         ))}
       </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div className="mono" style={{ fontSize: 'clamp(18px, 2vw, 24px)' }}>ONLINE</div>
-        <LiveDot color="var(--amber)" />
-      </div>
     </div>
+  );
+}
+
+interface ContribDay { date: string; count: number; level: number; }
+const GH_USER = 'devYRPauli';
+const GH_COLORS = ['var(--gh-0)', 'var(--gh-1)', 'var(--gh-2)', 'var(--gh-3)', 'var(--gh-4)'];
+
+// Real GitHub contribution graph — fetched client-side, breathing green squares that
+// reveal left → right on load. Decorative if the fetch fails (graceful skeleton).
+function GithubGraphModule() {
+  const [days, setDays] = useState<ContribDay[] | null>(null);
+  const [total, setTotal] = useState<number | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`https://github-contributions-api.jogruber.de/v4/${GH_USER}?y=last`)
+      .then((r) => r.json())
+      .then((d: { total?: Record<string, number>; contributions?: ContribDay[] }) => {
+        if (cancelled) return;
+        const c = d.contributions ?? [];
+        setDays(c);
+        setTotal(d.total ? Object.values(d.total)[0] ?? null : c.reduce((s, x) => s + x.count, 0));
+      })
+      .catch(() => { if (!cancelled) setFailed(true); });
+    return () => { cancelled = true; };
+  }, []);
+
+  // Chunk days into week-columns, padding the front so column 1 aligns to weekday.
+  const weeks = useMemo(() => {
+    const src = days ?? Array.from({ length: 364 }, () => ({ date: '', count: 0, level: 0 }) as ContribDay);
+    const padded: (ContribDay | null)[] = [...src];
+    if (src.length && src[0].date) {
+      const lead = new Date(src[0].date).getDay();
+      for (let k = 0; k < lead; k++) padded.unshift(null);
+    }
+    const cols: (ContribDay | null)[][] = [];
+    for (let k = 0; k < padded.length; k += 7) cols.push(padded.slice(k, k + 7));
+    return cols;
+  }, [days]);
+
+  const loading = !days && !failed;
+
+  return (
+    <a
+      href={`https://github.com/${GH_USER}`}
+      target="_blank"
+      rel="noreferrer"
+      onClick={(e) => e.stopPropagation()}
+      style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%', color: 'inherit', textDecoration: 'none', gap: 'var(--s-3)' }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="eyebrow" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          Activity // GitHub {!loading && !failed && <LiveDot color="var(--green)" />}
+        </div>
+        <div className="mono" style={{ fontSize: 10, color: 'var(--ink-dim)', letterSpacing: '0.06em' }}>
+          {total != null ? `${total.toLocaleString()} contributions · @${GH_USER}` : `@${GH_USER}`}
+        </div>
+      </div>
+      <div
+        style={{
+          flex: 1, minHeight: 0, display: 'grid', gridAutoFlow: 'column',
+          gridTemplateColumns: `repeat(${weeks.length}, 1fr)`, gridTemplateRows: 'repeat(7, 1fr)',
+          gap: 'clamp(2px, 0.3vw, 4px)', alignContent: 'center',
+        }}
+      >
+        {weeks.map((col, ci) =>
+          col.map((d, ri) => {
+            const lvl = d?.level ?? 0;
+            const anim = days
+              ? lvl >= 4
+                ? { animation: 'cell-in 420ms var(--ease-swift) both, breathe 3.2s ease-in-out infinite', animationDelay: `${ci * 13}ms, ${700 + ci * 13}ms` }
+                : { animation: 'cell-in 420ms var(--ease-swift) both', animationDelay: `${ci * 13}ms` }
+              : {};
+            return (
+              <span
+                key={`${ci}-${ri}`}
+                title={d?.date ? `${d.date}: ${d.count} contributions` : undefined}
+                style={{ borderRadius: 2, background: GH_COLORS[lvl], opacity: loading ? 0.5 : 1, ...anim }}
+              />
+            );
+          }),
+        )}
+      </div>
+    </a>
   );
 }
 
@@ -166,7 +247,8 @@ function ManifestoModule() {
 export function renderModule(item: Item) {
   switch (item.moduleType) {
     case 'clock': return <ClockModule />;
-    case 'flow': return <FlowModule />;
+    case 'facets': return <FacetsModule />;
+    case 'github': return <GithubGraphModule />;
     case 'visitor': return <VisitorModule />;
     case 'ticker': return <TickerModule items={item.items} />;
     case 'manifesto': return <ManifestoModule />;

@@ -2,9 +2,9 @@
   /* Surface */
   --bg: #0b0b0d;
   --bg-2: #111114;
-  --ink: #ededec;
-  --ink-dim: #8e8e95;
-  --ink-mute: #5a5a62;
+  --ink: #f1f1ef;
+  --ink-dim: #a8a8b0;
+  --ink-mute: #7c7c85;
   --line: rgba(255, 255, 255, 0.06);
   --line-2: rgba(255, 255, 255, 0.1);
   --line-3: rgba(255, 255, 255, 0.18);
@@ -18,6 +18,18 @@
   --cyan: oklch(82% 0.11 210);
   --cyan-soft: oklch(82% 0.11 210 / 0.14);
   --cyan-glow: oklch(82% 0.11 210 / 0.28);
+
+  /* Facet accents — used only in the home "facets" reel + timeline nodes */
+  --green: oklch(80% 0.15 150);
+  --rose: oklch(74% 0.16 18);
+  --violet: oklch(72% 0.15 300);
+
+  /* GitHub contribution scale (dark) */
+  --gh-0: rgba(255, 255, 255, 0.05);
+  --gh-1: #0e4429;
+  --gh-2: #006d32;
+  --gh-3: #26a641;
+  --gh-4: #39d353;
 
   /* Type */
   --font-sans: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
@@ -100,6 +112,11 @@ button { cursor: pointer; }
 @keyframes rise-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes pop-in { 0% { opacity: 0; transform: scale(0.96); } 100% { opacity: 1; transform: scale(1); } }
 @keyframes spin-slow { to { transform: rotate(360deg); } }
+@keyframes wave { 0%, 100% { transform: rotate(-3deg) translateY(0); } 50% { transform: rotate(4deg) translateY(-7px); } }
+@keyframes draw-line { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes ring { 0%, 100% { box-shadow: 0 0 0 0 var(--amber-glow); } 50% { box-shadow: 0 0 0 7px transparent; } }
+@keyframes cell-in { from { opacity: 0; transform: scale(0.3); } to { opacity: 1; transform: scale(1); } }
+@keyframes facet-in { from { opacity: 0; transform: translateY(10px); filter: blur(3px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
 
 /* Utilities */
 .mono { font-family: var(--font-mono); font-feature-settings: 'ss01', 'zero'; }

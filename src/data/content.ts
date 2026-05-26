@@ -3,7 +3,7 @@ import type { IconName } from '@/icons';
 
 export type IslandId = 'home' | 'work' | 'about' | 'lab' | 'playbooks' | 'contact';
 export type Size = '1x1' | '1x2' | '2x1' | '2x2';
-export type ModuleType = 'flow' | 'clock' | 'visitor' | 'ticker' | 'manifesto';
+export type ModuleType = 'facets' | 'github' | 'clock' | 'visitor' | 'ticker' | 'manifesto';
 export type ToolType = 'token' | 'prompt' | 'json' | 'regex' | 'curl' | 'contrast';
 export type Kind =
   | 'hero' | 'aboutHero' | 'pbHero' | 'contactHero'
@@ -72,11 +72,10 @@ export const ISLAND_BY_ID: Record<string, Island> = Object.fromEntries(
 export const CONTENT: Record<IslandId, Item[]> = {
   home: [
     { id: 'home-hero', size: '2x2', kind: 'hero', label: 'Profile // 01' },
-    { id: 'home-flow', size: '1x2', kind: 'module', moduleType: 'flow' },
-    { id: 'home-github', size: '1x1', kind: 'link', title: 'GitHub', subtitle: 'devYRPauli', icon: 'Git', href: 'https://github.com/devYRPauli' },
-    { id: 'home-email', size: '1x1', kind: 'link', title: 'Mail', subtitle: 'yashpn62@gmail.com', icon: 'Mail', href: 'mailto:yashpn62@gmail.com' },
-    { id: 'home-clock', size: '2x1', kind: 'module', moduleType: 'clock' },
-    { id: 'home-visitor', size: '2x1', kind: 'module', moduleType: 'visitor' },
+    { id: 'home-facets', size: '1x2', kind: 'module', moduleType: 'facets' },
+    { id: 'home-visitor', size: '1x1', kind: 'module', moduleType: 'visitor' },
+    { id: 'home-clock', size: '1x1', kind: 'module', moduleType: 'clock' },
+    { id: 'home-github', size: '2x1', kind: 'module', moduleType: 'github' },
   ],
 
   work: [
