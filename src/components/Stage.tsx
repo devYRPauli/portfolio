@@ -228,11 +228,12 @@ function StatCard({ item, settled }: { item: Item; settled: boolean }) {
   // Count up the leading number when the island arrives, e.g. "5M+" → 0→5 then "M+".
   const raw = item.title ?? '';
   const m = raw.match(/^(\d+)(.*)$/);
+  const isNum = m !== null;
   const target = m ? parseInt(m[1], 10) : 0;
   const suffix = m ? m[2] : '';
   const [val, setVal] = useState(0);
   useEffect(() => {
-    if (!m || !settled) return;
+    if (!isNum || !settled) return;
     let raf = 0;
     const dur = 900;
     const start = performance.now();
@@ -244,8 +245,8 @@ function StatCard({ item, settled }: { item: Item; settled: boolean }) {
     };
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [settled, m, target]);
-  const display = m ? `${val}${suffix}` : raw;
+  }, [settled, target, isNum]);
+  const display = isNum ? `${val}${suffix}` : raw;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
       <div className="eyebrow">Metric</div>
