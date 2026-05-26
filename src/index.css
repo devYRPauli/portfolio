@@ -58,6 +58,11 @@
   --stage-top: 104px;
   --stage-bottom: 56px;
   --stage-x: 56px;
+
+  /* Capped bento canvas — keeps boxes a sane size on large monitors instead of
+     stretching to fill the whole screen (which made cards huge + text tiny). */
+  --stage-max-w: 1180px;
+  --stage-max-h: 660px;
 }
 
 @media (max-width: 1200px) {
@@ -123,8 +128,8 @@ button { cursor: pointer; }
 .serif { font-family: var(--font-serif); }
 .eyebrow {
   font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.18em;
+  font-size: 11px;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ink-dim);
 }

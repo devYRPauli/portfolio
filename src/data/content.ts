@@ -73,9 +73,10 @@ export const CONTENT: Record<IslandId, Item[]> = {
   home: [
     { id: 'home-hero', size: '2x2', kind: 'hero', label: 'Profile // 01' },
     { id: 'home-facets', size: '1x2', kind: 'module', moduleType: 'facets' },
+    { id: 'home-github', size: '1x1', kind: 'module', moduleType: 'github' },
     { id: 'home-visitor', size: '1x1', kind: 'module', moduleType: 'visitor' },
-    { id: 'home-clock', size: '1x1', kind: 'module', moduleType: 'clock' },
-    { id: 'home-github', size: '2x1', kind: 'module', moduleType: 'github' },
+    { id: 'home-clock', size: '2x1', kind: 'module', moduleType: 'clock' },
+    { id: 'home-email', size: '2x1', kind: 'link', title: 'Mail', subtitle: 'yashpn62@gmail.com', icon: 'Mail', href: 'mailto:yashpn62@gmail.com' },
   ],
 
   work: [

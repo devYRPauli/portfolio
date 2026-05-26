@@ -74,30 +74,30 @@ interface ContribDay { date: string; count: number; level: number; }
 const GH_USER = 'devYRPauli';
 const GH_COLORS = ['var(--gh-0)', 'var(--gh-1)', 'var(--gh-2)', 'var(--gh-3)', 'var(--gh-4)'];
 
-// Real GitHub contribution graph — fetched client-side, breathing green squares that
-// reveal left → right on load. Decorative if the fetch fails (graceful skeleton).
+// Real GitHub activity — last 30 days as a small square heatmap, fetched client-side.
+// Breathing on the brightest days; graceful skeleton if the fetch fails.
 function GithubGraphModule() {
   const [days, setDays] = useState<ContribDay[] | null>(null);
-  const [total, setTotal] = useState<number | null>(null);
+  const [total30, setTotal30] = useState<number | null>(null);
   const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     fetch(`https://github-contributions-api.jogruber.de/v4/${GH_USER}?y=last`)
       .then((r) => r.json())
-      .then((d: { total?: Record<string, number>; contributions?: ContribDay[] }) => {
+      .then((d: { contributions?: ContribDay[] }) => {
         if (cancelled) return;
-        const c = d.contributions ?? [];
-        setDays(c);
-        setTotal(d.total ? Object.values(d.total)[0] ?? null : c.reduce((s, x) => s + x.count, 0));
+        const last30 = (d.contributions ?? []).slice(-30);
+        setDays(last30);
+        setTotal30(last30.reduce((s, x) => s + x.count, 0));
       })
       .catch(() => { if (!cancelled) setFailed(true); });
     return () => { cancelled = true; };
   }, []);
 
-  // Chunk days into week-columns, padding the front so column 1 aligns to weekday.
+  // Weekday-aligned columns for the last 30 days (square cells, centered).
   const weeks = useMemo(() => {
-    const src = days ?? Array.from({ length: 364 }, () => ({ date: '', count: 0, level: 0 }) as ContribDay);
+    const src = days ?? Array.from({ length: 30 }, () => ({ date: '', count: 0, level: 0 }) as ContribDay);
     const padded: (ContribDay | null)[] = [...src];
     if (src.length && src[0].date) {
       const lead = new Date(src[0].date).getDay();
@@ -116,40 +116,34 @@ function GithubGraphModule() {
       target="_blank"
       rel="noreferrer"
       onClick={(e) => e.stopPropagation()}
-      style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%', color: 'inherit', textDecoration: 'none', gap: 'var(--s-3)' }}
+      style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%', color: 'inherit', textDecoration: 'none', gap: 'var(--s-2)' }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div className="eyebrow" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          Activity // GitHub {!loading && !failed && <LiveDot color="var(--green)" />}
-        </div>
-        <div className="mono" style={{ fontSize: 10, color: 'var(--ink-dim)', letterSpacing: '0.06em' }}>
-          {total != null ? `${total.toLocaleString()} contributions · @${GH_USER}` : `@${GH_USER}`}
+      <div className="eyebrow" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        GitHub {!loading && !failed && <LiveDot color="var(--green)" />}
+      </div>
+      <div style={{ flex: 1, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ display: 'grid', gridTemplateRows: 'repeat(7, 1fr)', gridAutoFlow: 'column', gap: 'clamp(3px, 0.4vw, 5px)', height: 'min(100%, 128px)' }}>
+          {weeks.map((col, ci) =>
+            col.map((d, ri) => {
+              const lvl = d?.level ?? 0;
+              const anim = days
+                ? lvl >= 4
+                  ? { animation: 'cell-in 360ms var(--ease-swift) both, breathe 3s ease-in-out infinite', animationDelay: `${ci * 45 + ri * 8}ms, ${500 + ci * 45}ms` }
+                  : { animation: 'cell-in 360ms var(--ease-swift) both', animationDelay: `${ci * 45 + ri * 8}ms` }
+                : {};
+              return (
+                <span
+                  key={`${ci}-${ri}`}
+                  title={d?.date ? `${d.date}: ${d.count} contributions` : undefined}
+                  style={{ aspectRatio: '1', borderRadius: 2, background: GH_COLORS[lvl], opacity: loading ? 0.5 : 1, ...anim }}
+                />
+              );
+            }),
+          )}
         </div>
       </div>
-      <div
-        style={{
-          flex: 1, minHeight: 0, display: 'grid', gridAutoFlow: 'column',
-          gridTemplateColumns: `repeat(${weeks.length}, 1fr)`, gridTemplateRows: 'repeat(7, 1fr)',
-          gap: 'clamp(2px, 0.3vw, 4px)', alignContent: 'center',
-        }}
-      >
-        {weeks.map((col, ci) =>
-          col.map((d, ri) => {
-            const lvl = d?.level ?? 0;
-            const anim = days
-              ? lvl >= 4
-                ? { animation: 'cell-in 420ms var(--ease-swift) both, breathe 3.2s ease-in-out infinite', animationDelay: `${ci * 13}ms, ${700 + ci * 13}ms` }
-                : { animation: 'cell-in 420ms var(--ease-swift) both', animationDelay: `${ci * 13}ms` }
-              : {};
-            return (
-              <span
-                key={`${ci}-${ri}`}
-                title={d?.date ? `${d.date}: ${d.count} contributions` : undefined}
-                style={{ borderRadius: 2, background: GH_COLORS[lvl], opacity: loading ? 0.5 : 1, ...anim }}
-              />
-            );
-          }),
-        )}
+      <div className="mono" style={{ fontSize: 11, color: 'var(--ink-dim)', letterSpacing: '0.05em' }}>
+        {total30 != null ? `${total30} in last 30 days · @${GH_USER}` : `@${GH_USER}`}
       </div>
     </a>
   );

@@ -30,9 +30,10 @@ const LAYOUTS: Record<IslandId, Layout> = {
     cells: {
       'home-hero': '1 / 1 / 3 / 3',
       'home-facets': '1 / 3 / 3 / 4',
-      'home-visitor': '1 / 4 / 2 / 5',
-      'home-clock': '2 / 4 / 3 / 5',
-      'home-github': '3 / 1 / 4 / 5',
+      'home-github': '1 / 4 / 2 / 5',
+      'home-visitor': '2 / 4 / 3 / 5',
+      'home-clock': '3 / 1 / 4 / 3',
+      'home-email': '3 / 3 / 4 / 5',
     },
   },
   work: {
@@ -158,7 +159,7 @@ function AboutHero({ item }: { item: Item }) {
         <div className="serif" style={{ fontSize: 'clamp(36px, 4vw, 52px)', lineHeight: 1, letterSpacing: '-0.02em', fontStyle: 'italic', marginBottom: 'var(--s-3)' }}>
           Driven by<br />precision.
         </div>
-        <div style={{ fontSize: 'clamp(13px, 1vw, 14px)', color: 'var(--ink-dim)', lineHeight: 1.6, maxWidth: 380 }}>
+        <div style={{ fontSize: 'clamp(14px, 1vw, 16px)', color: 'var(--ink-dim)', lineHeight: 1.6, maxWidth: 380 }}>
           Craft is not a stage of the process — it's the entire process.
         </div>
       </div>
@@ -180,7 +181,7 @@ function PlaybooksHero({ item }: { item: Item }) {
         <div className="serif" style={{ fontSize: 'clamp(36px, 4vw, 52px)', lineHeight: 1, letterSpacing: '-0.02em', fontStyle: 'italic', marginBottom: 'var(--s-3)' }}>
           Field notes.
         </div>
-        <div style={{ fontSize: 'clamp(13px, 1vw, 14px)', color: 'var(--ink-dim)', lineHeight: 1.6, maxWidth: 380 }}>
+        <div style={{ fontSize: 'clamp(14px, 1vw, 16px)', color: 'var(--ink-dim)', lineHeight: 1.6, maxWidth: 380 }}>
           Patterns from production LLM systems. What I'd build the same, and what I'd never build again.
         </div>
       </div>
@@ -202,7 +203,7 @@ function ContactHero({ item }: { item: Item }) {
         <div className="serif" style={{ fontSize: 'clamp(34px, 3.6vw, 48px)', lineHeight: 1.05, letterSpacing: '-0.02em', fontStyle: 'italic', marginBottom: 'var(--s-3)' }}>
           Let's build<br />something real.
         </div>
-        <div style={{ fontSize: 'clamp(13px, 1vw, 14px)', color: 'var(--ink-dim)', lineHeight: 1.6, marginBottom: 'var(--s-4)' }}>
+        <div style={{ fontSize: 'clamp(14px, 1vw, 16px)', color: 'var(--ink-dim)', lineHeight: 1.6, marginBottom: 'var(--s-4)' }}>
           Open to good conversations on AI infrastructure and local-first LLM systems.
         </div>
         <Pill accent icon={<I.Mail size={12} />} href="mailto:yashpn62@gmail.com">yashpn62@gmail.com</Pill>
@@ -217,7 +218,7 @@ function HeaderCard({ item }: { item: Item }) {
       <div className="eyebrow">{item.label}</div>
       <div>
         <div style={{ fontSize: 'clamp(22px, 2vw, 30px)', fontWeight: 500, letterSpacing: '-0.02em', lineHeight: 1.1 }}>{item.title}</div>
-        <div style={{ fontSize: 13, color: 'var(--ink-dim)', marginTop: 'var(--s-2)', lineHeight: 1.5 }}>{item.subtitle}</div>
+        <div style={{ fontSize: 14.5, color: 'var(--ink-dim)', marginTop: 'var(--s-2)', lineHeight: 1.5 }}>{item.subtitle}</div>
       </div>
     </div>
   );
@@ -229,7 +230,7 @@ function StatCard({ item }: { item: Item }) {
       <div className="eyebrow">Metric</div>
       <div>
         <div className="mono" style={{ fontSize: 'clamp(36px, 4vw, 56px)', fontWeight: 500, lineHeight: 1, color: 'var(--ink)' }}>{item.title}</div>
-        <div style={{ fontSize: 12, color: 'var(--ink-dim)', marginTop: 'var(--s-2)' }}>{item.subtitle}</div>
+        <div style={{ fontSize: 13, color: 'var(--ink-dim)', marginTop: 'var(--s-2)' }}>{item.subtitle}</div>
       </div>
     </div>
   );
@@ -252,8 +253,8 @@ function ProjectCard({ item }: { item: Item }) {
       </div>
       <div>
         <div style={{ fontSize: 'clamp(20px, 1.8vw, 26px)', fontWeight: 500, letterSpacing: '-0.02em', lineHeight: 1.1 }}>{item.title}</div>
-        <div className="serif" style={{ fontSize: 'clamp(13px, 1vw, 15px)', fontStyle: 'italic', color: 'var(--ink-dim)', marginTop: 4 }}>{item.subtitle}</div>
-        <div style={{ fontSize: 12.5, color: 'var(--ink-dim)', marginTop: 'var(--s-2)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{item.description}</div>
+        <div className="serif" style={{ fontSize: 'clamp(14px, 1.05vw, 16px)', fontStyle: 'italic', color: 'var(--ink-dim)', marginTop: 4 }}>{item.subtitle}</div>
+        <div style={{ fontSize: 14, color: 'var(--ink-dim)', marginTop: 'var(--s-2)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{item.description}</div>
       </div>
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
         {item.tags?.slice(0, 4).map((t) => <Tag key={t}>{t}</Tag>)}
@@ -272,7 +273,7 @@ function PlaybookCard({ item }: { item: Item }) {
       </div>
       <div>
         <div className="serif" style={{ fontSize: 'clamp(20px, 1.8vw, 26px)', fontStyle: 'italic', letterSpacing: '-0.01em', lineHeight: 1.1, whiteSpace: 'pre-line' }}>{item.title}</div>
-        <div style={{ fontSize: 12, color: 'var(--ink-dim)', marginTop: 'var(--s-2)', lineHeight: 1.5 }}>{item.subtitle}</div>
+        <div style={{ fontSize: 13, color: 'var(--ink-dim)', marginTop: 'var(--s-2)', lineHeight: 1.5 }}>{item.subtitle}</div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span className="mono" style={{ fontSize: 10, color: 'var(--ink-dim)', letterSpacing: '0.1em' }}>{item.read?.toUpperCase() || 'READ'}</span>
@@ -292,7 +293,7 @@ function ToolCard({ item }: { item: Item }) {
       </div>
       <div>
         <div style={{ fontSize: 'clamp(18px, 1.5vw, 22px)', fontWeight: 500, letterSpacing: '-0.02em', lineHeight: 1.1 }}>{item.title}</div>
-        <div className="serif" style={{ fontSize: 'clamp(13px, 1vw, 15px)', fontStyle: 'italic', color: 'var(--ink-dim)', marginTop: 'var(--s-1)', lineHeight: 1.3 }}>{item.subtitle}</div>
+        <div className="serif" style={{ fontSize: 'clamp(14px, 1.05vw, 16px)', fontStyle: 'italic', color: 'var(--ink-dim)', marginTop: 'var(--s-1)', lineHeight: 1.3 }}>{item.subtitle}</div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span className="mono" style={{ fontSize: 10, color: 'var(--ink-dim)', letterSpacing: '0.1em' }}>LAUNCH</span>
@@ -318,7 +319,7 @@ function LinkCard({ item }: { item: Item }) {
       </div>
       <div>
         <div style={{ fontSize: item.big ? 'clamp(18px, 1.5vw, 22px)' : 'clamp(14px, 1.1vw, 16px)', fontWeight: 500 }}>{item.title}</div>
-        <div className="mono" style={{ fontSize: 10, color: 'var(--ink-dim)', marginTop: 4, letterSpacing: '0.05em' }}>{item.subtitle}</div>
+        <div className="mono" style={{ fontSize: 11.5, color: 'var(--ink-dim)', marginTop: 4, letterSpacing: '0.05em' }}>{item.subtitle}</div>
       </div>
     </a>
   );
@@ -334,8 +335,8 @@ function FactCard({ item }: { item: Item }) {
       </div>
       <div>
         <div style={{ fontSize: 'clamp(16px, 1.4vw, 20px)', fontWeight: 500 }}>{item.title}</div>
-        <div className="mono" style={{ fontSize: 10, color: 'var(--ink-dim)', marginTop: 4, letterSpacing: '0.05em' }}>{item.subtitle}</div>
-        {item.description && <div style={{ fontSize: 12, color: 'var(--ink-dim)', marginTop: 'var(--s-2)', lineHeight: 1.5 }}>{item.description}</div>}
+        <div className="mono" style={{ fontSize: 11.5, color: 'var(--ink-dim)', marginTop: 4, letterSpacing: '0.05em' }}>{item.subtitle}</div>
+        {item.description && <div style={{ fontSize: 13, color: 'var(--ink-dim)', marginTop: 'var(--s-2)', lineHeight: 1.5 }}>{item.description}</div>}
       </div>
     </div>
   );
@@ -409,7 +410,7 @@ function LabBanner() {
         <div className="serif" style={{ fontSize: 'clamp(22px, 2vw, 30px)', fontStyle: 'italic', lineHeight: 1.05, letterSpacing: '-0.015em', marginBottom: 'var(--s-2)' }}>
           No signup. No tracking.
         </div>
-        <div style={{ fontSize: 12, color: 'var(--ink-dim)', lineHeight: 1.5 }}>Everything runs client-side. Your data never leaves the browser.</div>
+        <div style={{ fontSize: 13, color: 'var(--ink-dim)', lineHeight: 1.5 }}>Everything runs client-side. Your data never leaves the browser.</div>
       </div>
     </div>
   );
@@ -607,6 +608,9 @@ export default function Stage({ duration }: { duration?: number }) {
           left: 'var(--stage-x)',
           right: 'var(--stage-x)',
           bottom: 'var(--stage-bottom)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           opacity: stageStyle.opacity,
           transform: stageStyle.transform,
           filter: stageStyle.filter,
@@ -622,6 +626,8 @@ export default function Stage({ duration }: { duration?: number }) {
             gap: 'clamp(10px, 1vw, 16px)',
             width: '100%',
             height: '100%',
+            maxWidth: 'var(--stage-max-w)',
+            maxHeight: 'var(--stage-max-h)',
           }}
         >
           {items.map((item, i) => {
