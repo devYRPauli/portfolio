@@ -53,6 +53,7 @@ export interface Item {
   role?: string;
   status?: string;
   read?: string;
+  accent?: string;          // CSS color/var used to tint this card's icon, labels, hover glow
   caseStudy?: CaseStudy;
 }
 
@@ -86,7 +87,7 @@ export const CONTENT: Record<IslandId, Item[]> = {
       id: 'work-blue-omics', size: '2x2', kind: 'project',
       title: 'Blue Omics', subtitle: 'Full-stack research data platform',
       description: 'A Django, React, and PostgreSQL platform that grew from zero to 5M+ live records and became the primary system for an entire research lab.',
-      icon: 'DB', tags: ['Django', 'React', 'PostgreSQL', 'GCP'], year: '2025', role: 'Software Engineer to Lead', status: 'Live',
+      icon: 'DB', tags: ['Django', 'React', 'PostgreSQL', 'GCP'], year: '2025', role: 'Software Engineer to Lead', status: 'Live', accent: 'var(--cyan)',
       caseStudy: {
         problem: 'A research lab ran its data on a sprawl of spreadsheets and manual workflows. Submitting, searching, and cross-referencing records was slow, error-prone, and impossible to scale across 30+ researchers and 5 labs.',
         approach: [
@@ -109,7 +110,7 @@ export const CONTENT: Record<IslandId, Item[]> = {
       id: 'work-turboquant', size: '1x2', kind: 'project',
       title: 'TurboQuant on Apple Silicon', subtitle: 'CPU-only LLM quantization study',
       description: 'Independent evaluation of TurboQuant (arXiv 2504.19874) ported to run on Apple Silicon. Open source and reproducible.',
-      icon: 'Cpu', tags: ['LLM', 'Quantization', 'MLX', 'llama.cpp'], year: '2026', role: 'Solo · Open source', status: 'Public',
+      icon: 'Cpu', tags: ['LLM', 'Quantization', 'MLX', 'llama.cpp'], year: '2026', role: 'Solo · Open source', status: 'Public', accent: 'var(--amber)',
       href: 'https://github.com/devYRPauli/turboquant-m1pro-evaluation',
       caseStudy: {
         problem: 'TurboQuant is a near-optimal LLM weight and activation quantization method, but the reference path assumed dedicated GPU hardware. The open question: can it run, and hold long-context accuracy, on consumer Apple Silicon with no GPU?',
@@ -131,7 +132,7 @@ export const CONTENT: Record<IslandId, Item[]> = {
       id: 'work-applyscore', size: '1x2', kind: 'project',
       title: 'ApplyScore', subtitle: 'AI resume gap-analysis extension',
       description: 'A published Chrome extension that scores how well a resume matches any job posting on the web, with evidence-linked gaps and no fluff.',
-      icon: 'Search', tags: ['Chrome Extension', 'LLM', 'Shadow DOM', 'BYO-key'], year: '2026', role: 'Solo · Shipped', status: 'Live',
+      icon: 'Search', tags: ['Chrome Extension', 'LLM', 'Shadow DOM', 'BYO-key'], year: '2026', role: 'Solo · Shipped', status: 'Live', accent: 'var(--green)',
       href: 'https://chromewebstore.google.com/detail/applyscore/ibecekikdjelajpnjnmapejhahgcplim',
       caseStudy: {
         problem: 'Most AI resume tools hallucinate skills and rewrite bullets with confident fluff that recruiters see through instantly. The honest question, how well does this resume actually match this job, went unanswered.',
@@ -150,8 +151,8 @@ export const CONTENT: Record<IslandId, Item[]> = {
   about: [
     { id: 'about-hero', size: '2x2', kind: 'aboutHero', label: 'About // 03' },
     { id: 'about-manifesto', size: '1x2', kind: 'module', moduleType: 'manifesto' },
-    { id: 'about-records', size: '1x1', kind: 'stat', title: '5M+', subtitle: 'Records in production' },
-    { id: 'about-promotions', size: '1x1', kind: 'stat', title: '3', subtitle: 'Roles in 14 months' },
+    { id: 'about-records', size: '1x1', kind: 'stat', title: '5M+', subtitle: 'Records in production', accent: 'var(--cyan)' },
+    { id: 'about-promotions', size: '1x1', kind: 'stat', title: '3', subtitle: 'Roles in 14 months', accent: 'var(--amber)' },
     {
       id: 'about-timeline', size: '2x1', kind: 'timeline', title: 'The Journey',
       timeline: [
@@ -173,28 +174,28 @@ export const CONTENT: Record<IslandId, Item[]> = {
   lab: [
     { id: 'lab-header', size: '2x1', kind: 'header', label: 'Lab // 04', title: 'Builder Tools', subtitle: 'Free, client-side. Your data never leaves the browser.' },
     { id: 'lab-tagline', size: '2x1', kind: 'labBanner' },
-    { id: 'lab-token', size: '2x2', kind: 'tool', toolType: 'token', label: 'Tool 01', title: 'Token Counter', subtitle: 'Cost across frontier models, side-by-side', icon: 'Cpu' },
-    { id: 'lab-prompt', size: '2x2', kind: 'tool', toolType: 'prompt', label: 'Tool 02', title: 'Prompt Formatter', subtitle: 'Restructure raw prompts into blocks', icon: 'Sparkle' },
-    { id: 'lab-json', size: '2x2', kind: 'tool', toolType: 'json', label: 'Tool 03', title: 'JSON to Schema', subtitle: 'Generate Pydantic / Zod / TypeScript', icon: 'Code' },
-    { id: 'lab-regex', size: '2x2', kind: 'tool', toolType: 'regex', label: 'Tool 04', title: 'Regex Playground', subtitle: 'Test, explain, match in real-time', icon: 'Search' },
-    { id: 'lab-curl', size: '2x2', kind: 'tool', toolType: 'curl', label: 'Tool 05', title: 'cURL Converter', subtitle: 'cURL to fetch / Python requests / httpx', icon: 'Terminal' },
-    { id: 'lab-contrast', size: '2x2', kind: 'tool', toolType: 'contrast', label: 'Tool 06', title: 'Contrast Checker', subtitle: 'WCAG AA/AAA with live preview', icon: 'Eye' },
+    { id: 'lab-token', size: '2x2', kind: 'tool', toolType: 'token', label: 'Tool 01', title: 'Token Counter', subtitle: 'Cost across frontier models, side-by-side', icon: 'Cpu', accent: 'var(--amber)' },
+    { id: 'lab-prompt', size: '2x2', kind: 'tool', toolType: 'prompt', label: 'Tool 02', title: 'Prompt Formatter', subtitle: 'Restructure raw prompts into blocks', icon: 'Sparkle', accent: 'var(--cyan)' },
+    { id: 'lab-json', size: '2x2', kind: 'tool', toolType: 'json', label: 'Tool 03', title: 'JSON to Schema', subtitle: 'Generate Pydantic / Zod / TypeScript', icon: 'Code', accent: 'var(--green)' },
+    { id: 'lab-regex', size: '2x2', kind: 'tool', toolType: 'regex', label: 'Tool 04', title: 'Regex Playground', subtitle: 'Test, explain, match in real-time', icon: 'Search', accent: 'var(--violet)' },
+    { id: 'lab-curl', size: '2x2', kind: 'tool', toolType: 'curl', label: 'Tool 05', title: 'cURL Converter', subtitle: 'cURL to fetch / Python requests / httpx', icon: 'Terminal', accent: 'var(--rose)' },
+    { id: 'lab-contrast', size: '2x2', kind: 'tool', toolType: 'contrast', label: 'Tool 06', title: 'Contrast Checker', subtitle: 'WCAG AA/AAA with live preview', icon: 'Eye', accent: 'var(--cyan)' },
   ],
 
   playbooks: [
     { id: 'pb-header', size: '2x2', kind: 'pbHero', label: 'Playbooks // 05' },
-    { id: 'pb-count', size: '2x1', kind: 'stat', title: '3', subtitle: 'Battle-tested plays' },
-    { id: 'pb-local-llm', size: '1x2', kind: 'playbook', playbookId: 'local-llm', label: 'Play 01', title: 'Self-Hosting\nOpen-Weight LLMs', subtitle: 'Run capable models locally without sending data to a cloud API', icon: 'Cpu', read: '8 min' },
-    { id: 'pb-rag', size: '1x2', kind: 'playbook', playbookId: 'rag-quality', label: 'Play 02', title: 'RAG That Holds Up\nin Production', subtitle: 'Retrieval, reranking, and the evals that keep it honest', icon: 'Layers', read: '10 min' },
-    { id: 'pb-eval', size: '2x1', kind: 'playbook', playbookId: 'eval-gated', label: 'Play 03', title: 'Evaluation-Gated Releases for LLM Systems', subtitle: 'Stop shipping regressions you cannot see', icon: 'DB', read: '9 min' },
+    { id: 'pb-count', size: '2x1', kind: 'stat', title: '3', subtitle: 'Battle-tested plays', accent: 'var(--amber)' },
+    { id: 'pb-local-llm', size: '1x2', kind: 'playbook', playbookId: 'local-llm', label: 'Play 01', title: 'Self-Hosting\nOpen-Weight LLMs', subtitle: 'Run capable models locally without sending data to a cloud API', icon: 'Cpu', read: '8 min', accent: 'var(--amber)' },
+    { id: 'pb-rag', size: '1x2', kind: 'playbook', playbookId: 'rag-quality', label: 'Play 02', title: 'RAG That Holds Up\nin Production', subtitle: 'Retrieval, reranking, and the evals that keep it honest', icon: 'Layers', read: '10 min', accent: 'var(--cyan)' },
+    { id: 'pb-eval', size: '2x1', kind: 'playbook', playbookId: 'eval-gated', label: 'Play 03', title: 'Evaluation-Gated Releases for LLM Systems', subtitle: 'Stop shipping regressions you cannot see', icon: 'DB', read: '9 min', accent: 'var(--green)' },
   ],
 
   contact: [
     { id: 'contact-hero', size: '2x2', kind: 'contactHero', label: 'Contact // 06' },
-    { id: 'contact-linkedin', size: '1x2', kind: 'link', title: 'LinkedIn', subtitle: '/in/yashrajpandeyy', icon: 'Linked', href: 'https://www.linkedin.com/in/yashrajpandeyy', big: true },
-    { id: 'contact-github', size: '1x2', kind: 'link', title: 'GitHub', subtitle: 'devYRPauli', icon: 'Git', href: 'https://github.com/devYRPauli', big: true },
-    { id: 'contact-location', size: '2x1', kind: 'fact', title: 'Gainesville, FL', subtitle: 'Eastern Time / UTC-5', description: 'University of Florida / IFAS.', icon: 'Map' },
-    { id: 'contact-avail', size: '2x1', kind: 'fact', title: 'Open to Conversations', subtitle: 'AI infrastructure / Local-first LLMs', description: 'Always up for a good conversation on building AI that runs in production.', icon: 'Zap', status: 'live' },
+    { id: 'contact-linkedin', size: '1x2', kind: 'link', title: 'LinkedIn', subtitle: '/in/yashrajpandeyy', icon: 'Linked', href: 'https://www.linkedin.com/in/yashrajpandeyy', big: true, accent: 'var(--cyan)' },
+    { id: 'contact-github', size: '1x2', kind: 'link', title: 'GitHub', subtitle: 'devYRPauli', icon: 'Git', href: 'https://github.com/devYRPauli', big: true, accent: 'var(--violet)' },
+    { id: 'contact-location', size: '2x1', kind: 'fact', title: 'Gainesville, FL', subtitle: 'Eastern Time / UTC-5', description: 'University of Florida / IFAS.', icon: 'Map', accent: 'var(--amber)' },
+    { id: 'contact-avail', size: '2x1', kind: 'fact', title: 'Open to Conversations', subtitle: 'AI infrastructure / Local-first LLMs', description: 'Always up for a good conversation on building AI that runs in production.', icon: 'Zap', status: 'live', accent: 'var(--green)' },
   ],
 };
 

@@ -229,7 +229,7 @@ function StatCard({ item }: { item: Item }) {
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
       <div className="eyebrow">Metric</div>
       <div>
-        <div className="mono" style={{ fontSize: 'clamp(36px, 4vw, 56px)', fontWeight: 500, lineHeight: 1, color: 'var(--ink)' }}>{item.title}</div>
+        <div className="mono" style={{ fontSize: 'clamp(36px, 4vw, 56px)', fontWeight: 500, lineHeight: 1, color: item.accent ?? 'var(--ink)' }}>{item.title}</div>
         <div style={{ fontSize: 13, color: 'var(--ink-dim)', marginTop: 'var(--s-2)' }}>{item.subtitle}</div>
       </div>
     </div>
@@ -247,8 +247,8 @@ function ProjectCard({ item }: { item: Item }) {
           <span>{item.role}</span>
         </div>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--s-2)', flexShrink: 0 }}>
-          <LiveDot color="var(--cyan)" />
-          <IconCmp size={16} style={{ color: 'var(--ink-dim)' }} />
+          <LiveDot color={item.accent ?? 'var(--cyan)'} />
+          <IconCmp size={16} style={{ color: item.accent ?? 'var(--ink-dim)' }} />
         </div>
       </div>
       <div>
@@ -265,19 +265,20 @@ function ProjectCard({ item }: { item: Item }) {
 
 function PlaybookCard({ item }: { item: Item }) {
   const IconCmp = iconOf(item.icon, 'Book');
+  const accent = item.accent ?? 'var(--ink-dim)';
   return (
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%', gap: 'var(--s-3)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div className="eyebrow">{item.label}</div>
-        <IconCmp size={16} style={{ color: 'var(--ink-dim)' }} />
+        <IconCmp size={16} style={{ color: accent }} />
       </div>
       <div>
         <div className="serif" style={{ fontSize: 'clamp(20px, 1.8vw, 26px)', fontStyle: 'italic', letterSpacing: '-0.01em', lineHeight: 1.1, whiteSpace: 'pre-line' }}>{item.title}</div>
         <div style={{ fontSize: 13, color: 'var(--ink-dim)', marginTop: 'var(--s-2)', lineHeight: 1.5 }}>{item.subtitle}</div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span className="mono" style={{ fontSize: 10, color: 'var(--ink-dim)', letterSpacing: '0.1em' }}>{item.read?.toUpperCase() || 'READ'}</span>
-        <I.Arrow size={14} style={{ color: 'var(--ink-dim)' }} />
+        <span className="mono" style={{ fontSize: 11, color: accent, letterSpacing: '0.1em' }}>{item.read?.toUpperCase() || 'READ'}</span>
+        <I.Arrow size={14} style={{ color: accent }} />
       </div>
     </div>
   );
@@ -285,19 +286,20 @@ function PlaybookCard({ item }: { item: Item }) {
 
 function ToolCard({ item }: { item: Item }) {
   const IconCmp = iconOf(item.icon, 'Flask');
+  const accent = item.accent ?? 'var(--ink-dim)';
   return (
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div className="eyebrow">{item.label}</div>
-        <IconCmp size={16} style={{ color: 'var(--ink-dim)' }} />
+        <IconCmp size={16} style={{ color: accent }} />
       </div>
       <div>
         <div style={{ fontSize: 'clamp(18px, 1.5vw, 22px)', fontWeight: 500, letterSpacing: '-0.02em', lineHeight: 1.1 }}>{item.title}</div>
         <div className="serif" style={{ fontSize: 'clamp(14px, 1.05vw, 16px)', fontStyle: 'italic', color: 'var(--ink-dim)', marginTop: 'var(--s-1)', lineHeight: 1.3 }}>{item.subtitle}</div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span className="mono" style={{ fontSize: 10, color: 'var(--ink-dim)', letterSpacing: '0.1em' }}>LAUNCH</span>
-        <I.ArrowUR size={14} style={{ color: 'var(--ink-dim)' }} />
+        <span className="mono" style={{ fontSize: 11, color: accent, letterSpacing: '0.1em' }}>LAUNCH</span>
+        <I.ArrowUR size={14} style={{ color: accent }} />
       </div>
     </div>
   );
@@ -314,7 +316,7 @@ function LinkCard({ item }: { item: Item }) {
       style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%', color: 'inherit', textDecoration: 'none' }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <IconCmp size={item.big ? 22 : 16} style={{ color: 'var(--ink-dim)' }} />
+        <IconCmp size={item.big ? 22 : 16} style={{ color: item.accent ?? 'var(--ink-dim)' }} />
         <I.ArrowUR size={12} style={{ color: 'var(--ink-mute)' }} />
       </div>
       <div>
@@ -330,8 +332,8 @@ function FactCard({ item }: { item: Item }) {
   const inner = (
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <IconCmp size={16} style={{ color: 'var(--ink-dim)' }} />
-        {item.href ? <I.ArrowUR size={12} style={{ color: 'var(--ink-mute)' }} /> : item.status === 'live' && <LiveDot color="var(--cyan)" />}
+        <IconCmp size={16} style={{ color: item.accent ?? 'var(--ink-dim)' }} />
+        {item.href ? <I.ArrowUR size={12} style={{ color: 'var(--ink-mute)' }} /> : item.status === 'live' && <LiveDot color={item.accent ?? 'var(--cyan)'} />}
       </div>
       <div>
         <div style={{ fontSize: 'clamp(16px, 1.4vw, 20px)', fontWeight: 500 }}>{item.title}</div>
@@ -354,42 +356,46 @@ const TIMELINE_HUES = ['var(--amber)', 'var(--cyan)', 'var(--green)', 'var(--vio
 
 function TimelineCard({ item }: { item: Item }) {
   const entries = item.timeline ?? [];
+  const n = entries.length;
+  const DRAW = 1700; // ms for the colored line to sweep fully across
+  // Each node lights up as the sweep reaches its position (left → right).
+  const litAt = (i: number) => 200 + (i / Math.max(1, n - 1)) * (DRAW - 250);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
       <div className="eyebrow">{item.title}</div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'stretch', position: 'relative', padding: 'var(--s-3) 0' }}>
-        {/* base track */}
-        <div style={{ position: 'absolute', left: 0, right: 0, top: '50%', height: 1, background: 'var(--line-2)' }} />
-        {/* animated colored track drawing left → right */}
+        {/* dim base track (always visible) */}
+        <div style={{ position: 'absolute', left: 0, right: 0, top: '50%', height: 2, borderRadius: 2, background: 'var(--line-2)' }} />
+        {/* colored track that sweeps in left → right */}
         <div
           style={{
             position: 'absolute', left: 0, right: 0, top: '50%', height: 2, borderRadius: 2,
             background: 'linear-gradient(90deg, var(--amber), var(--cyan), var(--green), var(--violet), var(--amber))',
             transformOrigin: 'left center',
-            animation: 'draw-line 1100ms var(--ease-cine) both',
+            animation: `draw-line ${DRAW}ms var(--ease-cine) both`,
           }}
         />
         {entries.map((it, i) => {
-          const last = i === entries.length - 1;
+          const last = i === n - 1;
           const hue = TIMELINE_HUES[i % TIMELINE_HUES.length];
+          const delay = litAt(i);
           return (
-            <div
-              key={it.year}
-              style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--s-2)', zIndex: 1, position: 'relative',
-                animation: `rise-fade 420ms var(--ease-swift) both`, animationDelay: `${250 + i * 150}ms`,
-              }}
-            >
-              <div className="mono" style={{ fontSize: 10, color: 'var(--ink-dim)', letterSpacing: '0.1em' }}>{it.year}</div>
-              <div
-                style={{
-                  width: last ? 11 : 9, height: last ? 11 : 9, borderRadius: '50%',
-                  background: hue, boxShadow: `0 0 10px ${hue}`,
-                  animation: last ? 'ring 2.4s ease-in-out infinite' : undefined,
-                  animationDelay: last ? '1400ms' : undefined,
-                }}
-              />
-              <div style={{ fontSize: 11, fontWeight: 500, color: last ? 'var(--ink)' : 'var(--ink-dim)' }}>{it.title}</div>
+            <div key={it.year} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--s-2)', zIndex: 1, position: 'relative' }}>
+              {/* year — visible but dim, brightens when the sweep arrives */}
+              <div className="mono" style={{ fontSize: 10, color: 'var(--ink)', letterSpacing: '0.1em', opacity: 0.32, animation: 'label-lit 460ms ease both', animationDelay: `${delay}ms` }}>{it.year}</div>
+              {/* dot: grey base + colored overlay that lights up in sequence */}
+              <div style={{ position: 'relative', width: last ? 12 : 10, height: last ? 12 : 10 }}>
+                <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'var(--ink-mute)' }} />
+                <div
+                  style={{
+                    position: 'absolute', inset: 0, borderRadius: '50%', background: hue, boxShadow: `0 0 10px ${hue}`, opacity: 0,
+                    animation: last ? 'dot-lit 460ms var(--ease-swift) both, ring 2.4s ease-in-out infinite' : 'dot-lit 460ms var(--ease-swift) both',
+                    animationDelay: last ? `${delay}ms, ${delay + 500}ms` : `${delay}ms`,
+                  }}
+                />
+              </div>
+              {/* title — visible but dim, brightens when the sweep arrives */}
+              <div style={{ fontSize: 11, fontWeight: 500, color: 'var(--ink)', textAlign: 'center', opacity: 0.32, animation: 'label-lit 460ms ease both', animationDelay: `${delay}ms` }}>{it.title}</div>
             </div>
           );
         })}
@@ -453,12 +459,16 @@ function BentoCard({ item, area, entryStyle, onOpen }: { item: Item; area: strin
         ? 'translateY(-2px)'
         : 'translateY(0)';
 
+  const accent = item.accent;
+  const hoverBorder = accent ? `color-mix(in oklch, ${accent} 55%, var(--line-3))` : 'var(--line-3)';
+  const hoverGlow = accent ? `color-mix(in oklch, ${accent} 24%, transparent)` : 'rgba(212,165,116,0.06)';
+
   const style: CSSProperties = {
     gridArea: area,
     position: 'relative',
     padding: 'clamp(14px, 1.6vw, 22px)',
     background: hover && expandable ? 'rgba(255,255,255,0.025)' : 'var(--glass)',
-    border: `1px solid ${hover && expandable ? 'var(--line-3)' : 'var(--line-2)'}`,
+    border: `1px solid ${hover && expandable ? hoverBorder : 'var(--line-2)'}`,
     borderRadius: 'var(--r-md)',
     overflow: 'hidden',
     isolation: 'isolate',
@@ -468,7 +478,7 @@ function BentoCard({ item, area, entryStyle, onOpen }: { item: Item; area: strin
       : 'opacity 360ms var(--ease-swift), border-color 140ms var(--ease-swift), transform 160ms cubic-bezier(0.34, 1.56, 0.64, 1), background 140ms var(--ease-swift)',
     transform,
     opacity: entryStyle ? entryStyle.opacity : 1,
-    boxShadow: hover && expandable ? '0 8px 24px rgba(0,0,0,0.25), 0 0 0 1px rgba(212,165,116,0.06)' : 'none',
+    boxShadow: hover && expandable ? `0 8px 24px rgba(0,0,0,0.25), 0 0 0 1px ${hoverGlow}` : 'none',
     minHeight: 0,
     minWidth: 0,
     willChange: entryStyle ? 'transform, opacity' : undefined,
