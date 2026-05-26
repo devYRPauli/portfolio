@@ -1,9 +1,10 @@
 // Detail overlay — project case study, playbook, tool launcher, long-form bio.
-import { Suspense, lazy, useEffect } from 'react';
+import { Suspense, lazy, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { PLAYBOOKS, type Item } from '@/data/content';
 import { I } from '@/icons';
 import { useStore } from '@/store/useStore';
+import { useFocusTrap } from '@/lib/useFocusTrap';
 import { Tag, LiveDot, Code, Pill } from './primitives';
 
 const ToolRenderer = lazy(() => import('./tools'));
@@ -210,6 +211,8 @@ function kindLabel(item: Item): string {
 export default function DetailView() {
   const item = useStore((s) => s.opened);
   const setOpened = useStore((s) => s.setOpened);
+  const modalRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(modalRef);
 
   useEffect(() => {
     if (!item) return;
@@ -226,9 +229,12 @@ export default function DetailView() {
       style={{ position: 'fixed', inset: 0, zIndex: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 'clamp(16px, 3vw, 40px)', background: 'rgba(5,5,7,0.78)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', animation: 'rise-fade 220ms var(--ease-swift) both' }}
     >
       <div
+        ref={modalRef}
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
+        aria-label={item.title ?? kindLabel(item)}
         style={{ width: 'min(1100px, 100%)', maxHeight: '90vh', background: 'var(--bg-2)', border: '1px solid var(--line-2)', borderRadius: 'var(--r-lg)', boxShadow: '0 40px 100px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.02) inset', overflowY: 'auto', padding: 'clamp(24px, 3vw, 40px) clamp(20px, 3vw, 48px) clamp(40px, 5vw, 64px)', animation: 'pop-in 260ms var(--ease-swift) both' }}
       >
         <div style={{ position: 'sticky', top: 'clamp(-24px, -3vw, -40px)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, padding: '16px 0', marginTop: 'clamp(-24px, -3vw, -40px)', borderBottom: '1px solid var(--line)', background: 'var(--bg-2)', zIndex: 1 }}>
