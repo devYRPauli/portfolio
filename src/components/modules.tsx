@@ -182,6 +182,8 @@ function VisitorModule() {
   );
 }
 
+const TICKER_HUES = ['var(--amber)', 'var(--cyan)', 'var(--green)', 'var(--violet)'];
+
 function TickerModule({ items }: { items?: string[] }) {
   const source = items?.length ? items : ['React', 'TypeScript', 'Python'];
   const content = [...source, ...source, ...source, ...source];
@@ -194,7 +196,7 @@ function TickerModule({ items }: { items?: string[] }) {
             <span
               key={i}
               className="mono"
-              style={{ fontSize: 14, padding: '0 18px', color: i % 3 === 1 ? 'var(--amber)' : 'var(--ink)', display: 'inline-flex', alignItems: 'center', gap: 10 }}
+              style={{ fontSize: 14, padding: '0 18px', color: TICKER_HUES[i % TICKER_HUES.length], display: 'inline-flex', alignItems: 'center', gap: 10 }}
             >
               {it}
               <span style={{ color: 'var(--ink-mute)' }}>/</span>

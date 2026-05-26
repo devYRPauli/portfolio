@@ -1,6 +1,6 @@
 // Viewport-fit stage — one screen per island, no scroll. Cards lay out in a fixed grid
 // that fills the safe viewport area; islands swap via the camera transition.
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { CONTENT, ISLANDS, ISLAND_BY_ID, type IslandId, type Item } from '@/data/content';
 import { I, type IconName } from '@/icons';
@@ -125,7 +125,7 @@ function HomeHero({ item }: { item: Item }) {
             width: 'auto',
             objectFit: 'contain',
             transformOrigin: '52% 88%',
-            animation: 'wave 3.6s var(--ease-cine) infinite',
+            animation: 'greet 1000ms var(--ease-cine) both, wave 3.6s var(--ease-cine) 1000ms infinite',
             filter: 'drop-shadow(0 16px 36px rgba(0,0,0,0.45))',
             userSelect: 'none',
             pointerEvents: 'none',
@@ -224,12 +224,33 @@ function HeaderCard({ item }: { item: Item }) {
   );
 }
 
-function StatCard({ item }: { item: Item }) {
+function StatCard({ item, settled }: { item: Item; settled: boolean }) {
+  // Count up the leading number when the island arrives, e.g. "5M+" → 0→5 then "M+".
+  const raw = item.title ?? '';
+  const m = raw.match(/^(\d+)(.*)$/);
+  const target = m ? parseInt(m[1], 10) : 0;
+  const suffix = m ? m[2] : '';
+  const [val, setVal] = useState(0);
+  useEffect(() => {
+    if (!m || !settled) return;
+    let raf = 0;
+    const dur = 900;
+    const start = performance.now();
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - start) / dur);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setVal(Math.round(eased * target));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [settled, m, target]);
+  const display = m ? `${val}${suffix}` : raw;
   return (
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
       <div className="eyebrow">Metric</div>
       <div>
-        <div className="mono" style={{ fontSize: 'clamp(36px, 4vw, 56px)', fontWeight: 500, lineHeight: 1, color: item.accent ?? 'var(--ink)' }}>{item.title}</div>
+        <div className="mono" style={{ fontSize: 'clamp(36px, 4vw, 56px)', fontWeight: 500, lineHeight: 1, color: item.accent ?? 'var(--ink)' }}>{display}</div>
         <div style={{ fontSize: 13, color: 'var(--ink-dim)', marginTop: 'var(--s-2)' }}>{item.subtitle}</div>
       </div>
     </div>
@@ -354,11 +375,12 @@ function FactCard({ item }: { item: Item }) {
 
 const TIMELINE_HUES = ['var(--amber)', 'var(--cyan)', 'var(--green)', 'var(--violet)', 'var(--amber)'];
 
-function TimelineCard({ item }: { item: Item }) {
+function TimelineCard({ item, settled }: { item: Item; settled: boolean }) {
   const entries = item.timeline ?? [];
   const n = entries.length;
   const DRAW = 1700; // ms for the colored line to sweep fully across
   // Each node lights up as the sweep reaches its position (left → right).
+  // The whole reveal only plays once the camera has arrived (settled), then holds lit.
   const litAt = (i: number) => 200 + (i / Math.max(1, n - 1)) * (DRAW - 250);
   return (
     <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', height: '100%' }}>
@@ -366,13 +388,14 @@ function TimelineCard({ item }: { item: Item }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'stretch', position: 'relative', padding: 'var(--s-3) 0' }}>
         {/* dim base track (always visible) */}
         <div style={{ position: 'absolute', left: 0, right: 0, top: '50%', height: 2, borderRadius: 2, background: 'var(--line-2)' }} />
-        {/* colored track that sweeps in left → right */}
+        {/* colored track that sweeps in left → right once arrived */}
         <div
           style={{
             position: 'absolute', left: 0, right: 0, top: '50%', height: 2, borderRadius: 2,
             background: 'linear-gradient(90deg, var(--amber), var(--cyan), var(--green), var(--violet), var(--amber))',
             transformOrigin: 'left center',
-            animation: `draw-line ${DRAW}ms var(--ease-cine) both`,
+            transform: settled ? undefined : 'scaleX(0)',
+            animation: settled ? `draw-line ${DRAW}ms var(--ease-cine) both` : undefined,
           }}
         />
         {entries.map((it, i) => {
@@ -382,20 +405,21 @@ function TimelineCard({ item }: { item: Item }) {
           return (
             <div key={it.year} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--s-2)', zIndex: 1, position: 'relative' }}>
               {/* year — visible but dim, brightens when the sweep arrives */}
-              <div className="mono" style={{ fontSize: 10, color: 'var(--ink)', letterSpacing: '0.1em', opacity: 0.32, animation: 'label-lit 460ms ease both', animationDelay: `${delay}ms` }}>{it.year}</div>
+              <div className="mono" style={{ fontSize: 10, color: 'var(--ink)', letterSpacing: '0.1em', opacity: settled ? 1 : 0.32, animation: settled ? 'label-lit 460ms ease both' : undefined, animationDelay: settled ? `${delay}ms` : undefined }}>{it.year}</div>
               {/* dot: grey base + colored overlay that lights up in sequence */}
               <div style={{ position: 'relative', width: last ? 12 : 10, height: last ? 12 : 10 }}>
                 <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'var(--ink-mute)' }} />
                 <div
                   style={{
-                    position: 'absolute', inset: 0, borderRadius: '50%', background: hue, boxShadow: `0 0 10px ${hue}`, opacity: 0,
-                    animation: last ? 'dot-lit 460ms var(--ease-swift) both, ring 2.4s ease-in-out infinite' : 'dot-lit 460ms var(--ease-swift) both',
-                    animationDelay: last ? `${delay}ms, ${delay + 500}ms` : `${delay}ms`,
+                    position: 'absolute', inset: 0, borderRadius: '50%', background: hue, boxShadow: `0 0 10px ${hue}`,
+                    opacity: settled ? 1 : 0,
+                    animation: settled ? (last ? 'dot-lit 460ms var(--ease-swift) both, ring 2.4s ease-in-out infinite' : 'dot-lit 460ms var(--ease-swift) both') : undefined,
+                    animationDelay: settled ? (last ? `${delay}ms, ${delay + 500}ms` : `${delay}ms`) : undefined,
                   }}
                 />
               </div>
               {/* title — visible but dim, brightens when the sweep arrives */}
-              <div style={{ fontSize: 11, fontWeight: 500, color: 'var(--ink)', textAlign: 'center', opacity: 0.32, animation: 'label-lit 460ms ease both', animationDelay: `${delay}ms` }}>{it.title}</div>
+              <div style={{ fontSize: 11, fontWeight: 500, color: 'var(--ink)', textAlign: 'center', opacity: settled ? 1 : 0.32, animation: settled ? 'label-lit 460ms ease both' : undefined, animationDelay: settled ? `${delay}ms` : undefined }}>{it.title}</div>
             </div>
           );
         })}
@@ -426,7 +450,7 @@ export function isExpandable(kind: string) {
   return EXPANDABLE.has(kind);
 }
 
-export function CardContent({ item }: { item: Item }) {
+export function CardContent({ item, settled = true }: { item: Item; settled?: boolean }) {
   switch (item.kind) {
     case 'hero': return <HomeHero item={item} />;
     case 'aboutHero': return <AboutHero item={item} />;
@@ -434,19 +458,19 @@ export function CardContent({ item }: { item: Item }) {
     case 'contactHero': return <ContactHero item={item} />;
     case 'header': return <HeaderCard item={item} />;
     case 'module': return renderModule(item);
-    case 'stat': return <StatCard item={item} />;
+    case 'stat': return <StatCard item={item} settled={settled} />;
     case 'project': return <ProjectCard item={item} />;
     case 'playbook': return <PlaybookCard item={item} />;
     case 'tool': return <ToolCard item={item} />;
     case 'link': return <LinkCard item={item} />;
     case 'fact': return <FactCard item={item} />;
-    case 'timeline': return <TimelineCard item={item} />;
+    case 'timeline': return <TimelineCard item={item} settled={settled} />;
     case 'labBanner': return <LabBanner />;
     default: return null;
   }
 }
 
-function BentoCard({ item, area, entryStyle, onOpen }: { item: Item; area: string; entryStyle: CardStyle | null; onOpen: (item: Item) => void }) {
+function BentoCard({ item, area, entryStyle, settled, onOpen }: { item: Item; area: string; entryStyle: CardStyle | null; settled: boolean; onOpen: (item: Item) => void }) {
   const expandable = EXPANDABLE.has(item.kind);
   const [hover, setHover] = useState(false);
   const [pressed, setPressed] = useState(false);
@@ -494,7 +518,7 @@ function BentoCard({ item, area, entryStyle, onOpen }: { item: Item; area: strin
       style={style}
     >
       <div style={{ position: 'relative', height: '100%', minHeight: 0 }}>
-        <CardContent item={item} />
+        <CardContent item={item} settled={settled} />
       </div>
       {expandable && (
         <div aria-hidden style={{ position: 'absolute', top: 10, right: 10, width: 18, height: 18, opacity: hover ? 1 : 0, transition: 'opacity 180ms', color: 'var(--ink-dim)' }}>
@@ -645,7 +669,7 @@ export default function Stage({ duration }: { duration?: number }) {
             if (!area) return null;
             const areaRect = parseAreaRect(area, layout.cols, layout.rows);
             const entryStyle = getCardEntryStyle(i, items.length, phase, t, areaRect);
-            return <BentoCard key={`${renderingId}-${item.id}`} item={item} area={area} entryStyle={entryStyle} onOpen={setOpened} />;
+            return <BentoCard key={`${renderingId}-${item.id}`} item={item} area={area} entryStyle={entryStyle} settled={phase === 'idle'} onOpen={setOpened} />;
           })}
         </div>
       </div>

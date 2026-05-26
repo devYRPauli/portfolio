@@ -4,6 +4,11 @@ import { ISLANDS } from '@/data/content';
 import { I } from '@/icons';
 import { useStore } from '@/store/useStore';
 
+const ISLAND_ACCENT: Record<string, string> = {
+  home: 'var(--amber)', work: 'var(--cyan)', about: 'var(--violet)',
+  lab: 'var(--green)', playbooks: 'var(--rose)', contact: 'var(--cyan)',
+};
+
 export default function CommandBar() {
   const active = useStore((s) => s.active);
   const setActive = useStore((s) => s.setActive);
@@ -42,6 +47,7 @@ export default function CommandBar() {
         {ISLANDS.map((isl) => {
           const isActive = isl.id === active;
           const isHover = hovered === isl.id;
+          const islAccent = ISLAND_ACCENT[isl.id] ?? 'var(--amber)';
           return (
             <button
               key={isl.id}
@@ -63,7 +69,7 @@ export default function CommandBar() {
               }}
             >
               {isl.label}
-              {isActive && <span aria-hidden style={{ position: 'absolute', bottom: 1, left: '50%', transform: 'translateX(-50%)', width: 16, height: 2, background: 'var(--amber)', borderRadius: 2 }} />}
+              {isActive && <span aria-hidden style={{ position: 'absolute', bottom: 1, left: '50%', transform: 'translateX(-50%)', width: 16, height: 2, background: islAccent, borderRadius: 2, boxShadow: `0 0 8px ${islAccent}` }} />}
             </button>
           );
         })}

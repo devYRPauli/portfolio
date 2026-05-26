@@ -9,11 +9,11 @@ import { Tag, LiveDot, Code, Pill } from './primitives';
 
 const ToolRenderer = lazy(() => import('./tools'));
 
-function Section({ n, heading, children }: { n: string; heading: string; children: ReactNode }) {
+function Section({ n, heading, accent = 'var(--amber)', children }: { n: string; heading: string; accent?: string; children: ReactNode }) {
   return (
     <section style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 14 }}>
-        <span className="mono" style={{ fontSize: 11, color: 'var(--amber)', letterSpacing: '0.1em' }}>// {n}</span>
+        <span className="mono" style={{ fontSize: 11, color: accent, letterSpacing: '0.1em' }}>// {n}</span>
         <h2 style={{ fontSize: 'clamp(20px, 2.4vw, 26px)', fontWeight: 500, letterSpacing: '-0.01em' }}>{heading}</h2>
       </div>
       <div>{children}</div>
@@ -32,13 +32,14 @@ function Stat({ label, value }: { label: string; value?: string }) {
 
 function ProjectDetail({ item }: { item: Item }) {
   const cs = item.caseStudy;
+  const accent = item.accent ?? 'var(--amber)';
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 36 }}>
       <div>
         <div style={{ display: 'flex', gap: 10, marginBottom: 20, alignItems: 'center', flexWrap: 'wrap' }}>
           {item.tags?.map((t) => <Tag key={t}>{t}</Tag>)}
           <span style={{ marginLeft: 'auto', display: 'inline-flex', gap: 6, alignItems: 'center', fontSize: 11 }} className="mono">
-            <LiveDot color="var(--cyan)" /> {(item.status || '').toUpperCase()}
+            <LiveDot color={accent} /> {(item.status || '').toUpperCase()}
           </span>
         </div>
         <h1 className="serif" style={{ fontSize: 'clamp(40px, 7vw, 72px)', lineHeight: 0.98, letterSpacing: '-0.03em', fontStyle: 'italic', marginBottom: 16 }}>{item.title}</h1>
@@ -58,22 +59,22 @@ function ProjectDetail({ item }: { item: Item }) {
 
       {cs && (
         <>
-          <Section n="01" heading="Problem">
+          <Section n="01" heading="Problem" accent={accent}>
             <p style={{ fontSize: 16, lineHeight: 1.7, color: 'var(--ink)' }}>{cs.problem}</p>
           </Section>
 
-          <Section n="02" heading="Approach">
+          <Section n="02" heading="Approach" accent={accent}>
             <ol style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
               {cs.approach.map((a, i) => (
                 <li key={i} style={{ display: 'flex', gap: 16, fontSize: 15, lineHeight: 1.7 }}>
-                  <span className="mono" style={{ color: 'var(--amber)', minWidth: 30, fontSize: 12, paddingTop: 5 }}>{String(i + 1).padStart(2, '0')}</span>
+                  <span className="mono" style={{ color: accent, minWidth: 30, fontSize: 12, paddingTop: 5 }}>{String(i + 1).padStart(2, '0')}</span>
                   <span>{a}</span>
                 </li>
               ))}
             </ol>
           </Section>
 
-          <Section n="03" heading="Stack">
+          <Section n="03" heading="Stack" accent={accent}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
               {cs.stack.map((s) => (
                 <div key={s} className="mono" style={{ padding: '8px 14px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--line)', borderRadius: 6, fontSize: 12 }}>{s}</div>
@@ -82,15 +83,15 @@ function ProjectDetail({ item }: { item: Item }) {
           </Section>
 
           {cs.metrics.length > 0 && (
-            <Section n="04" heading="Impact">
+            <Section n="04" heading="Impact" accent={accent}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 14 }}>
                 {cs.metrics.map((m) => (
                   <div key={m.label} style={{ padding: 18, background: 'rgba(255,255,255,0.025)', border: '1px solid var(--line)', borderRadius: 10 }}>
                     <div className="mono" style={{ fontSize: 10, color: 'var(--ink-dim)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 10 }}>{m.label}</div>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, flexWrap: 'wrap' }}>
                       <span className="mono" style={{ fontSize: 14, color: 'var(--ink-mute)', textDecoration: 'line-through' }}>{m.before}</span>
-                      <I.Arrow size={12} style={{ color: 'var(--amber)' }} />
-                      <span className="mono" style={{ fontSize: 22, color: 'var(--amber)', fontWeight: 500 }}>{m.after}</span>
+                      <I.Arrow size={12} style={{ color: accent }} />
+                      <span className="mono" style={{ fontSize: 22, color: accent, fontWeight: 500 }}>{m.after}</span>
                     </div>
                   </div>
                 ))}
@@ -98,7 +99,7 @@ function ProjectDetail({ item }: { item: Item }) {
             </Section>
           )}
 
-          <Section n="05" heading="Trade-offs">
+          <Section n="05" heading="Trade-offs" accent={accent}>
             <p className="serif" style={{ fontSize: 15, lineHeight: 1.7, color: 'var(--ink-dim)', fontStyle: 'italic' }}>{cs.tradeoffs}</p>
           </Section>
         </>
@@ -110,6 +111,7 @@ function ProjectDetail({ item }: { item: Item }) {
 function PlaybookDetail({ item }: { item: Item }) {
   const pb = item.playbookId ? PLAYBOOKS[item.playbookId] : undefined;
   if (!pb) return null;
+  const accent = item.accent ?? 'var(--amber)';
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 36 }}>
       <div>
@@ -117,14 +119,14 @@ function PlaybookDetail({ item }: { item: Item }) {
         <h1 className="serif" style={{ fontSize: 'clamp(36px, 6vw, 64px)', lineHeight: 1, letterSpacing: '-0.03em', fontStyle: 'italic', marginBottom: 14 }}>{pb.title}</h1>
         <div style={{ fontSize: 'clamp(15px, 1.8vw, 20px)', color: 'var(--ink-dim)', lineHeight: 1.4 }}>{pb.subtitle}</div>
       </div>
-      <div style={{ padding: 24, borderLeft: '2px solid var(--amber)', background: 'var(--amber-soft)', borderRadius: '0 10px 10px 0' }}>
+      <div style={{ padding: 24, borderLeft: `2px solid ${accent}`, background: `color-mix(in oklch, ${accent} 12%, transparent)`, borderRadius: '0 10px 10px 0' }}>
         <div className="serif" style={{ fontSize: 17, lineHeight: 1.7, fontStyle: 'italic' }}>{pb.intro}</div>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
         {pb.chapters.map((ch) => (
           <div key={ch.n}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, marginBottom: 12 }}>
-              <span className="mono" style={{ color: 'var(--amber)', fontSize: 13 }}>{ch.n}</span>
+              <span className="mono" style={{ color: accent, fontSize: 13 }}>{ch.n}</span>
               <h3 style={{ fontSize: 'clamp(18px, 2.2vw, 22px)', fontWeight: 500, letterSpacing: '-0.01em' }}>{ch.heading}</h3>
             </div>
             <p style={{ fontSize: 15, lineHeight: 1.75, color: 'var(--ink)', marginLeft: 40 }}>{ch.body}</p>

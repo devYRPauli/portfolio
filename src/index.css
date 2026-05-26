@@ -119,6 +119,12 @@ button { cursor: pointer; }
 @keyframes pop-in { 0% { opacity: 0; transform: scale(0.96); } 100% { opacity: 1; transform: scale(1); } }
 @keyframes spin-slow { to { transform: rotate(360deg); } }
 @keyframes wave { 0%, 100% { transform: rotate(-3deg) translateY(0); } 50% { transform: rotate(4deg) translateY(-7px); } }
+@keyframes greet {
+  0% { transform: scale(0.7) rotate(-12deg) translateY(16px); opacity: 0; }
+  45% { transform: scale(1.07) rotate(12deg) translateY(0); opacity: 1; }
+  70% { transform: scale(1) rotate(-6deg); }
+  100% { transform: rotate(-3deg) translateY(0); opacity: 1; }
+}
 @keyframes draw-line { from { transform: scaleX(0); } to { transform: scaleX(1); } }
 @keyframes ring { 0%, 100% { box-shadow: 0 0 0 0 var(--amber-glow); } 50% { box-shadow: 0 0 0 7px transparent; } }
 @keyframes cell-in { from { opacity: 0; transform: scale(0.3); } to { opacity: 1; transform: scale(1); } }
