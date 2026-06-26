@@ -37,13 +37,15 @@ const LAYOUTS: Record<IslandId, Layout> = {
     },
   },
   work: {
-    cols: 4, rows: 3,
+    cols: 4, rows: 4,
     cells: {
       'work-header': '1 / 1 / 2 / 3',
       'work-stack': '1 / 3 / 2 / 5',
       'work-blue-omics': '2 / 1 / 4 / 3',
-      'work-turboquant': '2 / 3 / 4 / 4',
-      'work-applyscore': '2 / 4 / 4 / 5',
+      'work-looma': '2 / 3 / 4 / 4',
+      'work-mddocs': '2 / 4 / 4 / 5',
+      'work-turboquant': '4 / 1 / 5 / 3',
+      'work-applyscore': '4 / 3 / 5 / 5',
     },
   },
   about: {

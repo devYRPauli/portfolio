@@ -81,8 +81,8 @@ export const CONTENT: Record<IslandId, Item[]> = {
   ],
 
   work: [
-    { id: 'work-header', size: '2x1', kind: 'header', label: 'Work // 02', title: 'Selected Works', subtitle: 'Production systems and open-source work. Click any card to open the case study.' },
-    { id: 'work-stack', size: '2x1', kind: 'module', moduleType: 'ticker', items: ['Python', 'Django', 'React', 'TypeScript', 'PostgreSQL', 'RAG', 'Qdrant', 'vLLM', 'Ollama', 'Docker', 'Kubernetes', 'Terraform'] },
+    { id: 'work-header', size: '2x1', kind: 'header', label: 'Work // 02', title: 'Selected Works', subtitle: 'Production systems, developer tools, and open-source work across the stack. Click any card to open the case study.' },
+    { id: 'work-stack', size: '2x1', kind: 'module', moduleType: 'ticker', items: ['Python', 'TypeScript', 'Swift', 'C/C++', 'Django', 'React', 'Node.js', 'PostgreSQL', 'RAG', 'Qdrant', 'vLLM', 'Docker', 'Kubernetes', 'Terraform'] },
     {
       id: 'work-blue-omics', size: '2x2', kind: 'project',
       title: 'Blue Omics', subtitle: 'Full-stack research data platform',
@@ -107,7 +107,47 @@ export const CONTENT: Record<IslandId, Item[]> = {
       },
     },
     {
-      id: 'work-turboquant', size: '1x2', kind: 'project',
+      id: 'work-looma', size: '1x2', kind: 'project',
+      title: 'Looma', subtitle: 'Local-first project memory for coding agents',
+      description: 'A command-line tool that turns Claude Code, Codex, and Cursor history into resumable project context, with zero third-party dependencies.',
+      icon: 'Terminal', tags: ['Python', 'CLI', 'SQLite', 'Local-first'], year: '2026', role: 'Solo · Open source', status: 'Public', accent: 'var(--violet)',
+      href: 'https://github.com/devYRPauli/looma',
+      caseStudy: {
+        problem: 'Coding-agent transcripts pile up fast, but the moment you switch projects the context is gone. Searching old sessions to remember what you were doing, what you decided, and what is left is slow and unreliable.',
+        approach: [
+          'Normalizes Claude Code, Codex, and Cursor history into vendor-agnostic events, then reconstructs structured WorkItems (features, bugfixes, refactors, migrations) instead of keyword-searching logs.',
+          'Emits token-budgeted context packs so one agent can hand off to another without replaying the whole history.',
+          'Built on the Python standard library only (SQLite + FTS5), with an optional local LLM extractor that inherits the same heuristic guardrails.',
+        ],
+        stack: ['Python (stdlib only)', 'SQLite + FTS5', 'Local-first', 'Optional local LLM'],
+        metrics: [
+          { label: 'Third-party deps', before: 'typical CLI', after: '0' },
+          { label: 'Extraction F1 (clean fixtures)', before: 'Qwen2.5-7B 0.84', after: 'heuristic 0.86' },
+          { label: 'Test suite', before: 'baseline', after: '131 passing' },
+        ],
+        tradeoffs: 'Chose a transparent heuristic core over an LLM-by-default pipeline: it is auditable, runs anywhere with no keys, and on clean fixtures actually beat a 7B local model. Every reconstruction carries a confidence score and shows alternatives instead of guessing.',
+      },
+    },
+    {
+      id: 'work-mddocs', size: '1x2', kind: 'project',
+      title: 'mddocs', subtitle: 'Git-native collaborative Markdown, with an agent API',
+      description: 'A local-first, self-hostable Markdown editor: real-time multiplayer, comments, and accept/reject suggestions, plus a first-class HTTP API for AI agents. Published on npm.',
+      icon: 'File', tags: ['TypeScript', 'CRDT (Yjs)', 'Node.js', 'npm'], year: '2026', role: 'Solo · Open source', status: 'Live', accent: 'var(--rose)',
+      href: 'https://github.com/devYRPauli/mddocs',
+      caseStudy: {
+        problem: 'Teams want Google-Docs-style collaboration on Markdown without handing their content to a SaaS, and the AI agents that edit documents are usually bolted on as second-class clients with no real API.',
+        approach: [
+          'Built a git-native editor where every change is a commit, so there is no central database to run and the full history lives in the repo.',
+          'Real-time multiplayer, inline comments, and accept/reject suggestion review backed by a CRDT (Yjs) model that merges concurrent edits without conflicts.',
+          'Shipped a first-class agent HTTP API: per-agent tokens, rate-limit headers, and a Server-Sent Events stream, so automated writers are first-class collaborators.',
+        ],
+        stack: ['TypeScript', 'Node.js', 'Yjs (CRDT)', 'Git', 'Server-Sent Events'],
+        metrics: [],
+        tradeoffs: 'Git-native storage trades a query-optimized database for transparency and zero-infra self-hosting: the repo is the source of truth and the backup. The agent API mirrors the human surface exactly, so anything a person can do, an agent can do through tokens and rate limits.',
+      },
+    },
+    {
+      id: 'work-turboquant', size: '2x1', kind: 'project',
       title: 'TurboQuant on Apple Silicon', subtitle: 'CPU-only LLM quantization study',
       description: 'Independent evaluation of TurboQuant (arXiv 2504.19874) ported to run on Apple Silicon. Open source and reproducible.',
       icon: 'Cpu', tags: ['LLM', 'Quantization', 'MLX', 'llama.cpp'], year: '2026', role: 'Solo · Open source', status: 'Public', accent: 'var(--amber)',
@@ -129,7 +169,7 @@ export const CONTENT: Record<IslandId, Item[]> = {
       },
     },
     {
-      id: 'work-applyscore', size: '1x2', kind: 'project',
+      id: 'work-applyscore', size: '2x1', kind: 'project',
       title: 'ApplyScore', subtitle: 'AI resume gap-analysis extension',
       description: 'A published Chrome extension that scores how well a resume matches any job posting on the web, with evidence-linked gaps and no fluff.',
       icon: 'Search', tags: ['Chrome Extension', 'LLM', 'Shadow DOM', 'BYO-key'], year: '2026', role: 'Solo · Shipped', status: 'Live', accent: 'var(--green)',
@@ -195,7 +235,7 @@ export const CONTENT: Record<IslandId, Item[]> = {
     { id: 'contact-linkedin', size: '1x2', kind: 'link', title: 'LinkedIn', subtitle: '/in/yashrajpandeyy', icon: 'Linked', href: 'https://www.linkedin.com/in/yashrajpandeyy', big: true, accent: 'var(--cyan)' },
     { id: 'contact-github', size: '1x2', kind: 'link', title: 'GitHub', subtitle: 'devYRPauli', icon: 'Git', href: 'https://github.com/devYRPauli', big: true, accent: 'var(--violet)' },
     { id: 'contact-location', size: '2x1', kind: 'fact', title: 'Gainesville, FL', subtitle: 'Eastern Time / UTC-5', description: 'University of Florida / IFAS.', icon: 'Map', accent: 'var(--amber)' },
-    { id: 'contact-avail', size: '2x1', kind: 'fact', title: 'Open to Conversations', subtitle: 'AI infrastructure / Local-first LLMs', description: 'Always up for a good conversation on building AI that runs in production.', icon: 'Zap', status: 'live', accent: 'var(--green)' },
+    { id: 'contact-avail', size: '2x1', kind: 'fact', title: 'Open to Conversations', subtitle: 'AI infra / Full-stack / Systems', description: 'Always up for a good conversation on AI infrastructure, systems, and building things that ship.', icon: 'Zap', status: 'live', accent: 'var(--green)' },
   ],
 };
 
