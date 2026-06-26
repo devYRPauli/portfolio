@@ -128,7 +128,7 @@ export function useIslandTransition(
   return { renderingId, phase, t, prevIsland, nextIsland: activeIsland };
 }
 
-// Outer stage transform — pan-zoom: blur + slide out toward travel direction, slide in.
+// Outer stage transform - pan-zoom: blur + slide out toward travel direction, slide in.
 const TRAVEL = 18; // vw/vh shift at peak
 
 export function getStageTransform(phase: Phase, t: number, dir: TravelVector): StageStyle {
@@ -155,7 +155,7 @@ export function getStageTransform(phase: Phase, t: number, dir: TravelVector): S
   };
 }
 
-// Per-card entry choreography — slide in from nearest screen edge with overshoot.
+// Per-card entry choreography - slide in from nearest screen edge with overshoot.
 export function getCardEntryStyle(
   i: number,
   total: number,

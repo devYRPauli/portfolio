@@ -11,7 +11,7 @@
   --glass: rgba(18, 18, 20, 0.65);
   --glass-strong: rgba(12, 12, 14, 0.92);
 
-  /* Accent — set at runtime by the accent theme, defaults to amber */
+  /* Accent - set at runtime by the accent theme, defaults to amber */
   --amber: oklch(82% 0.14 75);
   --amber-soft: oklch(82% 0.14 75 / 0.14);
   --amber-glow: oklch(82% 0.14 75 / 0.28);
@@ -19,7 +19,7 @@
   --cyan-soft: oklch(82% 0.11 210 / 0.14);
   --cyan-glow: oklch(82% 0.11 210 / 0.28);
 
-  /* Facet accents — used only in the home "facets" reel + timeline nodes */
+  /* Facet accents - used only in the home "facets" reel + timeline nodes */
   --green: oklch(80% 0.15 150);
   --rose: oklch(74% 0.16 18);
   --violet: oklch(72% 0.15 300);
@@ -36,7 +36,7 @@
   --font-serif: 'Instrument Serif', ui-serif, Georgia, serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
 
-  /* Spacing — 4pt scale */
+  /* Spacing - 4pt scale */
   --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
   --s-5: 20px; --s-6: 24px; --s-7: 32px; --s-8: 40px;
   --s-9: 48px; --s-10: 64px;
@@ -53,13 +53,13 @@
   --t-base: 280ms;
   --t-slow: 600ms;
 
-  /* Stage insets — room for top command bar + breathing room */
+  /* Stage insets - room for top command bar + breathing room */
   --hud-inset: 24px;
   --stage-top: 104px;
   --stage-bottom: 56px;
   --stage-x: 56px;
 
-  /* Capped bento canvas — clean side gutters (width cap) while filling most of the
+  /* Capped bento canvas - clean side gutters (width cap) while filling most of the
      vertical space so it doesn't float in a void. Boxes stay a sane size; text now
      fills them since type was bumped up. */
   --stage-max-w: 1320px;

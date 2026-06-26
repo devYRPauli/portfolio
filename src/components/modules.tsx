@@ -37,7 +37,7 @@ function ClockModule() {
 }
 
 // The home centerpiece: cycles through the facets of who Yash is, each with its own
-// accent. Not "RAG guy" — range.
+// accent. Not "RAG guy" - range.
 const FACETS = [
   { label: 'Architect.', sub: 'AI agents in production', color: 'var(--amber)' },
   { label: 'Researcher.', sub: 'quantization on Apple Silicon', color: 'var(--cyan)' },
@@ -74,7 +74,7 @@ interface ContribDay { date: string; count: number; level: number; }
 const GH_USER = 'devYRPauli';
 const GH_COLORS = ['var(--gh-0)', 'var(--gh-1)', 'var(--gh-2)', 'var(--gh-3)', 'var(--gh-4)'];
 
-// Real GitHub activity — last 30 days as a small square heatmap, fetched client-side.
+// Real GitHub activity - last 30 days as a small square heatmap, fetched client-side.
 // Breathing on the brightest days; graceful skeleton if the fetch fails.
 function GithubGraphModule() {
   const [days, setDays] = useState<ContribDay[] | null>(null);

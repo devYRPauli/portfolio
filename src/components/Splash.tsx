@@ -1,4 +1,4 @@
-// Boot splash — cycles a few greetings, then reveals the app.
+// Boot splash - cycles a few greetings, then reveals the app.
 import { useEffect, useState } from 'react';
 import { useStore } from '@/store/useStore';
 

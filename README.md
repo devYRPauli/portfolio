@@ -4,7 +4,7 @@ Personal portfolio and free toolbox for builders. Live at [yashrajpandey.com](ht
 
 ## What it is
 
-A spatial portfolio built on an infinite canvas. Instead of traditional page navigation, the interface is a 2D virtual world — clicking a nav item moves the camera to that island of content. Six islands: Home, Work, About, Lab, Playbooks, Contact.
+A spatial portfolio built on an infinite canvas. Instead of traditional page navigation, the interface is a 2D virtual world - clicking a nav item moves the camera to that island of content. Six islands: Home, Work, About, Lab, Playbooks, Contact.
 
 On mobile the canvas collapses to a standard vertical scroll layout.
 
@@ -12,17 +12,17 @@ On mobile the canvas collapses to a standard vertical scroll layout.
 
 Everything runs client-side. Nothing leaves the browser.
 
-**Token Counter** — Paste any prompt or text and get an instant token estimate with cost breakdown across frontier models (Gemini 3.1 Pro, GPT-5.4, Claude Sonnet 4.6, Claude Opus 4.6).
+**Token Counter** - Paste any prompt or text and get an instant token estimate with cost breakdown across frontier models (Gemini 3.1 Pro, GPT-5.4, Claude Sonnet 4.6, Claude Opus 4.6).
 
-**Prompt Formatter** — Paste a raw prompt in any format and get it restructured into `[SYSTEM] [TASK] [CONSTRAINTS] [OUTPUT FORMAT]` blocks, ready to copy.
+**Prompt Formatter** - Paste a raw prompt in any format and get it restructured into `[SYSTEM] [TASK] [CONSTRAINTS] [OUTPUT FORMAT]` blocks, ready to copy.
 
 ## Playbooks
 
 Three production-sourced LLM engineering guides:
 
-1. **Prompt Debugging Checklist** — 8 reasons why LLM output keeps breaking
-2. **FastAPI + LLM Service Pattern** — Streaming, retries, structured outputs, Pydantic validation
-3. **Designing Reliable Multi-Step LLM Workflows** — Contracts between pipeline steps, validation, observability
+1. **Prompt Debugging Checklist** - 8 reasons why LLM output keeps breaking
+2. **FastAPI + LLM Service Pattern** - Streaming, retries, structured outputs, Pydantic validation
+3. **Designing Reliable Multi-Step LLM Workflows** - Contracts between pipeline steps, validation, observability
 
 ## Tech stack
 
@@ -50,7 +50,7 @@ npm run lint     # ESLint, zero warnings
 
 ## Deployment
 
-Deployed to GitHub Pages. The `public/CNAME` file sets the custom domain — do not delete it.
+Deployed to GitHub Pages. The `public/CNAME` file sets the custom domain - do not delete it.
 
 To deploy manually:
 

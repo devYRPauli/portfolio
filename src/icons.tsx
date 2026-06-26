@@ -1,4 +1,4 @@
-// Inline SVG icon set — consistent 1.5px stroke. Ported from the v2 prototype.
+// Inline SVG icon set - consistent 1.5px stroke. Ported from the v2 prototype.
 import type { SVGProps, ReactNode } from 'react';
 
 export interface IconProps extends SVGProps<SVGSVGElement> {

@@ -1,4 +1,4 @@
-// Mobile (<768px) layout — a single vertical scroll of all islands, restyled with v2 tokens.
+// Mobile (<768px) layout - a single vertical scroll of all islands, restyled with v2 tokens.
 // Reuses the same card renderers as the desktop stage so content stays identical.
 import type { CSSProperties } from 'react';
 import { CONTENT, ISLANDS, type Item } from '@/data/content';
@@ -54,7 +54,7 @@ export default function MobileView() {
         <div className="serif" style={{ fontSize: 34, fontStyle: 'italic', lineHeight: 1.05, letterSpacing: '-0.02em', marginTop: 8 }}>
           AI Agents Architect.
         </div>
-        <div style={{ fontSize: 14, color: 'var(--ink-dim)', marginTop: 6 }}>Local-first AI infrastructure — open-weight LLMs, RAG, and agents in production.</div>
+        <div style={{ fontSize: 14, color: 'var(--ink-dim)', marginTop: 6 }}>Local-first AI infrastructure - open-weight LLMs, RAG, and agents in production.</div>
       </header>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>

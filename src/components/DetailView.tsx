@@ -1,4 +1,4 @@
-// Detail overlay — project case study, playbook, tool launcher, long-form bio.
+// Detail overlay - project case study, playbook, tool launcher, long-form bio.
 import { Suspense, lazy, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { PLAYBOOKS, type Item } from '@/data/content';

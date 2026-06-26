@@ -1,4 +1,4 @@
-// Command palette — fuzzy-searchable navigator with real actions (⌘K).
+// Command palette - fuzzy-searchable navigator with real actions (⌘K).
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CONTENT, ISLANDS, type Item } from '@/data/content';
 import { I, type IconName } from '@/icons';

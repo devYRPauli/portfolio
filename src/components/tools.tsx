@@ -1,4 +1,4 @@
-// Lab tools — client-side only. Lazy-loaded via DetailView.
+// Lab tools - client-side only. Lazy-loaded via DetailView.
 import { useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { I } from '@/icons';
@@ -572,8 +572,8 @@ function ContrastChecker() {
         <div className="eyebrow">Live preview</div>
         <div style={{ flex: 1, padding: 28, background: bg, color: fg, border: '1px solid var(--line)', borderRadius: 8, display: 'flex', flexDirection: 'column', gap: 14, justifyContent: 'center' }}>
           <div style={{ fontSize: 36, fontWeight: 600, lineHeight: 1.1 }}>Headline 36px</div>
-          <div style={{ fontSize: 18 }}>Large body 18px — still easy to read?</div>
-          <div style={{ fontSize: 14 }}>Normal body 14px — the acid test for AA compliance.</div>
+          <div style={{ fontSize: 18 }}>Large body 18px - still easy to read?</div>
+          <div style={{ fontSize: 14 }}>Normal body 14px - the acid test for AA compliance.</div>
           <div style={{ fontSize: 11, opacity: 0.8 }} className="mono">SMALL MONO 11PX · THE WORST CASE</div>
         </div>
       </div>

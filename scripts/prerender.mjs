@@ -1,6 +1,6 @@
 // Build-time prerender: generate complete static HTML from the canonical content
 // (content.ts) and inject it into dist/index.html's #root. React replaces it on
-// mount, so this is purely for crawlers / AI fetchers / no-JS readers — it ships the
+// mount, so this is purely for crawlers / AI fetchers / no-JS readers - it ships the
 // real, full content (every island, case study, and playbook) in the raw HTML.
 //
 // Runs after `vite build`. Resilient by design: any failure leaves the built
@@ -43,7 +43,7 @@ try {
 
   const out = [];
   out.push('<header>');
-  out.push('<h1>Yash Raj Pandey — AI Agents Architect</h1>');
+  out.push('<h1>Yash Raj Pandey - AI Agents Architect</h1>');
   out.push(
     '<p>AI Agents Architect at the University of Florida (IFAS), building local-first AI infrastructure: self-hosted open-weight LLMs, retrieval-augmented generation (RAG), vector search, and AI agents running in production. Joined UF as a Software Engineer (Mar 2025), promoted to Lead (Oct 2025), then Architect (Apr 2026).</p>',
   );
@@ -56,16 +56,16 @@ try {
     for (const it of items) {
       switch (it.kind) {
         case 'header':
-          if (it.title) parts.push(`<p><strong>${oneLine(it.title)}</strong>${it.subtitle ? ` — ${oneLine(it.subtitle)}` : ''}</p>`);
+          if (it.title) parts.push(`<p><strong>${oneLine(it.title)}</strong>${it.subtitle ? ` - ${oneLine(it.subtitle)}` : ''}</p>`);
           break;
         case 'stat':
-          parts.push(`<p><strong>${oneLine(it.title)}</strong> — ${oneLine(it.subtitle)}</p>`);
+          parts.push(`<p><strong>${oneLine(it.title)}</strong> - ${oneLine(it.subtitle)}</p>`);
           break;
         case 'module':
           if (it.moduleType === 'ticker' && it.items?.length) parts.push(`<p><strong>Stack:</strong> ${esc(it.items.join(', '))}</p>`);
           break;
         case 'project': {
-          parts.push(`<article><h3>${oneLine(it.title)}${it.subtitle ? ` — ${oneLine(it.subtitle)}` : ''}</h3>`);
+          parts.push(`<article><h3>${oneLine(it.title)}${it.subtitle ? ` - ${oneLine(it.subtitle)}` : ''}</h3>`);
           if (it.description) parts.push(`<p>${oneLine(it.description)}</p>`);
           const cs = it.caseStudy;
           if (cs) {
@@ -81,23 +81,23 @@ try {
         }
         case 'playbook': {
           const pb = it.playbookId ? PLAYBOOKS[it.playbookId] : null;
-          parts.push(`<article><h3>${oneLine(it.title)}${it.subtitle ? ` — ${oneLine(it.subtitle)}` : ''}</h3>`);
+          parts.push(`<article><h3>${oneLine(it.title)}${it.subtitle ? ` - ${oneLine(it.subtitle)}` : ''}</h3>`);
           if (pb?.intro) parts.push(`<p>${oneLine(pb.intro)}</p>`);
           if (pb?.chapters?.length) parts.push(`<ul>${pb.chapters.map((c) => `<li>${oneLine(c.heading)}</li>`).join('')}</ul>`);
           parts.push('</article>');
           break;
         }
         case 'tool':
-          parts.push(`<p><strong>${oneLine(it.title)}</strong> — ${oneLine(it.subtitle)} (runs entirely in your browser, no signup)</p>`);
+          parts.push(`<p><strong>${oneLine(it.title)}</strong> - ${oneLine(it.subtitle)} (runs entirely in your browser, no signup)</p>`);
           break;
         case 'timeline':
-          if (it.timeline?.length) parts.push(`<p><strong>${oneLine(it.title)}</strong></p><ul>${it.timeline.map((t) => `<li>${oneLine(t.year)} — ${oneLine(t.title)}: ${oneLine(t.description)}</li>`).join('')}</ul>`);
+          if (it.timeline?.length) parts.push(`<p><strong>${oneLine(it.title)}</strong></p><ul>${it.timeline.map((t) => `<li>${oneLine(t.year)} - ${oneLine(t.title)}: ${oneLine(t.description)}</li>`).join('')}</ul>`);
           break;
         case 'fact':
-          parts.push(`<p><strong>${oneLine(it.title)}</strong> — ${oneLine(it.subtitle)}${it.description ? `. ${oneLine(it.description)}` : ''}${it.href ? ` (<a href="${esc(it.href)}">${esc(it.href)}</a>)` : ''}</p>`);
+          parts.push(`<p><strong>${oneLine(it.title)}</strong> - ${oneLine(it.subtitle)}${it.description ? `. ${oneLine(it.description)}` : ''}${it.href ? ` (<a href="${esc(it.href)}">${esc(it.href)}</a>)` : ''}</p>`);
           break;
         case 'link':
-          if (it.href) parts.push(`<p><a href="${esc(it.href)}">${oneLine(it.title)}</a>${it.subtitle ? ` — ${oneLine(it.subtitle)}` : ''}</p>`);
+          if (it.href) parts.push(`<p><a href="${esc(it.href)}">${oneLine(it.title)}</a>${it.subtitle ? ` - ${oneLine(it.subtitle)}` : ''}</p>`);
           break;
         default:
           break;

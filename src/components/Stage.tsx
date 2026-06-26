@@ -1,4 +1,4 @@
-// Viewport-fit stage — one screen per island, no scroll. Cards lay out in a fixed grid
+// Viewport-fit stage - one screen per island, no scroll. Cards lay out in a fixed grid
 // that fills the safe viewport area; islands swap via the camera transition.
 import { useEffect, useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
@@ -162,7 +162,7 @@ function AboutHero({ item }: { item: Item }) {
           Driven by<br />precision.
         </div>
         <div style={{ fontSize: 'clamp(14px, 1vw, 16px)', color: 'var(--ink-dim)', lineHeight: 1.6, maxWidth: 380 }}>
-          Craft is not a stage of the process — it's the entire process.
+          Craft is not a stage of the process - it's the entire process.
         </div>
       </div>
       <div className="mono" style={{ fontSize: 10, color: 'var(--ink-mute)', display: 'flex', gap: 'var(--s-4)', letterSpacing: '0.1em', flexWrap: 'wrap' }}>
@@ -409,7 +409,7 @@ function TimelineCard({ item, settled }: { item: Item; settled: boolean }) {
           const delay = litAt(i);
           return (
             <div key={it.year} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--s-2)', zIndex: 1, position: 'relative' }}>
-              {/* year — visible but dim, brightens when the sweep arrives */}
+              {/* year - visible but dim, brightens when the sweep arrives */}
               <div className="mono" style={{ fontSize: 10, color: 'var(--ink)', letterSpacing: '0.1em', opacity: settled ? 1 : 0.32, animation: settled ? 'label-lit 460ms ease both' : undefined, animationDelay: settled ? `${delay}ms` : undefined }}>{it.year}</div>
               {/* dot: grey base + colored overlay that lights up in sequence */}
               <div style={{ position: 'relative', width: last ? 12 : 10, height: last ? 12 : 10 }}>
@@ -423,7 +423,7 @@ function TimelineCard({ item, settled }: { item: Item; settled: boolean }) {
                   }}
                 />
               </div>
-              {/* title — visible but dim, brightens when the sweep arrives */}
+              {/* title - visible but dim, brightens when the sweep arrives */}
               <div style={{ fontSize: 11, fontWeight: 500, color: 'var(--ink)', textAlign: 'center', opacity: settled ? 1 : 0.32, animation: settled ? 'label-lit 460ms ease both' : undefined, animationDelay: settled ? `${delay}ms` : undefined }}>{it.title}</div>
             </div>
           );

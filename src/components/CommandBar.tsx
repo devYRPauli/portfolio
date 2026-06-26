@@ -1,4 +1,4 @@
-// Top command bar — brand + ET clock (left), island switcher (center), ⌘K trigger (right).
+// Top command bar - brand + ET clock (left), island switcher (center), ⌘K trigger (right).
 import { useEffect, useState } from 'react';
 import { ISLANDS } from '@/data/content';
 import { I } from '@/icons';

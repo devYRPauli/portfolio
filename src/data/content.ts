@@ -1,4 +1,4 @@
-// Islands + bento content — canonical, verified content (from ~/Downloads/data.jsx).
+// Islands + bento content - canonical, verified content (from ~/Downloads/data.jsx).
 import type { IconName } from '@/icons';
 
 export type IslandId = 'home' | 'work' | 'about' | 'lab' | 'playbooks' | 'contact';
