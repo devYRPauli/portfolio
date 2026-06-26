@@ -213,6 +213,7 @@ const MANIFESTO = [
   ['Craft is compounding.', 'Every detail shipped is a detail future-you inherits.'],
   ['Ship the smallest thing.', 'Then let real use teach you the next one.'],
   ['Reliability is a feature.', 'Users will forgive slow. They will not forgive broken.'],
+  ['If it hallucinates, it does not ship.', 'I would rather say "I do not know" than make something up.'],
 ];
 
 function ManifestoModule() {

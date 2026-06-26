@@ -139,7 +139,7 @@ function HomeHero({ item }: { item: Item }) {
           Yash Raj Pandey.
         </div>
         <div className="serif" style={{ fontSize: 'clamp(18px, 1.8vw, 26px)', fontStyle: 'italic', color: 'var(--ink-dim)', lineHeight: 1.15, letterSpacing: '-0.01em', marginBottom: 'var(--s-4)' }}>
-          AI Agents Architect.<br />Local-first AI infrastructure.
+          AI Agents Architect.<br />Local-first AI, full-stack, and systems.
         </div>
         <div style={{ display: 'flex', gap: 'var(--s-2)', flexWrap: 'wrap' }}>
           <Pill accent icon={<I.ArrowUR size={11} />}>Open case studies</Pill>
@@ -166,7 +166,7 @@ function AboutHero({ item }: { item: Item }) {
         </div>
       </div>
       <div className="mono" style={{ fontSize: 10, color: 'var(--ink-mute)', display: 'flex', gap: 'var(--s-4)', letterSpacing: '0.1em', flexWrap: 'wrap' }}>
-        <span>5M+ RECORDS</span><span>3 ROLES / 14 MO</span><span>UF IFAS</span>
+        <span>5M+ RECORDS</span><span>3 ROLES / 13 MO</span><span>UF IFAS</span>
       </div>
     </div>
   );
@@ -206,7 +206,7 @@ function ContactHero({ item }: { item: Item }) {
           Let's build<br />something real.
         </div>
         <div style={{ fontSize: 'clamp(14px, 1vw, 16px)', color: 'var(--ink-dim)', lineHeight: 1.6, marginBottom: 'var(--s-4)' }}>
-          Open to good conversations on AI infrastructure and local-first LLM systems.
+          Open to good conversations on AI infrastructure, full-stack systems, and building things that ship.
         </div>
         <Pill accent icon={<I.Mail size={12} />} href="mailto:yashpn62@gmail.com">yashpn62@gmail.com</Pill>
       </div>

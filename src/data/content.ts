@@ -192,7 +192,7 @@ export const CONTENT: Record<IslandId, Item[]> = {
     { id: 'about-hero', size: '2x2', kind: 'aboutHero', label: 'About // 03' },
     { id: 'about-manifesto', size: '1x2', kind: 'module', moduleType: 'manifesto' },
     { id: 'about-records', size: '1x1', kind: 'stat', title: '5M+', subtitle: 'Records in production', accent: 'var(--cyan)' },
-    { id: 'about-promotions', size: '1x1', kind: 'stat', title: '3', subtitle: 'Roles in 14 months', accent: 'var(--amber)' },
+    { id: 'about-promotions', size: '1x1', kind: 'stat', title: '3', subtitle: 'Roles in 13 months', accent: 'var(--amber)' },
     {
       id: 'about-timeline', size: '2x1', kind: 'timeline', title: 'The Journey',
       timeline: [
@@ -206,7 +206,7 @@ export const CONTENT: Record<IslandId, Item[]> = {
     {
       id: 'about-football', size: '2x1', kind: 'fact',
       title: 'Off the clock', subtitle: 'Football Hub',
-      description: 'A live football stats app I built for myself because I love the game.',
+      description: 'A live football stats app I built because just watching the game was never quite enough.',
       icon: 'Zap', href: 'https://football-hub-six.vercel.app/',
     },
   ],
