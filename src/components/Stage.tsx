@@ -33,7 +33,8 @@ const LAYOUTS: Record<IslandId, Layout> = {
       'home-github': '1 / 4 / 2 / 5',
       'home-visitor': '2 / 4 / 3 / 5',
       'home-clock': '3 / 1 / 4 / 3',
-      'home-email': '3 / 3 / 4 / 5',
+      'home-email': '3 / 3 / 4 / 4',
+      'home-resume': '3 / 4 / 4 / 5',
     },
   },
   work: {

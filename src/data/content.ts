@@ -77,7 +77,8 @@ export const CONTENT: Record<IslandId, Item[]> = {
     { id: 'home-github', size: '1x1', kind: 'module', moduleType: 'github' },
     { id: 'home-visitor', size: '1x1', kind: 'module', moduleType: 'visitor' },
     { id: 'home-clock', size: '2x1', kind: 'module', moduleType: 'clock' },
-    { id: 'home-email', size: '2x1', kind: 'link', title: 'Mail', subtitle: 'yashpn62@gmail.com', icon: 'Mail', href: 'mailto:yashpn62@gmail.com' },
+    { id: 'home-email', size: '1x1', kind: 'link', title: 'Mail', subtitle: 'yashpn62@gmail.com', icon: 'Mail', href: 'mailto:yashpn62@gmail.com' },
+    { id: 'home-resume', size: '1x1', kind: 'link', title: 'Resume', subtitle: 'PDF', icon: 'File', href: '/Resume_YashRaj.pdf', accent: 'var(--green)' },
   ],
 
   work: [
