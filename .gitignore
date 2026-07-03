@@ -23,9 +23,12 @@ dist-ssr
 
 *.md
 !README.md
+!src/content/**/*.md
 
 .claude/
 .cursor/
 CLAUDE.md
 
 .superpowers/
+
+.astro/
