@@ -1,6 +1,6 @@
 {
-  "name": "YRP",
-  "short_name": "YRP",
+  "name": "Yash Raj Pandey",
+  "short_name": "Yash",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
@@ -15,7 +15,7 @@
       "purpose": "maskable"
     }
   ],
-  "theme_color": "#000000",
-  "background_color": "#000000",
-  "display": "standalone"
+  "theme_color": "#f9f7ef",
+  "background_color": "#f9f7ef",
+  "display": "browser"
 }

@@ -28,7 +28,13 @@ const {
 const fmt = (d: Date) =>
   d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
 ---
-<BaseLayout title={title} description={description} jsonLd={jsonLd}>
+<BaseLayout
+  title={title}
+  description={description}
+  jsonLd={jsonLd}
+  ogType={date ? 'article' : 'website'}
+  publishedTime={date}
+>
   <div class="progress" aria-hidden="true"></div>
   <article>
     <header>
