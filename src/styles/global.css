@@ -61,6 +61,7 @@ code, pre { font-family: var(--font-mono); font-size: 0.9em; }
   border-radius: 4px;
 }
 pre {
+  position: relative;
   padding: 1rem 1.25rem;
   border-radius: 10px;
   border: 1px solid var(--line);
@@ -124,8 +125,55 @@ html.js [data-reveal] {
 }
 html.js [data-reveal].revealed { opacity: 1; transform: none; }
 
+.prose .heading-anchor {
+  margin-left: 0.4em;
+  color: var(--ink-soft);
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.prose .heading-anchor::after { content: '#'; }
+.prose :is(h2, h3, h4):hover .heading-anchor,
+.prose .heading-anchor:focus-visible { opacity: 1; }
+.prose .heading-anchor:hover { color: var(--accent); }
+
+.copy-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  font: 500 0.75rem var(--font-sans);
+  color: var(--ink-soft);
+  background: var(--bg-raised);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.2rem 0.55rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+pre:hover .copy-btn,
+.copy-btn:focus-visible { opacity: 1; }
+.copy-btn:hover { color: var(--ink); border-color: var(--ink-soft); }
+
+@media (hover: none) {
+  .copy-btn { opacity: 1; }
+  .prose .heading-anchor { opacity: 0.55; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   html.js [data-reveal] { opacity: 1; transform: none; transition: none; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+@media print {
+  body > header, footer, .progress, .back, .copy-btn, .heading-anchor { display: none !important; }
+  body { background: #fff; color: #000; }
+  a { color: #000; }
+  html.js [data-reveal] { opacity: 1 !important; transform: none !important; }
+  .prose a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.875em;
+    color: #555;
+  }
 }

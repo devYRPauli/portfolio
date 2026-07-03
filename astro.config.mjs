@@ -1,5 +1,29 @@
 import { defineConfig, fontProviders } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import { satteri } from '@astrojs/markdown-satteri';
+import GithubSlugger from 'github-slugger';
+
+// Runs before Astro's heading-ids plugin, which keeps any id already set.
+const headingAnchors = () => {
+  const slugger = new GithubSlugger();
+  return {
+    name: 'heading-anchors',
+    element: {
+      filter: ['h2', 'h3', 'h4'],
+      visit(node, ctx) {
+        const existing = node.properties?.id;
+        const id = typeof existing === 'string' ? existing : slugger.slug(ctx.textContent(node));
+        ctx.setProperty(node, 'id', id);
+        ctx.appendChild(node, {
+          type: 'element',
+          tagName: 'a',
+          properties: { href: `#${id}`, className: ['heading-anchor'], ariaLabel: 'Link to this section' },
+          children: [],
+        });
+      },
+    },
+  };
+};
 
 export default defineConfig({
   site: 'https://yashrajpandey.com',
@@ -15,6 +39,7 @@ export default defineConfig({
     shikiConfig: {
       themes: { light: 'github-light', dark: 'github-dark' },
     },
+    processor: satteri({ hastPlugins: [headingAnchors] }),
   },
   fonts: [
     {

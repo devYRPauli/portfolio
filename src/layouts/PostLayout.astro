@@ -7,6 +7,7 @@ interface Props {
   date?: Date;
   updated?: Date;
   meta?: string;
+  ogImage?: string;
   jsonLd?: object;
   transitionName?: string;
   backHref?: string;
@@ -19,6 +20,7 @@ const {
   date,
   updated,
   meta,
+  ogImage,
   jsonLd,
   transitionName,
   backHref = '/',
@@ -31,6 +33,7 @@ const fmt = (d: Date) =>
 <BaseLayout
   title={title}
   description={description}
+  ogImage={ogImage}
   jsonLd={jsonLd}
   ogType={date ? 'article' : 'website'}
   publishedTime={date}
@@ -61,6 +64,25 @@ const fmt = (d: Date) =>
     };
     addEventListener('scroll', onScroll, { passive: true });
     document.addEventListener('astro:page-load', onScroll);
+
+    const addCopyButtons = () => {
+      document.querySelectorAll('.prose pre').forEach((pre) => {
+        if (pre.querySelector('.copy-btn')) return;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'copy-btn';
+        btn.textContent = 'Copy';
+        btn.addEventListener('click', () => {
+          navigator.clipboard.writeText(pre.querySelector('code')?.textContent ?? '');
+          btn.textContent = 'Copied';
+          setTimeout(() => {
+            btn.textContent = 'Copy';
+          }, 1500);
+        });
+        pre.appendChild(btn);
+      });
+    };
+    document.addEventListener('astro:page-load', addCopyButtons);
   </script>
 </BaseLayout>
 

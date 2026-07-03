@@ -9,6 +9,12 @@ const year = new Date().getFullYear();
       <a href="/rss.xml">RSS</a>
     </span>
   </div>
+  <div class="container">
+    <p class="colophon">
+      Built with Astro. No client framework, under 20 KB of JS.
+      <a href="https://github.com/devYRPauli/portfolio">Source on GitHub</a>.
+    </p>
+  </div>
 </footer>
 
 <style>
@@ -16,10 +22,15 @@ const year = new Date().getFullYear();
   .row {
     display: flex;
     justify-content: space-between;
-    padding-block: 1.5rem;
+    padding-block: 1.5rem 0.5rem;
     font-size: 0.875rem;
     color: var(--ink-soft);
   }
   .links { display: flex; gap: 1rem; }
   a { color: var(--ink-soft); }
+  .colophon {
+    padding-bottom: 1.5rem;
+    font-size: 0.8125rem;
+    color: var(--ink-soft);
+  }
 </style>
