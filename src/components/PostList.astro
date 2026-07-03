@@ -5,7 +5,7 @@ interface Props { posts: CollectionEntry<'writing'>[] }
 const { posts } = Astro.props;
 
 const fmt = (d: Date) =>
-  d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });
 ---
 <ul>
   {posts.map((p) => (

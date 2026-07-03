@@ -9,17 +9,30 @@ interface Props {
   meta?: string;
   jsonLd?: object;
   transitionName?: string;
+  backHref?: string;
+  backLabel?: string;
 }
 
-const { title, description, date, updated, meta, jsonLd, transitionName } = Astro.props;
+const {
+  title,
+  description,
+  date,
+  updated,
+  meta,
+  jsonLd,
+  transitionName,
+  backHref = '/',
+  backLabel = 'Home',
+} = Astro.props;
 
 const fmt = (d: Date) =>
-  d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
 ---
 <BaseLayout title={title} description={description} jsonLd={jsonLd}>
   <div class="progress" aria-hidden="true"></div>
   <article>
     <header>
+      <a class="back" href={backHref}>&larr; {backLabel}</a>
       <h1 transition:name={transitionName}>{title}</h1>
       <p class="byline">
         {date && <time class="numeric" datetime={date.toISOString()}>{fmt(date)}</time>}
@@ -48,6 +61,14 @@ const fmt = (d: Date) =>
 <style>
   article { margin-top: 3rem; }
   header { margin-bottom: 2.5rem; }
+  .back {
+    display: inline-block;
+    color: var(--ink-soft);
+    text-decoration: none;
+    font-size: 0.9375rem;
+    margin-bottom: 1.25rem;
+  }
+  .back:hover { color: var(--ink); }
   .byline {
     color: var(--ink-soft);
     font-size: 0.9375rem;

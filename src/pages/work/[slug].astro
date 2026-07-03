@@ -16,6 +16,8 @@ const { role, year, stack, links } = project.data;
   description={project.data.summary}
   meta={`${role} | ${year}`}
   transitionName={`work-${project.id}`}
+  backHref="/#work"
+  backLabel="Home"
 >
   <p class="stack">
     {stack.map((s) => <span>{s}</span>)}

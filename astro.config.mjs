@@ -4,6 +4,13 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
   site: 'https://yashrajpandey.com',
   integrations: [sitemap()],
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: 'viewport',
+  },
+  experimental: {
+    clientPrerender: true,
+  },
   markdown: {
     shikiConfig: {
       themes: { light: 'github-light', dark: 'github-dark' },
