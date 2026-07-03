@@ -25,8 +25,6 @@ Most AI resume tools hallucinate skills and rewrite bullets with confident fluff
 - Runs a strict, evidence-based gap analysis: a confidence-weighted 0-100 fit score, requirement-by-requirement matches linked to the exact resume bullets that prove them, and a prioritized list of what is missing.
 - Privacy-first by design: the resume is cached locally and the user brings their own API key (OpenAI, Anthropic, or Google), so data and model choice stay fully in their control.
 
-## Results
-
 ## Trade-offs
 
 Deliberately a gap analyzer, not a rewriter. Suggesting only 1-2 targeted, non-hallucinated bullets keeps it honest; the BYO-key model trades one-click convenience for the user keeping full control of their data and cost.

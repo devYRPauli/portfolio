@@ -26,8 +26,6 @@ Teams want Google-Docs-style collaboration on Markdown without handing their con
 - Real-time multiplayer, inline comments, and accept/reject suggestion review backed by a CRDT (Yjs) model that merges concurrent edits without conflicts.
 - Shipped a first-class agent HTTP API: per-agent tokens, rate-limit headers, and a Server-Sent Events stream, so automated writers are first-class collaborators.
 
-## Results
-
 ## Trade-offs
 
 Git-native storage trades a query-optimized database for transparency and zero-infra self-hosting: the repo is the source of truth and the backup. The agent API mirrors the human surface exactly, so anything a person can do, an agent can do through tokens and rate limits.
