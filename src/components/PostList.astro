@@ -1,0 +1,38 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props { posts: CollectionEntry<'writing'>[] }
+const { posts } = Astro.props;
+
+const fmt = (d: Date) =>
+  d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+---
+<ul>
+  {posts.map((p) => (
+    <li data-reveal>
+      <a href={`/writing/${p.id}/`}>
+        <span class="row">
+          <strong transition:name={`post-${p.id}`}>{p.data.title}</strong>
+          <time class="numeric" datetime={p.data.pubDate.toISOString()}>{fmt(p.data.pubDate)}</time>
+        </span>
+        <span class="summary">{p.data.description}</span>
+      </a>
+    </li>
+  ))}
+</ul>
+
+<style>
+  ul { list-style: none; padding: 0; display: grid; gap: 0.25rem; }
+  a {
+    display: block;
+    padding: 0.85rem 1rem;
+    margin-inline: -1rem;
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  a:hover { background: var(--bg-raised); }
+  .row { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+  time { color: var(--ink-soft); font-size: 0.875rem; white-space: nowrap; }
+  .summary { color: var(--ink-soft); font-size: 0.9375rem; }
+</style>

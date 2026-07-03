@@ -1,0 +1,35 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props { projects: CollectionEntry<'work'>[] }
+const { projects } = Astro.props;
+---
+<ul>
+  {projects.map((p) => (
+    <li data-reveal>
+      <a href={`/work/${p.id}/`}>
+        <span class="row">
+          <strong transition:name={`work-${p.id}`}>{p.data.title}</strong>
+          <time class="numeric">{p.data.year}</time>
+        </span>
+        <span class="summary">{p.data.summary}</span>
+      </a>
+    </li>
+  ))}
+</ul>
+
+<style>
+  ul { list-style: none; padding: 0; display: grid; gap: 0.25rem; }
+  a {
+    display: block;
+    padding: 0.85rem 1rem;
+    margin-inline: -1rem;
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  a:hover { background: var(--bg-raised); }
+  .row { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+  time { color: var(--ink-soft); font-size: 0.875rem; }
+  .summary { color: var(--ink-soft); font-size: 0.9375rem; }
+</style>
