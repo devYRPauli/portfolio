@@ -49,7 +49,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <Font cssVariable="--font-serif" />
     <Font cssVariable="--font-mono" />
     <ClientRouter />
-    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+    {jsonLd && <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
     <script is:inline>
       document.documentElement.classList.add('js');
       const applyTheme = () => {
