@@ -1,0 +1,23 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostList from '../../components/PostList.astro';
+
+const posts = (await getCollection('writing'))
+  .filter((p) => !p.data.draft)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+<BaseLayout
+  title="Writing - Yash Raj Pandey"
+  description="Essays and playbooks on local-first AI, RAG, LLM evals, and systems engineering."
+>
+  <section>
+    <h1>Writing</h1>
+    <PostList posts={posts} />
+  </section>
+</BaseLayout>
+
+<style>
+  section { margin-top: 3rem; }
+  h1 { margin-bottom: 1.5rem; }
+</style>
