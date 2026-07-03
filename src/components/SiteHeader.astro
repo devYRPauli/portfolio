@@ -1,0 +1,66 @@
+---
+const nav = [
+  { href: '/#work', label: 'Work' },
+  { href: '/writing/', label: 'Writing' },
+  { href: '/#about', label: 'About' },
+];
+---
+<header>
+  <div class="container bar">
+    <a class="brand" href="/">Yash Raj Pandey</a>
+    <nav aria-label="Main">
+      {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+      <button id="theme-toggle" type="button" aria-label="Toggle color theme">
+        <svg class="sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4m11.4-11.4 1.4-1.4" />
+        </svg>
+        <svg class="moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z" />
+        </svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<style>
+  header { border-bottom: 1px solid var(--line); }
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: 0.9rem;
+  }
+  .brand { font-weight: 600; color: var(--ink); text-decoration: none; }
+  nav { display: flex; align-items: center; gap: 1.1rem; }
+  nav a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    font-size: 0.9375rem;
+  }
+  nav a:hover { color: var(--ink); }
+  button {
+    display: grid;
+    place-items: center;
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--ink-soft);
+    width: 2rem;
+    height: 2rem;
+    cursor: pointer;
+  }
+  button:hover { color: var(--ink); border-color: var(--ink-soft); }
+  :global(html[data-theme='dark']) .moon { display: none; }
+  :global(html:not([data-theme='dark'])) .sun { display: none; }
+</style>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    document.getElementById('theme-toggle')?.addEventListener('click', () => {
+      const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      localStorage.setItem('theme', next);
+    });
+  });
+</script>

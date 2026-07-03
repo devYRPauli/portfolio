@@ -1,0 +1,25 @@
+---
+const year = new Date().getFullYear();
+---
+<footer>
+  <div class="container row">
+    <span>(c) {year} Yash Raj Pandey</span>
+    <span class="links">
+      <a href="mailto:yashpn62@gmail.com">Email</a>
+      <a href="/rss.xml">RSS</a>
+    </span>
+  </div>
+</footer>
+
+<style>
+  footer { border-top: 1px solid var(--line); margin-top: 4rem; }
+  .row {
+    display: flex;
+    justify-content: space-between;
+    padding-block: 1.5rem;
+    font-size: 0.875rem;
+    color: var(--ink-soft);
+  }
+  .links { display: flex; gap: 1rem; }
+  a { color: var(--ink-soft); }
+</style>
