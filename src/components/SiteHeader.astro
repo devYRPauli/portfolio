@@ -3,13 +3,21 @@ const nav = [
   { href: '/#work', label: 'Work' },
   { href: '/writing/', label: 'Writing' },
   { href: '/#about', label: 'About' },
+  { href: '/#contact', label: 'Contact' },
 ];
+
+const path = Astro.url.pathname;
+const isCurrent = (href: string) => href === '/writing/' && path.startsWith('/writing');
 ---
 <header>
   <div class="container bar">
     <a class="brand" href="/">Yash Raj Pandey</a>
     <nav aria-label="Main">
-      {nav.map((item) => <a href={item.href}>{item.label}</a>)}
+      {nav.map((item) => (
+        <a href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+          {item.label}
+        </a>
+      ))}
       <button id="theme-toggle" type="button" aria-label="Toggle color theme">
         <svg class="sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
           <circle cx="12" cy="12" r="4" />
@@ -39,6 +47,13 @@ const nav = [
     font-size: 0.9375rem;
   }
   nav a:hover { color: var(--ink); }
+  nav a[aria-current='page'] { color: var(--ink); }
+  @media (max-width: 480px) {
+    .bar { padding-block: 0.75rem; flex-wrap: wrap; gap: 0.35rem 1rem; }
+    .brand { font-size: 0.9375rem; white-space: nowrap; }
+    nav { gap: 0.75rem; }
+    nav a { font-size: 0.875rem; }
+  }
   button {
     display: grid;
     place-items: center;

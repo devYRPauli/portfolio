@@ -13,13 +13,14 @@ interface Props {
 }
 
 const { title, description, ogImage = '/og.png', jsonLd } = Astro.props;
+const pageTitle = title.includes('Yash Raj Pandey') ? title : `${title} - Yash Raj Pandey`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
+    <title>{pageTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
@@ -28,7 +29,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <link rel="manifest" href="/manifest.json" />
     <link rel="alternate" type="application/rss+xml" title="Yash Raj Pandey" href="/rss.xml" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content={title} />
+    <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={new URL(ogImage, Astro.site)} />
