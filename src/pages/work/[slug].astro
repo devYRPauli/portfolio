@@ -1,0 +1,41 @@
+---
+import { getCollection, render } from 'astro:content';
+import PostLayout from '../../layouts/PostLayout.astro';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('work');
+  return projects.map((p) => ({ params: { slug: p.id }, props: { project: p } }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+const { role, year, stack, links } = project.data;
+---
+<PostLayout
+  title={project.data.title}
+  description={project.data.summary}
+  meta={`${role} | ${year}`}
+  transitionName={`work-${project.id}`}
+>
+  <p class="stack">
+    {stack.map((s) => <span>{s}</span>)}
+  </p>
+  {links && (
+    <p>
+      {links.map((l) => <a href={l.href}>{l.label}</a>)}
+    </p>
+  )}
+  <Content />
+</PostLayout>
+
+<style>
+  .stack { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .stack span {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 0.1rem 0.5rem;
+    color: var(--ink-soft);
+  }
+</style>
