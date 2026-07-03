@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://yashrajpandey.com/sitemap.xml
+Sitemap: https://yashrajpandey.com/sitemap-index.xml
