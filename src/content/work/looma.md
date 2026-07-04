@@ -10,7 +10,7 @@ stack:
   - Optional local LLM
 links:
   - { label: GitHub, href: https://github.com/devYRPauli/looma }
-order: 2
+order: 1
 ---
 
 A command-line tool that turns Claude Code, Codex, and Cursor history into resumable project context, with zero third-party dependencies.
@@ -28,9 +28,10 @@ Coding-agent transcripts pile up fast, but the moment you switch projects the co
 ## Results
 
 - **Third-party deps:** typical CLI -> 0
-- **Extraction F1 (clean fixtures):** Qwen2.5-7B 0.84 -> heuristic 0.86
-- **Test suite:** baseline -> 131 passing
+- **Retrieval recall@3 (hybrid FTS5 + graph + vectors):** 0.62 -> 1.00
+- **Extraction F1 (golden benchmark):** heuristic 0.86, auto-detected local Qwen2.5-7B 0.95
+- **Test suite:** baseline -> 134 passing
 
 ## Trade-offs
 
-Chose a transparent heuristic core over an LLM-by-default pipeline: it is auditable, runs anywhere with no keys, and on clean fixtures actually beat a 7B local model. Every reconstruction carries a confidence score and shows alternatives instead of guessing.
+Chose a transparent heuristic core over an LLM-by-default pipeline: it is auditable and runs anywhere with no keys or model downloads. When a local model server is running, Looma auto-detects it and upgrades extraction (F1 0.95 vs 0.86 with a Q4_K_M Qwen2.5-7B), while the heuristic stays the always-available fallback. Every reconstruction carries a confidence score and shows alternatives instead of guessing.
