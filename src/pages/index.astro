@@ -14,7 +14,7 @@ const timeline = [
   { year: '2019', title: 'BTech begins', description: 'Computer Science at Jaypee University of Engineering and Technology.' },
   { year: '2022', title: 'First production app', description: 'SWE intern at Hackdev: shipped a Flutter legal-tech app to production.' },
   { year: '2023', title: 'Exchange to UF', description: 'Final undergrad semester at UF as an exchange student, which led to MS admission.' },
-  { year: '2025', title: 'Blue Omics', description: 'Joined UF IFAS, built a 5M+ record platform, promoted to Lead.' },
+  { year: '2025', title: 'Blue Omics', description: 'Joined UF IFAS, built a 5M+ record platform, promoted to Lead, grew the team to three.' },
   { year: '2026', title: 'AI Agents Architect', description: 'Proposed and now lead a local-first AI systems function.' },
 ];
 
@@ -48,6 +48,19 @@ const jsonLd = {
     <h2 id="writing-h" class="section-label">Writing</h2>
     <PostList posts={posts} />
     <a class="more" href="/writing/">All writing -&gt;</a>
+  </section>
+
+  <section id="open-source" aria-labelledby="oss-h">
+    <h2 id="oss-h" class="section-label">Open Source</h2>
+    <p>40+ merged pull requests across 30+ projects, from C++ inference kernels to Python ML frameworks to TypeScript tooling. Highlights:</p>
+    <ul class="oss">
+      <li data-reveal><a href="https://github.com/ggml-org/llama.cpp/pull/24305">llama.cpp</a> - fixed rms_norm_back producing wrong output under in-place aliasing in the CPU backend</li>
+      <li data-reveal><a href="https://github.com/ml-explore/mlx/pulls?q=is%3Apr+author%3AdevYRPauli+is%3Amerged">Apple MLX</a> - two undefined-behavior fixes in core ops: arange with step 0, integer overflow in roll and tile</li>
+      <li data-reveal><a href="https://github.com/google-research/tabfm/pull/42">Google Research TabFM</a> - fixed predict crashing on every multi-GPU host, with a regression test that runs on CPU</li>
+      <li data-reveal><a href="https://github.com/mem0ai/mem0/pulls?q=is%3Apr+author%3AdevYRPauli+is%3Amerged">mem0</a> - four fixes across vector stores and LLM clients: FAISS, Redis, Weaviate, HTTP proxy support</li>
+      <li data-reveal><a href="https://github.com/BerriAI/litellm/pulls?q=is%3Apr+author%3AdevYRPauli+is%3Amerged">LiteLLM</a> - three cost-tracking fixes so provider usage bills at the real price</li>
+      <li data-reveal><a href="https://github.com/infiniflow/ragflow/pulls?q=is%3Apr+author%3AdevYRPauli+is%3Amerged">RAGFlow</a> - parser fixes that stop Excel and HTML chunking from silently dropping data</li>
+    </ul>
   </section>
 
   <section id="about" aria-labelledby="about-h">
@@ -85,4 +98,6 @@ const jsonLd = {
   .timeline { list-style: none; padding: 0; display: grid; gap: 0.6rem; margin-top: 0.5rem; }
   .timeline li { display: flex; gap: 1.25rem; }
   .timeline time { color: var(--ink-soft); min-width: 3rem; }
+  .oss { list-style: none; padding: 0; display: grid; gap: 0.6rem; margin-top: 0.75rem; }
+  .oss a { font-weight: 500; }
 </style>
