@@ -22,9 +22,9 @@ Most AI resume tools hallucinate skills and rewrite bullets with confident fluff
 ## Approach
 
 - Built a universal scraper that reads job postings across LinkedIn, Greenhouse, Ashby, Lever, Workday and more, piercing Shadow DOM to work on virtually any board.
-- Runs a strict, evidence-based gap analysis: a confidence-weighted 0-100 fit score, requirement-by-requirement matches linked to the exact resume bullets that prove them, and a prioritized list of what is missing.
+- Runs a strict, evidence-based gap analysis: a confidence-weighted 0-100 fit score, top requirement matches linked to the exact resume bullets that prove them, and a prioritized list of what is missing.
 - Privacy-first by design: the resume is cached locally and the user brings their own API key (OpenAI, Anthropic, or Google), so data and model choice stay fully in their control.
 
 ## Trade-offs
 
-Deliberately a gap analyzer, not a rewriter. Suggesting only 1-2 targeted, non-hallucinated bullets keeps it honest; the BYO-key model trades one-click convenience for the user keeping full control of their data and cost.
+Deliberately a gap analyzer, not a rewriter: it tells you what matches and what is missing, and never generates resume bullets, which is exactly what keeps it honest. The BYO-key model trades one-click convenience for the user keeping full control of their data and cost.
