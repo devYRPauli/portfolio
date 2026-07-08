@@ -2,6 +2,7 @@
 title: I Tried to Break Google's New Tabular Foundation Model. Then I Fixed It.
 description: An independent, reproducible evaluation of TabFM - what held up, what did not, and the bug fix that got merged into Google's repo
 pubDate: 2026-07-01
+updatedDate: 2026-07-07
 tags:
   - evals
   - reproducibility
@@ -16,6 +17,7 @@ What I found, in one breath:
 - On small-to-mid tables, TabFM **beat a properly Optuna-tuned XGBoost on all 10 fold-matched datasets**, zero-shot. On the anchor dataset the gap actually *widened* under tuning (0.877 vs 0.821 accuracy).
 - But I held myself to the same bar I'd hold the authors to. A multi-seed check forced me to **demote two "wins" to ties** because the margins were smaller than measurement noise.
 - The advertised "22.75 GB GPU footprint" turned out to be **mostly an XLA allocator artifact**; the real footprint is ~16.95 GB, and disabling preallocation roughly **doubled the usable context** (from ~10k rows to ~20k).
+- **Update (2026-07-07):** after a TabFM author mentioned the repo now enables bf16 + activation chunking, I benchmarked the PyTorch backend at current `main`. On the same 4090 it holds a **3-7 GB working set (vs the JAX pin's flat ~17 GB), fits 40k rows where JAX OOMs at ~20k, and runs 2-4x faster at large context.** Details in the hardware section.
 - Along the way I found a bug that **crashes `predict` on any machine with two or more GPUs**. I root-caused it, wrote a fix and a regression test, and the PR was **merged into `google-research/tabfm` by one of TabFM's own authors**.
 
 Everything below is seeded, pinned, and reproducible: **[github.com/devYRPauli/tabfm-evaluation](https://github.com/devYRPauli/tabfm-evaluation)**
@@ -173,6 +175,25 @@ For completeness I finished the CPU curve on the Studio too. The full latency-vs
 | 5000 | 31.1 s | 1299.2 s | 42x |
 
 The GPU is 14x to 42x faster where it fits, and the gap *widens* with context. There is no speed crossover - the GPU is always faster where it fits, and simply stops fitting past its memory ceiling. The CPU can hold far more context (64 GB unified memory), but at ~21 minutes per single prediction at 5,000 rows, it is impractical at scale. This matches exactly why the largest TabArena datasets (78k and 150k rows) could not be benchmarked exhaustively.
+
+### Update: the PyTorch backend changed the memory story
+
+After I published, one of TabFM's authors reached out to say the repo had recently been updated to enable **bf16 computation and activation chunking** for speed and memory, and asked whether my eval predated the change. It did - and the honest answer has two halves. The accuracy numbers are untouched: those changes are **PyTorch-backend-only** and post-date my pinned commit, and the JAX backend I used already computed in bfloat16, so nothing above moves. But it raised an obvious question I hadn't measured: what does the *updated* backend actually do to the hardware envelope?
+
+So I ran the sweep again on the same 4090, this time on the **PyTorch backend at current `main`**, chunking on. The chunking is the whole story:
+
+| Context (n_train) | JAX pin (b6ea70b) | PyTorch main (chunked) | Latency: JAX -> PyTorch |
+|---|---|---|---|
+| 100 | ~17 GB | 3.1 GB | 2.07 s -> 1.84 s |
+| 1000 | ~17 GB | 3.3 GB | 4.36 s -> 3.02 s |
+| 5000 | ~17 GB | 3.9 GB | 31.6 s -> 14.1 s |
+| 10000 | ~17 GB | 4.1 GB | 107.3 s -> 34.5 s |
+| 20000 | ~17 GB (near ceiling) | 5.0 GB | 384.1 s -> 87.8 s |
+| 40000 | OOM (>24 GB) | 7.0 GB | - -> 245.4 s |
+
+Two caveats I want to be explicit about, because the numbers look almost too good. First, the memory columns are **not the same metric**: the JAX figure is `nvidia-smi` (masked by XLA preallocation), while the PyTorch figure is `torch.cuda.max_memory_allocated` (the device-authoritative live working set). So "17 GB vs 3 GB" is not a clean like-for-like allocation delta - the honest framing is "flat ~17 GB and OOM around 20-30k" versus "3-7 GB and comfortably fits 40k." Second, this compares two *code states* (my older JAX pin against today's chunked PyTorch main), not JAX-vs-PyTorch as languages.
+
+With those caveats stated, the practical result is real and it is large: on a single 24 GB card the updated PyTorch backend **fits roughly twice the context and runs 2-4x faster at scale.** My original "distrust flat numbers" finding still stands for the JAX backend - but the maintainers' chunking work is exactly the fix that flattens the memory wall for good. That is the best possible outcome for a reproduction to surface: not just a verdict on the old state, but a measured confirmation that the new state is better.
 
 ---
 
