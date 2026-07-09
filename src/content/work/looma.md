@@ -10,6 +10,7 @@ stack:
   - Optional local LLM
 links:
   - { label: GitHub, href: https://github.com/devYRPauli/looma }
+  - { label: PyPI, href: https://pypi.org/project/looma/ }
 order: 1
 ---
 
