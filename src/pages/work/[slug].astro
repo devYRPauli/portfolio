@@ -24,7 +24,7 @@ const { role, year, stack, links } = project.data;
     {stack.map((s) => <span>{s}</span>)}
   </p>
   {links && (
-    <p>
+    <p class="links">
       {links.map((l) => <a href={l.href}>{l.label}</a>)}
     </p>
   )}
@@ -33,6 +33,7 @@ const { role, year, stack, links } = project.data;
 
 <style>
   .stack { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .links { display: flex; flex-wrap: wrap; gap: 1rem; }
   .stack span {
     font-family: var(--font-mono);
     font-size: 0.8125rem;
