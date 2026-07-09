@@ -23,9 +23,10 @@ Friend-group prediction pools live in spreadsheets: someone owns the file, scori
 ## Approach
 
 - Fixtures and results sync automatically from football-data.org on a daily Vercel Cron, with manual admin editing for when the API is late; members join with an invite code.
-- Fairness is enforced by the clock: match picks lock at kickoff, group qualifier picks lock when that group first plays, and knockout picks are winner-only from the Round of 32 onward - including the new 2026 third-place qualifier format.
+- Fairness is enforced by the clock: match picks lock at kickoff and group qualifier picks lock when that group first plays. Group picks are two teams plus an optional third, matching the 2026 format where the best third-placed teams also advance; knockout picks are winner-only from the Round of 32 on.
 - Scoring (3 points per correct outcome, 5 per qualifier that advances) is computed on read from stored results, never stored, so a scoring change takes effect instantly with nothing to recalculate.
-- Three leaderboard views: total points, a knockout-only board, and standardized accuracy - correct picks over all decided games, so skipping a match counts the same as getting it wrong.
+- Three leaderboard views: total points, a knockout-only board with per-round filters, and standardized accuracy - correct picks over all decided games, so skipping a match counts the same as getting it wrong.
+- Match cards show the pool's split on every game, and profiles track streaks and exact-scoreline calls - small stats that keep the group chat lively.
 
 ## Trade-offs
 
