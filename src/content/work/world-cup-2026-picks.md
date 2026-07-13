@@ -11,7 +11,7 @@ stack:
 links:
   - { label: GitHub, href: https://github.com/devYRPauli/world-cup-2026-picks }
   - { label: Live, href: https://world-cup-2026-picks.vercel.app }
-order: 4
+order: 5
 ---
 
 A prediction pool for small groups, built for the 2026 World Cup and running live through the tournament: pick match outcomes, choose group qualifiers, and compete on a leaderboard that updates as real results come in.
