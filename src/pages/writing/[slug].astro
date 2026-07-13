@@ -20,6 +20,8 @@ const jsonLd = {
   description: post.data.description,
   datePublished: post.data.pubDate.toISOString(),
   ...(post.data.updatedDate && { dateModified: post.data.updatedDate.toISOString() }),
+  image: new URL(`/og/writing/${post.id}.png`, Astro.site).href,
+  keywords: post.data.tags,
   author: { '@type': 'Person', name: 'Yash Raj Pandey', url: 'https://yashrajpandey.com' },
 };
 ---
@@ -28,6 +30,7 @@ const jsonLd = {
   description={post.data.description}
   date={post.data.pubDate}
   updated={post.data.updatedDate}
+  tags={post.data.tags}
   meta={readTime}
   ogImage={`/og/writing/${post.id}.png`}
   jsonLd={jsonLd}

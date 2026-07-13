@@ -16,6 +16,8 @@ The part I like most is how it was built. Baton is a tool for delegating code to
 
 Repo: **[github.com/devYRPauli/baton](https://github.com/devYRPauli/baton)** (MIT, CI green on macOS and Linux)
 
+Short case study: **[Baton](/work/baton/)**
+
 ---
 
 ## Why I built this

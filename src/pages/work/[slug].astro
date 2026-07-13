@@ -10,15 +10,28 @@ export async function getStaticPaths() {
 const { project } = Astro.props;
 const { Content } = await render(project);
 const { role, year, stack, links } = project.data;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'CreativeWork',
+  name: project.data.title,
+  description: project.data.summary,
+  url: new URL(`/work/${project.id}/`, Astro.site).href,
+  image: new URL(`/og/work/${project.id}.png`, Astro.site).href,
+  dateCreated: year,
+  keywords: stack,
+  creator: { '@type': 'Person', name: 'Yash Raj Pandey', url: 'https://yashrajpandey.com' },
+};
 ---
 <PostLayout
   title={project.data.title}
   description={project.data.summary}
   meta={`${role} | ${year}`}
   ogImage={`/og/work/${project.id}.png`}
+  jsonLd={jsonLd}
   transitionName={`work-${project.id}`}
-  backHref="/#work"
-  backLabel="Home"
+  backHref="/work/"
+  backLabel="Work"
 >
   <p class="stack">
     {stack.map((s) => <span>{s}</span>)}

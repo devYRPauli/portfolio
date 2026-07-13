@@ -6,6 +6,7 @@ interface Props {
   description: string;
   date?: Date;
   updated?: Date;
+  tags?: string[];
   meta?: string;
   ogImage?: string;
   jsonLd?: object;
@@ -19,6 +20,7 @@ const {
   description,
   date,
   updated,
+  tags,
   meta,
   ogImage,
   jsonLd,
@@ -34,9 +36,12 @@ const fmt = (d: Date) =>
   title={title}
   description={description}
   ogImage={ogImage}
+  ogImageAlt={`${title} by Yash Raj Pandey`}
   jsonLd={jsonLd}
   ogType={date ? 'article' : 'website'}
   publishedTime={date}
+  modifiedTime={updated}
+  tags={tags}
 >
   <div class="progress" aria-hidden="true"></div>
   <article>
@@ -72,9 +77,22 @@ const fmt = (d: Date) =>
         btn.type = 'button';
         btn.className = 'copy-btn';
         btn.textContent = 'Copy';
-        btn.addEventListener('click', () => {
-          navigator.clipboard.writeText(pre.querySelector('code')?.textContent ?? '');
-          btn.textContent = 'Copied';
+        btn.addEventListener('click', async () => {
+          let timeout: number | undefined;
+          btn.textContent = 'Copying';
+          try {
+            await Promise.race([
+              navigator.clipboard.writeText(pre.querySelector('code')?.textContent ?? ''),
+              new Promise<never>((_, reject) => {
+                timeout = window.setTimeout(() => reject(new Error('Clipboard write timed out')), 2000);
+              }),
+            ]);
+            btn.textContent = 'Copied';
+          } catch {
+            btn.textContent = 'Copy failed';
+          } finally {
+            if (timeout !== undefined) window.clearTimeout(timeout);
+          }
           setTimeout(() => {
             btn.textContent = 'Copy';
           }, 1500);

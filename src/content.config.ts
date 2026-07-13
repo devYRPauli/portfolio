@@ -20,10 +20,12 @@ const work = defineCollection({
     title: z.string(),
     summary: z.string(),
     role: z.string(),
+    kind: z.string(),
     year: z.string(),
     stack: z.array(z.string()),
     links: z.array(z.object({ label: z.string(), href: z.string() })).optional(),
     order: z.number(),
+    featuredOrder: z.number().int().positive().optional(),
   }),
 });
 

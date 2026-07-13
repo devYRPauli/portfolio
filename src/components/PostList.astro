@@ -9,7 +9,7 @@ const fmt = (d: Date) =>
 ---
 <ul>
   {posts.map((p) => (
-    <li data-reveal>
+    <li>
       <a href={`/writing/${p.id}/`}>
         <span class="row">
           <strong transition:name={`post-${p.id}`}>{p.data.title}</strong>
@@ -22,17 +22,21 @@ const fmt = (d: Date) =>
 </ul>
 
 <style>
-  ul { list-style: none; padding: 0; display: grid; gap: 0.25rem; }
+  ul { list-style: none; padding: 0; display: grid; gap: var(--space-1); }
   a {
     display: block;
-    padding: 0.85rem 1rem;
-    margin-inline: -1rem;
+    padding: var(--space-3) var(--space-4);
+    margin-inline: calc(-1 * var(--space-4));
     border-radius: 10px;
     text-decoration: none;
     color: var(--ink);
   }
   a:hover { background: var(--bg-raised); }
-  .row { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+  .row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-4); }
   time { color: var(--ink-soft); font-size: 0.875rem; white-space: nowrap; }
   .summary { color: var(--ink-soft); font-size: 0.9375rem; }
+  @media (max-width: 520px) {
+    .row { align-items: flex-start; }
+    time { margin-top: 0.15rem; }
+  }
 </style>

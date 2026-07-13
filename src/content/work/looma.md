@@ -2,6 +2,7 @@
 title: Looma
 summary: Local-first project memory for coding agents
 role: Solo - Open source
+kind: AI infrastructure
 year: "2026"
 stack:
   - Python (stdlib only)
@@ -11,7 +12,8 @@ stack:
 links:
   - { label: GitHub, href: https://github.com/devYRPauli/looma }
   - { label: PyPI, href: https://pypi.org/project/looma/ }
-order: 1
+order: 2
+featuredOrder: 2
 ---
 
 A command-line tool that turns Claude Code, Codex, and Cursor history into resumable project context, with zero third-party dependencies.

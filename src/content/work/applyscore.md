@@ -2,6 +2,7 @@
 title: ApplyScore
 summary: AI resume gap-analysis extension
 role: Solo - Shipped
+kind: Browser extension
 year: "2026"
 stack:
   - JavaScript
@@ -10,7 +11,7 @@ stack:
   - LLM APIs (BYO-key)
 links:
   - { label: Site, href: https://chromewebstore.google.com/detail/applyscore/ibecekikdjelajpnjnmapejhahgcplim }
-order: 4
+order: 7
 ---
 
 A published Chrome extension that scores how well a resume matches any job posting on the web, with evidence-linked gaps and no fluff.

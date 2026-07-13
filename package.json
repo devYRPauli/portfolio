@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro check && astro build",
+    "check": "astro check",
+    "check:links": "node scripts/check-links.mjs",
+    "build": "npm run check && astro build && npm run check:links",
     "preview": "astro preview"
   },
   "dependencies": {

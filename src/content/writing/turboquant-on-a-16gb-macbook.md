@@ -14,6 +14,8 @@ I took TurboQuant, a KV cache compression method from a 2025 Google Research pap
 
 Repo with all logs, patches, scripts, and reports: https://github.com/devYRPauli/turboquant-m1pro-evaluation
 
+Short case study: **[TurboQuant Evaluation](/work/turboquant-evaluation/)**
+
 ---
 
 ## Why this caught my eye

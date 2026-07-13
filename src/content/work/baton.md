@@ -2,6 +2,7 @@
 title: Baton
 summary: A kit that installs a reliable code-delegation workflow into Claude Code
 role: Solo - Open source
+kind: Developer tool
 year: "2026"
 stack:
   - Bash (zero deps)
@@ -11,7 +12,8 @@ stack:
 links:
   - { label: GitHub, href: https://github.com/devYRPauli/baton }
   - { label: Writeup, href: https://yashrajpandey.com/writing/baton-the-tool-that-built-itself/ }
-order: 3
+order: 1
+featuredOrder: 1
 ---
 
 A standalone kit that installs an orchestrator-delegates-to-executor workflow into Claude Code: a coding agent hands implementation work to an executor CLI (Codex), and the jobs survive the session that launched them. Point your agent at the repo and it interviews you, then writes a tailored delegation skill plus a detached job runner into your config.

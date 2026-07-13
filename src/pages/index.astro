@@ -1,47 +1,72 @@
 ---
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import WorkList from '../components/WorkList.astro';
 import PostList from '../components/PostList.astro';
+import memoji from '../assets/memoji.png';
 
 const projects = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
+const selectedProjects = projects
+  .filter((project) => project.data.featuredOrder !== undefined)
+  .sort((a, b) => (a.data.featuredOrder ?? Infinity) - (b.data.featuredOrder ?? Infinity))
+  .slice(0, 3);
 const posts = (await getCollection('writing'))
   .filter((p) => !p.data.draft)
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-  .slice(0, 4);
-
-const timeline = [
-  { year: '2019', title: 'BTech begins', description: 'Computer Science at Jaypee University of Engineering and Technology.' },
-  { year: '2022', title: 'First production app', description: 'SWE intern at Hackdev: shipped a Flutter legal-tech app to production.' },
-  { year: '2023', title: 'Exchange to UF', description: 'Final undergrad semester at UF as an exchange student, which led to MS admission.' },
-  { year: '2025', title: 'Blue Omics', description: 'Joined UF IFAS, built a 5M+ record platform, promoted to Lead, grew the team to three.' },
-  { year: '2026', title: 'AI Agents Architect', description: 'Proposed and now lead a local-first AI systems function.' },
-];
+  .slice(0, 3);
 
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Person',
   name: 'Yash Raj Pandey',
+  image: new URL(memoji.src, Astro.site).href,
   jobTitle: 'AI Agents Architect',
   worksFor: { '@type': 'Organization', name: 'University of Florida IFAS' },
+  alumniOf: [
+    { '@type': 'CollegeOrUniversity', name: 'University of Florida' },
+    { '@type': 'CollegeOrUniversity', name: 'Jaypee University of Engineering and Technology' },
+  ],
+  knowsAbout: [
+    'AI agents',
+    'LLM infrastructure',
+    'Retrieval-augmented generation',
+    'Model evaluation',
+    'Developer tools',
+  ],
   url: 'https://yashrajpandey.com',
-  sameAs: ['https://github.com/devYRPauli', 'https://www.linkedin.com/in/yashrajpandeyy'],
+  sameAs: [
+    'https://github.com/devYRPauli',
+    'https://www.linkedin.com/in/yashrajpandeyy/',
+    'https://x.com/I_AM_YRP',
+  ],
 };
 ---
 <BaseLayout
   title="Yash Raj Pandey - AI Agents Architect"
-  description="AI Agents Architect at UF IFAS. I proposed and lead a local-first AI function - LLMs, RAG, and agents, running entirely on-premise."
+  description="AI systems engineer building local-first LLM infrastructure, agent platforms, evaluation systems, and developer tools. AI Agents Architect at UF IFAS."
   jsonLd={jsonLd}
 >
   <section class="hero">
-    <img src="/memoji.png" alt="Yash's memoji, waving" width="88" height="90" />
+    <Image
+      src={memoji}
+      alt="Yash's memoji, waving"
+      width={88}
+      format="webp"
+      quality={85}
+      loading="eager"
+      fetchpriority="high"
+    />
     <h1>Yash Raj Pandey</h1>
-    <p class="tagline"><em>AI Agents Architect.</em> I proposed and lead UF IFAS's local-first AI function - LLMs, RAG, and agents, running entirely on-premise.</p>
+    <p class="tagline"><em>AI systems engineer.</em> I build local-first LLM infrastructure, agent platforms, evaluation systems, and developer tools.</p>
+    <p class="intro">At UF IFAS, I lead the AI systems function I proposed. I also reproduce new model research, contribute fixes upstream, and write about what broke. Outside work, I follow football and build small tools I want to use myself.</p>
   </section>
 
   <section id="work" aria-labelledby="work-h">
     <h2 id="work-h" class="section-label">Selected Work</h2>
-    <WorkList projects={projects} />
+    <WorkList projects={selectedProjects} />
+    <a class="more" href="/work/">All work -&gt;</a>
+    <p class="work-note">I also have 45+ pull requests merged across 30+ open-source projects, including llama.cpp, Apple MLX, and Google Research's TabFM. <a href="https://github.com/devYRPauli?tab=pullrequests">See the pull requests</a>.</p>
   </section>
 
   <section id="writing" aria-labelledby="writing-h">
@@ -50,52 +75,16 @@ const jsonLd = {
     <a class="more" href="/writing/">All writing -&gt;</a>
   </section>
 
-  <section id="open-source" aria-labelledby="oss-h">
-    <h2 id="oss-h" class="section-label">Open Source</h2>
-    <p>45+ merged pull requests across 30+ projects, from C++ inference kernels to Python ML frameworks to TypeScript tooling. Highlights:</p>
-    <ul class="oss">
-      <li data-reveal><a href="https://github.com/ggml-org/llama.cpp/pull/24305">llama.cpp</a> - fixed rms_norm_back producing wrong output under in-place aliasing in the CPU backend</li>
-      <li data-reveal><a href="https://github.com/ml-explore/mlx/pulls?q=is%3Apr+author%3AdevYRPauli+is%3Amerged">Apple MLX</a> - two undefined-behavior fixes in core ops: arange with step 0, integer overflow in roll and tile</li>
-      <li data-reveal><a href="https://github.com/google-research/tabfm/pull/42">Google Research TabFM</a> - fixed predict crashing on every multi-GPU host, with a regression test that runs on CPU</li>
-      <li data-reveal><a href="https://github.com/mem0ai/mem0/pulls?q=is%3Apr+author%3AdevYRPauli+is%3Amerged">mem0</a> - four fixes across vector stores and LLM clients: FAISS, Redis, Weaviate, HTTP proxy support</li>
-      <li data-reveal><a href="https://github.com/BerriAI/litellm/pulls?q=is%3Apr+author%3AdevYRPauli+is%3Amerged">LiteLLM</a> - three cost-tracking fixes so provider usage bills at the real price</li>
-      <li data-reveal><a href="https://github.com/infiniflow/ragflow/pulls?q=is%3Apr+author%3AdevYRPauli+is%3Amerged">RAGFlow</a> - parser fixes that stop Excel and HTML chunking from silently dropping data</li>
-    </ul>
-  </section>
-
-  <section id="about" aria-labelledby="about-h">
-    <h2 id="about-h" class="section-label">About</h2>
-    <p>I build AI infrastructure and production software systems. I'm the AI Agents Architect at the University of Florida's Institute of Food and Agricultural Sciences, where I lead a function I proposed myself: self-hosted, local-first AI that runs entirely on-premise, so sensitive data never has to leave the building.</p>
-    <ol class="timeline">
-      {timeline.map((t) => (
-        <li data-reveal>
-          <time class="numeric">{t.year}</time>
-          <span><strong>{t.title}</strong>{t.description && <> - {t.description}</>}</span>
-        </li>
-      ))}
-    </ol>
-  </section>
-
-  <section id="contact" aria-labelledby="contact-h">
-    <h2 id="contact-h" class="section-label">Contact</h2>
-    <p>
-      Reach me at <a href="mailto:yashpn62@gmail.com">yashpn62@gmail.com</a>, on <a href="https://github.com/devYRPauli">GitHub</a> or <a href="https://www.linkedin.com/in/yashrajpandeyy">LinkedIn</a>, or grab my <a href="/Resume_YashRaj.pdf">resume</a>.
-    </p>
-  </section>
 </BaseLayout>
 
 <style>
-  section { margin-top: 3.5rem; }
-  .hero { margin-top: 4rem; }
+  section { margin-top: var(--space-8); }
   .hero img { border-radius: 20px; }
-  .hero h1 { margin-top: 1rem; }
-  .tagline { font-size: 1.25rem; margin-top: 0.5rem; }
+  .hero h1 { margin-top: var(--space-4); }
+  .tagline { font-size: 1.25rem; margin-top: var(--space-2); }
   .tagline em { font-family: var(--font-serif); font-style: italic; font-size: 1.15em; }
-  .section-label { margin-bottom: 1rem; }
-  .more { display: inline-block; margin-top: 0.75rem; font-size: 0.9375rem; }
-  .timeline { list-style: none; padding: 0; display: grid; gap: 0.6rem; margin-top: 0.5rem; }
-  .timeline li { display: flex; gap: 1.25rem; }
-  .timeline time { color: var(--ink-soft); min-width: 3rem; }
-  .oss { list-style: none; padding: 0; display: grid; gap: 0.6rem; margin-top: 0.75rem; }
-  .oss a { font-weight: 500; }
+  .intro { color: var(--ink-soft); margin-top: var(--space-4); }
+  .section-label { margin-bottom: var(--space-4); }
+  .more { display: inline-block; margin-top: var(--space-3); font-size: 0.9375rem; }
+  .work-note { color: var(--ink-soft); font-size: 0.9375rem; margin-top: var(--space-5); }
 </style>

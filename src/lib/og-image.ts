@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import satori, { type SatoriOptions } from 'satori';
 import { Resvg } from '@resvg/resvg-js';
 
@@ -12,6 +13,7 @@ const PAPER = '#f9f7ef';
 const INK = '#261d16';
 const SOFT = '#4a4038';
 const AMBER = '#b46d10';
+const require = createRequire(import.meta.url);
 
 const el = (type: string, style: Record<string, unknown>, children?: unknown) => ({
   type,
@@ -19,7 +21,7 @@ const el = (type: string, style: Record<string, unknown>, children?: unknown) =>
 });
 
 const font = (pkg: string, file: string) =>
-  readFile(`node_modules/@fontsource/${pkg}/files/${file}`);
+  readFile(require.resolve(`@fontsource/${pkg}/files/${file}`));
 
 let fonts: Promise<SatoriOptions['fonts']> | undefined;
 const loadFonts = () =>

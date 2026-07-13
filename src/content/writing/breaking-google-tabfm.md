@@ -22,6 +22,8 @@ What I found, in one breath:
 
 Everything below is seeded, pinned, and reproducible: **[github.com/devYRPauli/tabfm-evaluation](https://github.com/devYRPauli/tabfm-evaluation)**
 
+Short case study: **[TabFM Evaluation](/work/tabfm-evaluation/)**
+
 ---
 
 ## How this started
