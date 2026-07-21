@@ -117,8 +117,9 @@ failures are swallowed).
 
 That is the mechanism behind the whole matrix. It favours llama.cpp
 systematically, in every row, for every model. A llama.cpp-versus-Ollama delta
-is not evidence that Ollama is defective or that a model is worse than another
-- it is what constrained versus unconstrained decoding looks like in a table.
+is not evidence that Ollama is defective or that a model is worse than
+another - it is what constrained versus unconstrained decoding looks like in
+a table.
 The comparison that isolates the model is same-server, never cross-server. The
 site now discloses this above the matrix, because without it, every reader
 would misread the reds the same way I did.
@@ -151,8 +152,8 @@ does not predict tool-calling ability, in either direction.
 
 One result looks like a contradiction and is not: on mlx-lm, the 8bit
 community conversion of Qwen2.5-7B scores 7/50 while the 4bit scores 46/50.
-Before writing that up as a quant effect I recovered the raw generation again
-- and the 8bit conversion emits doubled braces in its tool calls:
+Before writing that up as a quant effect I recovered the raw generation
+again - and the 8bit conversion emits doubled braces in its tool calls:
 
 ```
 8bit:  <tool_call> {{"name": "get_weather", "arguments": {"city": "Boston"}}}
