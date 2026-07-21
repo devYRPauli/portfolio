@@ -11,7 +11,7 @@ stack:
   - LLM APIs (BYO-key)
 links:
   - { label: Site, href: https://chromewebstore.google.com/detail/applyscore/ibecekikdjelajpnjnmapejhahgcplim }
-order: 7
+order: 8
 ---
 
 A published Chrome extension that scores how well a resume matches any job posting on the web, with evidence-linked gaps and no fluff.

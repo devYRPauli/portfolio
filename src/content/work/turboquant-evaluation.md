@@ -12,7 +12,7 @@ stack:
 links:
   - { label: GitHub, href: https://github.com/devYRPauli/turboquant-m1pro-evaluation }
   - { label: Writeup, href: https://yashrajpandey.com/writing/turboquant-on-a-16gb-macbook/ }
-order: 4
+order: 5
 ---
 
 I tried to reproduce TurboQuant, a KV-cache compression method from Google Research, on a 16 GB M1 Pro. The stock implementations returned 0% on my needle-in-a-haystack test, so I treated the result as a systems problem before treating it as an algorithm failure.

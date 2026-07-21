@@ -13,7 +13,7 @@ links:
   - { label: GitHub, href: https://github.com/devYRPauli/tabfm-evaluation }
   - { label: Writeup, href: https://yashrajpandey.com/writing/breaking-google-tabfm/ }
   - { label: Merged fix, href: https://github.com/google-research/tabfm/pull/42 }
-order: 3
+order: 4
 ---
 
 I evaluated Google's TabFM across ten public datasets and three machines, then followed the failures far enough to find a bug in the public prediction path.
