@@ -11,10 +11,9 @@ tags:
 
 ## TL;DR
 
-Tool calling is the load-bearing capability of the agent era, and on local
-stacks it breaks silently: the same model, at the same quantization, with the
-same prompt, can execute tool calls perfectly on one inference server and fail
-completely on another. I built [willitcall](https://github.com/devYRPauli/willitcall)
+Tool calling on local stacks breaks silently: the same model, at the same
+quantization, with the same prompt, can execute tool calls perfectly on one
+inference server and fail completely on another. I built [willitcall](https://github.com/devYRPauli/willitcall)
 to measure this: a Rust CLI that runs 50 tool-calling scenarios against any
 OpenAI-compatible endpoint, and a
 [public red/green matrix](https://devyrpauli.github.io/willitcall/) of
@@ -34,7 +33,7 @@ Three findings survived replication, and one of my own headline claims did not:
    Q8_0, Q4_K_M, and Q3_K_M, seed-varied replication puts the arms within noise
    of each other. What CAN destroy a row outright is a bad conversion artifact,
    which is a different thing than a dose-response effect.
-3. **There is a failure mode nobody's vocabulary covered:** a model that emits
+3. **There is a failure mode I did not have a name for:** a model that emits
    correct, well-formed tool calls in a format that no server parses. Those
    cells look identical to "this model cannot call tools", and that is false.
 
@@ -43,7 +42,7 @@ valid tool call. A maintainer pushed back, I recovered the actual discarded
 bytes, and the model had emitted the tool's *description* where its *name*
 belonged. Ollama's parser was right; my inference was wrong. I retracted the
 claim publicly, and the investigation that followed produced finding number 1,
-which is worth more than the bug report ever was.
+which turned out to matter far more than the bug report.
 
 ## The problem
 
@@ -59,8 +58,8 @@ tool calling: pick a model, a quant, and a server, and see whether that exact
 combination executes tool calls, with the evidence one click away.
 
 So the unit of measurement in willitcall is the *combination*. A cell is a
-property of the whole stack. That framing sounded like a hedge when I wrote it
-into the spec. It turned out to be the main finding.
+property of the whole stack. When I wrote that into the spec it felt like a
+hedge. By the end it was the main finding.
 
 ## What I built
 
@@ -102,7 +101,7 @@ inference from the token count, not on the tokens themselves. I retitled the
 issue, retracted the claim in the thread with credit to the person who
 challenged it, and rewrote the case study to carry the correction.
 
-Here is the part that mattered: if the model emitted a wrong name through
+That left a question: if the model emitted a wrong name through
 Ollama, why did the same weights emit the right name through llama.cpp, every
 time?
 
@@ -115,26 +114,27 @@ mlx-lm sits on the unconstrained side too (verified by reading the source:
 tools reach the chat template only, there is no grammar machinery, and parse
 failures are swallowed).
 
-That is the mechanism behind the whole matrix. It favours llama.cpp
+That is the mechanism behind the whole matrix. It favors llama.cpp
 systematically, in every row, for every model. A llama.cpp-versus-Ollama delta
 is not evidence that Ollama is defective or that a model is worse than
-another - it is what constrained versus unconstrained decoding looks like in
-a table.
+another - it is the difference between constrained and unconstrained decoding
+showing up in a table.
 The comparison that isolates the model is same-server, never cross-server. The
 site now discloses this above the matrix, because without it, every reader
 would misread the reds the same way I did.
 
-The lesson generalizes past this project: **an empty response is
-unattributable without the raw tokens.** Symptom-level inference - "tokens
-were billed, nothing returned, therefore the server ate a valid call" - feels
-rigorous and is not. Get the bytes.
+The bigger lesson: **an empty response is unattributable without the raw
+tokens.** My inference - "tokens were billed, nothing returned, therefore the
+server ate a valid call" - felt rigorous at the time, but it was a guess. Get
+the bytes.
 
 ## Quantization does not order tool-calling ability (and how I almost published the opposite)
 
 The folklore says aggressive quantization degrades tool-call formatting. I
 measured three models across Q8_0, Q4_K_M, and Q3_K_M on llama.cpp and the
-first pass said something spicier: two of three models scored *highest* at the
-lowest quant. A contrarian headline, at n=1 per arm.
+first pass said the opposite: two of three models scored *highest* at the
+lowest quant. That would have made a good contrarian headline, except it was
+n=1 per arm.
 
 Project rule: no verdict below five runs per arm. So I re-ran every arm five
 times, and got the same numbers. Exactly the same numbers. Identical scores,
@@ -167,10 +167,10 @@ gradual degradation, and it cannot be extrapolated to "8bit is worse than
 4bit". The distinction matters: quantization as a dose does nothing here;
 one specific conversion is simply defective.
 
-## The failure taxonomy nobody had words for
+## The failure modes I had to name myself
 
-Scoring thousands of transcripts forces vocabulary. The matrix now
-distinguishes, mechanically, per response:
+After scoring thousands of transcripts I needed more precise labels than pass
+and fail. The matrix now distinguishes, mechanically, per response:
 
 - **error** - the server refused or crashed. Ollama returns HTTP 400 for any
   gemma3 request carrying tools. llama.cpp returns HTTP 500 on 7-9 of 50
@@ -183,7 +183,7 @@ distinguishes, mechanically, per response:
   what the model emitted - the client is told a call happened and handed
   nothing. From the API alone this is indistinguishable from the model saying
   nothing at all, which is exactly why the recovery step exists.
-- **unparsed_tool_call** - the one that needed inventing. granite3.1-dense:8b
+- **unparsed_tool_call** - the one I had to invent. granite3.1-dense:8b
   emits well-formed calls, right function, valid arguments, in its own
   `<tool_call>[...]` format - and scores 7/50 on Ollama AND 7/50 on llama.cpp
   fed the identical blob, because nothing parses that format into tool_calls.
@@ -197,7 +197,7 @@ Each class is assigned conservatively - crediting a model with a call it never
 made is worse than leaving a cell unexplained - and the full precedence rules
 live in the schema docs.
 
-## What measuring taught me about measuring
+## Rules I learned the hard way
 
 Every wrong conclusion this project produced followed the same shape: a
 pattern at n=1, generalized. The single-sample "fix" that a later replication
@@ -216,7 +216,8 @@ project rule with a mechanism behind it:
   Everything published was re-measured on one host, and result files carry
   environment fields now.
 
-None of these rules existed at the start. Every one was paid for.
+None of these rules existed at the start. Each one exists because I got
+something wrong first.
 
 ## Where it stands
 

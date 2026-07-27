@@ -38,7 +38,7 @@ Before writing anything, I settled the questions that are expensive to change la
 
 **Template the models, hard-code the invariants.** The kit is meant to be shared, and model names go stale fast. "Use this specific model at this specific effort" is my opinion for this month, not a durable design. So the installer fills in model, effort, and paths from an interview, while the things that are actually the product stay fixed text: every brief ends with a smallest-diff constraint, every result is verified before it is called done, and a detached job is confirmed alive before anyone assumes it is running. If those were optional, you could interview your way into a kit that just runs an executor sometimes.
 
-I ran the design past a stronger reasoning model as a critic before committing. The sharpest note it gave me: make the installer verify itself. An installer that does not prove it worked is precisely the failure mode the tool exists to prevent. That became a rule - the last thing setup does is run a live job end to end and show you the real output before it declares success.
+I ran the design past a stronger reasoning model as a critic before committing. The sharpest note it gave me: make the installer verify itself. An installer that does not prove it worked is exactly the failure mode the tool exists to prevent. That became a rule - the last thing setup does is run a live job end to end and show you the real output before it declares success.
 
 The rest fell out of those: an agent-driven `SETUP.md` installer instead of a shell script (the interview needs judgment a script cannot fake), a per-scope config that defines the executor invocation as a small shell function (which is what lets you swap in a non-Codex executor), and two policy presets so the kit is not opinionated about other people's API bills - quality-first for maximum effort, balanced for a lighter default.
 
@@ -50,7 +50,7 @@ Here is the loop I used to build it, which is the same loop the tool ships.
 
 I wrote a spec, then an implementation plan broken into eight small test-driven tasks. Then, task by task, my orchestrator wrote a tight brief (the files to touch, the acceptance test, and a hard "smallest diff, no incidental changes" constraint) and handed it to the Codex executor through a detached runner. The executor implemented the task and ran the tests in its own runtime. When it came back, I did not take its word for it. I re-ran the tests myself, read the diff, and only then committed.
 
-Every task carried the same non-negotiable: return paths and a concise summary, never a wall of logs. The orchestrator plans and checks; the executor writes. I never hand-wrote the runner's bash.
+Every task carried the same rule: return paths and a concise summary, never a wall of logs. The orchestrator plans and checks; the executor writes. I never hand-wrote the runner's bash.
 
 The tasks, each an independently testable slice:
 
@@ -91,13 +91,13 @@ The mechanism is a detached runner started with `nohup` and disowned, so the ope
 
 Then I ran the full install flow against a fake executor, exactly as `SETUP.md` describes it: render the templates, install into a throwaway scope, and run the acceptance test. Rendered files had zero unfilled slots, the installed runner launched a job, reached done, returned the right output, and wrote one well-formed telemetry line. Finally I let CI run the suite on both macOS and Linux, since the kit claims both. Both are green.
 
-That is the ethos I try to hold on every project: the tool does not get to say it works. The evidence does.
+That is the standard I try to hold on every project: do not take the tool's word for it, look at the evidence.
 
 ---
 
 ## Two bugs, and they were mine
 
-The best beat in the build was not a bug in the generated code. It was a bug in my plan.
+The most interesting failure in the build was not a bug in the generated code. It was a bug in my plan.
 
 Two tasks failed their tests on the first pass. When I dug in, the executor had implemented my plan faithfully, character for character. The plan was wrong.
 
@@ -131,7 +131,7 @@ After that, "delegate this to the executor" just works, with a brief, a durable 
 1. **Decide the expensive-to-reverse things first.** Standalone-versus-plugin and template-versus-fixed shaped everything downstream. Getting them right early meant the eight build tasks were mechanical.
 2. **Make the installer prove itself.** The most valuable rule in the whole design is that setup ends with a live job, not a claim. It doubles as the demo.
 3. **A faithful executor implements your mistakes exactly.** Both build failures were my plan, not the generated code. Delegation makes the quality of your brief the ceiling on the result.
-4. **Durability is a property you can point at.** "Jobs survive the session" is not a vibe; it is a parent process ID of 1. Find the observable version of your claim and check it.
+4. **Durability is a property you can point at.** "Jobs survive the session" sounds like marketing copy until you can point at a parent process ID of 1. Find the observable version of your claim and check it.
 5. **The orchestrator should not write the code.** Keeping the planning model out of the implementation, and making it verify instead, is the discipline Baton packages - and it is the discipline that built Baton.
 
 The stock background path dropped jobs on the floor. The finished kit hands work to an executor, keeps custody of it through the session ending, and proves the handoff landed - and it wrote its own runner while I watched.

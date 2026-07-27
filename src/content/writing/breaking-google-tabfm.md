@@ -12,7 +12,7 @@ tags:
 
 Google Research released **TabFM** on 2026-06-30, a zero-shot foundation model for tabular data: no training, no tuning, you hand it your table and it predicts. The claim is that a single pre-trained model can match or beat tuned gradient-boosted trees out of the box. That is a big claim, so I ran an independent reproduction across three machines.
 
-What I found, in one breath:
+What I found:
 
 - On small-to-mid tables, TabFM **beat a properly Optuna-tuned XGBoost on all 10 fold-matched datasets**, zero-shot. On the anchor dataset the gap actually *widened* under tuning (0.877 vs 0.821 accuracy).
 - But I held myself to the same bar I'd hold the authors to. A multi-seed check forced me to **demote two "wins" to ties** because the margins were smaller than measurement noise.
@@ -30,7 +30,7 @@ Short case study: **[TabFM Evaluation](/work/tabfm-evaluation/)**
 
 I read the TabFM launch post the day it went up. The pitch is genuinely interesting: tabular data is the one domain where deep learning has repeatedly lost to gradient-boosted trees, and here was a foundation-model approach claiming to close that gap with *zero* training on your data. It learns in-context, the way a large language model does, except the "context" is your training rows.
 
-My first instinct with a claim like that is not to believe it and not to dismiss it, but to reproduce it. Benchmarks in papers and blog posts are run by people who want their method to look good; that is not dishonesty, it is gravity. An independent reproduction is the only way to know which parts survive contact with someone who has no stake in the outcome.
+My first instinct with a claim like that is not to believe it and not to dismiss it, but to reproduce it. Benchmarks in papers and blog posts are run by people who want their method to look good. That is not dishonesty; it is just how incentives work. An independent reproduction is the only way to know which parts hold up when someone with no stake in the outcome runs them.
 
 So I set three rules for myself before writing a line of code:
 
@@ -80,7 +80,7 @@ Before the headline benchmark, three checks:
 
 **Phase 2 - known-answer sanity.** Before trusting it on real data, I checked it can learn things I already know the answer to. It nails XOR (accuracy 1.00), accuracy climbs from 0.69 to 0.98 as I feed it more context rows, and it recovers a monotone function at R2 0.997. It genuinely learns from context; it is not pattern-matching noise.
 
-**A caught harness bug.** My first sanity layer looked broken until I found the bug was *mine*: the synthetic-data generator was drawing a fresh labeling function for train versus test. Fixing my own harness before blaming the model is a recurring theme. Most "the model is wrong" moments are "my measurement is wrong" moments in disguise.
+**A caught harness bug.** My first sanity layer looked broken until I found the bug was *mine*: the synthetic-data generator was drawing a fresh labeling function for train versus test. Fixing my own harness before blaming the model is a recurring theme. Most of my "the model is wrong" moments turned out to be "my measurement is wrong" moments.
 
 ---
 
@@ -94,13 +94,13 @@ Baselines: TabFM's default and `.ensemble()` presets, versus XGBoost, random for
 
 The first pass was clearly favorable to TabFM. It matched or beat every baseline on the primary metric, zero-shot: churn 0.979 vs 0.956 XGBoost, maternal-health 0.877 vs 0.842 random forest, diamonds R2 0.985. Against TabPFN it was directionally ahead but by hair-thin margins (MIC 0.891 vs 0.889).
 
-I published that. And then the internet did its job.
+I published that, and the pushback arrived quickly.
 
 ---
 
 ## The pushback: three critiques, and how I chased each one down
 
-The feedback I got was sharp, specific, and correct. Three critiques stuck, and rather than defend the first draft I spent real compute closing each one. This is the part I am proudest of, because the honest answers made the story *more* interesting, not less.
+The feedback was specific and correct. Three critiques stuck, and rather than defend the first draft I spent real compute closing each one. The honest answers made the story *more* interesting, not less.
 
 ### Critique 1: "Your tree baseline was too soft."
 
@@ -127,7 +127,7 @@ The headline: **on the anchor dataset (maternal-health), proper tuning did not c
 
 Also fair. My first run used one seed. So I re-ran **both TabFM and the baselines at three seeds** on the thin-margin datasets and measured the run-to-run spread on each side.
 
-The result was two-sided and humbling. First, the good news: **TabFM is remarkably stable.** Its run-to-run standard deviation is 0.0001 to 0.0006 - smaller than *every* tree baseline (the tuned XGBoost drifts up to 0.005, random forest up to 0.004). So the thin margins are not a TabFM-noise artifact; TabFM sits stably where it sits.
+The result cut both ways. First, the good news: **TabFM is remarkably stable.** Its run-to-run standard deviation is 0.0001 to 0.0006 - smaller than *every* tree baseline (the tuned XGBoost drifts up to 0.005, random forest up to 0.004). So the thin margins are not a TabFM-noise artifact; TabFM sits stably where it sits.
 
 | Dataset | Method | Seed 0 | Seed 1 | Seed 2 | Std |
 |---|---|---|---|---|---|
@@ -138,7 +138,7 @@ The result was two-sided and humbling. First, the good news: **TabFM is remarkab
 | blood | **TabFM** | 0.8008 | 0.8021 | 0.8021 | **0.0006** |
 | blood | xgboost_heavy | 0.7754 | 0.7660 | 0.7781 | 0.0051 |
 
-Now the humbling part. Being stable does not mean the thin wins are real. When a margin is +0.001 and sits within test-set granularity, you cannot claim it. So I **demoted the two thinnest results to ties**:
+Now the catch. Being stable does not mean the thin wins are real. When a margin is +0.001 and sits within test-set granularity, you cannot claim it. So I **demoted the two thinnest results to ties**:
 
 - **concrete vs TabPFN (+0.0011): a genuine near-tie.** Reported as a tie.
 - **MIC vs TabPFN (+0.0022) and vs Optuna (+0.0029):** too close to call a robust win. Ties. (Optuna on MIC actually got slightly *worse* across seeds, 0.890 to 0.889.)
@@ -148,7 +148,7 @@ I also hit a wall I could not climb: **TabPFN would not run at seeds 1 and 2.** 
 
 ### Critique 3: "Your 22.75 GB memory number is an XLA artifact."
 
-The most technically satisfying one. My Phase 4 hardware sweep reported GPU peak memory pinned at a suspiciously flat ~22.75 GB across every context size. A commenter pointed out that I had not disabled XLA preallocation, so I was almost certainly measuring XLA's preallocated *pool*, not the model's live working set.
+This one was the most fun to chase down. My Phase 4 hardware sweep reported GPU peak memory pinned at a suspiciously flat ~22.75 GB across every context size. A commenter pointed out that I had not disabled XLA preallocation, so I was almost certainly measuring XLA's preallocated *pool*, not the model's live working set.
 
 They were right, and the truth was more nuanced than either "real" or "artifact." I re-ran with `XLA_PYTHON_CLIENT_PREALLOCATE=false` on an otherwise-empty card:
 
@@ -217,11 +217,11 @@ Two things made this a clean contribution instead of a bug report:
 1. **I reproduced it without a GPU.** JAX's `--xla_force_host_platform_device_count=2` simulates multiple devices on CPU, which triggers the exact same crash. That let me build a **regression test that runs in CI with no GPU at all** - the kind of test a maintainer actually wants.
 2. **I verified against current `main`, not my pinned commit.** A separate bug I found (`predict` returning an object-dtype array that breaks sklearn metrics) turned out to already be fixed upstream. Checking first saved me from filing a stale duplicate.
 
-The fix itself is small and surgical: remove the buggy override so the forward path uses the sharding it already correctly derived. Replicated when there is no mesh, properly sharded when the user configures one. I verified the full red-to-green cycle on simulated devices, confirmed all 36 existing tests still passed, and checked that the single-device path (the common case) was untouched.
+The fix itself is small: remove the buggy override so the forward path uses the sharding it already correctly derived. Replicated when there is no mesh, properly sharded when the user configures one. I verified the full red-to-green cycle on simulated devices, confirmed all 36 existing tests still passed, and checked that the single-device path (the common case) was untouched.
 
 The pull request was **merged into `google-research/tabfm`, approved by one of TabFM's own authors.**
 
-That is the outcome I care about most. The point of a careful reproduction is not to render a verdict on someone else's work. It is that the deepest way to understand a system is to try to break it, and the best thing you can leave behind is not an opinion - it is a patch that makes the tool better for everyone who uses it next.
+That is the outcome I care about most. A careful reproduction is not about passing a verdict on someone else's work. Trying to break a system is the deepest way to understand it, and the best thing you can leave behind is a patch that makes the tool better for the next person who uses it.
 
 ---
 
@@ -238,7 +238,7 @@ That is the outcome I care about most. The point of a careful reproduction is no
 
 ## Honest limitations
 
-No evaluation is complete, and pretending otherwise is its own kind of dishonesty:
+No evaluation is complete, and I would rather list the gaps than pretend there are none:
 
 - **9 of 13 target datasets are fully scored.** Bioresponse (1,777 features) is a genuine TabFM failure on high-dimensional data. SDSS17 (78k rows) and GiveMeSomeCredit (150k rows) were impractically slow to finish - reported as findings, not hidden.
 - **The seed study varies the model seed on fixed folds**, not the data resample, and TabPFN's own variance is unmeasured (the network hang).

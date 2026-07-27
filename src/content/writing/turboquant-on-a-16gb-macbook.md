@@ -10,7 +10,7 @@ tags:
 
 ## TL;DR
 
-I took TurboQuant, a KV cache compression method from a 2025 Google Research paper (ICLR 2026), and tried to make it actually work for long-context retrieval on an Apple M1 Pro with 16GB of RAM. Every stock implementation I tried scored 0% on needle-in-a-haystack retrieval. After a lot of debugging, the fixes took it to 100% retrieval at 16,000 tokens while cutting KV cache memory by 3.5x to 4x. Along the way I found and fixed five distinct issues across two different codebases, shipped fixes upstream to two open-source forks, and then, crucially, re-read the paper carefully and discovered that my own headline "bug fix" was mischaracterized. This post is the whole story, with the data.
+I took TurboQuant, a KV cache compression method from a 2025 Google Research paper (ICLR 2026), and tried to make it actually work for long-context retrieval on an Apple M1 Pro with 16GB of RAM. Every stock implementation I tried scored 0% on needle-in-a-haystack retrieval. After a lot of debugging, the fixes took it to 100% retrieval at 16,000 tokens while cutting KV cache memory by 3.5x to 4x. Along the way I found and fixed five distinct issues across two different codebases, shipped fixes upstream to two open-source forks, and then re-read the paper carefully and discovered that my own headline "bug fix" was mischaracterized. This post is the whole story, with the data.
 
 Repo with all logs, patches, scripts, and reports: https://github.com/devYRPauli/turboquant-m1pro-evaluation
 
@@ -30,7 +30,7 @@ What makes it elegant is a two-stage design:
 
 2. **QJL (the inner-product stage).** MSE-optimal quantizers are biased when you use them to estimate inner products, and attention scores are inner products. So the paper adds a second stage: a 1-bit "Quantized Johnson-Lindenstrauss" transform on the quantization residual that provides an unbiased correction.
 
-It reads beautifully on paper. The interesting question was whether it survives contact with a real model on real hardware. Short answer: not at first.
+On paper it is elegant. The question was whether it holds up against a real model on real hardware. At first, it did not.
 
 ---
 
@@ -77,7 +77,7 @@ With the math validated, I ran the full pipeline through actual generation. Base
 
 The MSE-only variant produced coherent text at tiny prompts but completely failed to retrieve the needle at any real context length: at 16K it hallucinated fake IDs like "UF-B999999999999". The moment I enabled the QJL correction stage, generation collapsed into literal word-loop degeneration ("gen gen gen gen...") even at 36 tokens.
 
-Here is the telling detail: both of the independent open-source implementations I was working from (a Python prototype and an MLX package) had quietly abandoned the QJL stage in favor of MSE-only. Two separate engineers had independently concluded that the paper's second stage made things worse. That is a strong signal that something real was wrong, and it is where the investigation got interesting.
+One detail stood out: both of the independent open-source implementations I was working from (a Python prototype and an MLX package) had quietly abandoned the QJL stage in favor of MSE-only. Two separate engineers had independently concluded that the paper's second stage made things worse. That is a strong signal that something real was wrong, and it is where the investigation got interesting.
 
 ---
 
@@ -183,7 +183,7 @@ Two things in this project could easily have been wrong and gone unnoticed, so I
 
 1. **The 2K number.** Reproduced from a clean, independently rebuilt environment. Byte-identical result. This is why the tables above say 0.5 and not 100%.
 
-2. **The QJL framing.** Ablated ingredient by ingredient, which is what let me correct my own "two bugs" story into the accurate "one coupled variance-reducing substitution" story before it calcified into the writeup.
+2. **The QJL framing.** Ablated ingredient by ingredient, which is what let me correct my own "two bugs" story into the accurate "one coupled variance-reducing substitution" story before the wrong version stuck.
 
 I mention this because it is the part I am most proud of. The flashy result is 0% to 100%. The result I actually care about is catching my own mischaracterization by re-reading the source and running a controlled experiment, then correcting the public record, including a clarification comment on the merged upstream pull request whose commit message carried the wrong framing.
 
