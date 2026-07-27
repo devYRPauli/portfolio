@@ -35,4 +35,4 @@ The public `predict` API crashed on every multi-GPU host I tested. I traced the 
 
 The evaluation also clarified the practical trade-off. TabFM was competitive across the benchmark and stable across seeds, but the pinned JAX path reserved roughly 17 GB even for small contexts. The later PyTorch path used much less memory and scaled to larger tables.
 
-The point of the project was not to declare a winner. It was to turn a new research release into evidence a team could use: where it works, what it costs, and what still breaks.
+I was not trying to declare a winner. I wanted to turn a new research release into evidence a team could use: where it works, what it costs, and what still breaks.

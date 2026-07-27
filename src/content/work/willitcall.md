@@ -36,7 +36,7 @@ Nobody published the combined matrix.
   OpenAI-compatible endpoint, with deterministic scoring and no LLM judge.
 - A static matrix site fed by result-file PRs, where every red cell links the
   full request/response transcript that produced it.
-- A methodology that got paid for in public: no verdict below five runs per
+- A methodology built out of public mistakes: no verdict below five runs per
   arm, seed-varied replication (greedy repeats are not replication), raw-token
   recovery before any cause is attributed, and one retracted upstream bug
   report that turned into the project's central finding - llama.cpp

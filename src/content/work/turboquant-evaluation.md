@@ -30,4 +30,4 @@ I isolated the stages, checked the math with controlled ablations, and rebuilt t
 - The 2K run remained imperfect at 0.5, and the published results say so.
 - Fixes were merged into the Python reference and submitted to the llama.cpp implementation.
 
-The useful lesson was not simply that compression worked. It was that model and algorithm failures often hide ordinary systems defects. Stage-level checks made it possible to tell the difference.
+The lesson that stuck with me is that what looks like a model or algorithm failure often hides an ordinary systems defect. Stage-level checks are how you tell the difference.
