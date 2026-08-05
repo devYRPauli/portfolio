@@ -18,7 +18,7 @@ I competed for a week. The results:
 - I built a ledger of what transfers between Apple silicon generations and what does not. Local timing did not just fail to predict ranked results - **it pointed the wrong way on five separate occasions**, for me and for competitors with better hardware than mine.
 - The competition was decided by measurement bandwidth. The leaders priced 3-5 candidates a day against the ranked machine. I priced about one a day against an instrument that lied.
 
-Everything below is from the public record: submission ids, public run logs, and published solver notes.
+Everything below is from the public record: submission ids, public run logs, and published solver notes. The full appendix - the oracle recipe, the transfer ledger, the dead-lever list, and the verification protocol - is in [this gist](https://gist.github.com/devYRPauli/61279a20fd5f8378af1b0c856569621c).
 
 ---
 
