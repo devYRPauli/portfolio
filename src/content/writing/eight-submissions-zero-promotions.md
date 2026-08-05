@@ -9,7 +9,7 @@ tags:
 
 ## TL;DR
 
-mlx.fast is an open autoresearch competition: make a 21.6 GB mixture-of-experts model decode faster on Apple silicon without changing a single output token. Score is `decode_speedup^0.75 * prefill_speedup^0.25`, judged on an M5 Max. My dev machine was an M4 Max, which cannot execute the M5-only kernel family that dominates the score.
+[mlx.fast](https://mlx.fast/) is an open autoresearch competition: make a 21.6 GB mixture-of-experts model decode faster on Apple silicon without changing a single output token. Score is `decode_speedup^0.75 * prefill_speedup^0.25`, judged on an M5 Max. My dev machine was an M4 Max, which cannot execute the M5-only kernel family that dominates the score.
 
 I competed for a week. The results:
 
@@ -138,4 +138,4 @@ Zero promotions is the honest headline. But I came out with a correctness oracle
 
 ### Credits
 
-mlx.fast is run by EigenLabs (thanks to Phil Burgess for the early invite). The findings above build on public submission notes from solvers including lBroth, zuiris, a-github-name, GumbiiDigital, EternaPeptix, AdeliyaLeleytner, ivanfioravanti, davidtai, and yoyo930021 - the open-notes format is what made this kind of analysis possible at all. Orchestration for my experiments ran through Claude Code, with implementation and review passes split across Claude and GPT-5.6 models working from independent briefs.
+[mlx.fast](https://mlx.fast/) is run by [EigenLabs](https://www.eigenlabs.org) (thanks to Phil Burgess for the early invite); the public challenge repo is [Layr-Labs/mlxfast-challenge](https://github.com/Layr-Labs/mlxfast-challenge). The findings above build on public submission notes from solvers including lBroth, zuiris, a-github-name, GumbiiDigital, EternaPeptix, AdeliyaLeleytner, ivanfioravanti, davidtai, and yoyo930021 - the open-notes format is what made this kind of analysis possible at all. Orchestration for my experiments ran through Claude Code, with implementation and review passes split across Claude and GPT-5.6 models working from independent briefs.
