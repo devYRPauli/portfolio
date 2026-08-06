@@ -2,6 +2,7 @@
 title: Same Weights, Same Prompt, Opposite Results - Why Local Tool Calling Breaks
 description: I built willitcall, a conformance suite and public matrix for tool calling on local models. The findings that survived replication, the ones that did not, and the bug report I had to retract.
 pubDate: 2026-07-21
+updatedDate: 2026-08-06
 tags:
   - local-llms
   - tool-calling
@@ -219,6 +220,63 @@ project rule with a mechanism behind it:
 None of these rules existed at the start. Each one exists because I got
 something wrong first.
 
+## The comparison I built the project for, and could not make
+
+Months in, I went to group the matrix by model so you could see one model
+across three servers. I could not. The schema had no way to say which model a
+row measured.
+
+Each result stored a field called `model_id`. It held whatever string the
+server happened to use. Ollama wrote a tag like `qwen3:8b`. llama.cpp wrote a
+Hugging Face reference, or an absolute file path when I served a raw blob.
+mlx-lm wrote a repository id. All 32 rows held different values, so nothing
+joined. phi4-mini is measured on all three servers, and the schema saw three
+unrelated rows.
+
+The whole premise of the project is that a cell is a property of the stack, so
+the interesting question is what happens to one model across servers. I had
+been unable to ask it since the beginning and had not noticed, because the site
+labeled its rows from the result file names. The labels looked right. Nothing
+behind them was.
+
+The fix was a new schema version. A row now records the checkpoint it measured,
+the artifact that produced it, and how confident I am in each. Identity comes
+from a registry I check in, never from a file name, and every value cites the
+evidence it came from. Of the 32 rows, 1 is verified, 27 are declared, and 4
+are unresolved. The unresolved ones stay in the matrix, labeled as unverified
+artifacts, and are excluded from any grouping rather than guessed at.
+
+Recovering the identities was the interesting part. Ollama had been
+deregistered on the measurement host. But 14 manifests and 54 blobs were still
+on disk, and 12 of those blobs carry their own provenance in the GGUF header.
+`general.name` says "Qwen2.5 7B Instruct". `general.organization` says
+"NousResearch". That is what the measured bytes say about themselves, which
+beats anything I could infer later. The manifests also gave me the quantization
+for the Ollama rows, which had been null for all 14 of them. Two of the rows I
+had assumed were Q4_K_M are Q4_0.
+
+Two other things were wrong and had been on the public site for weeks.
+
+gemma3 is refused outright by Ollama, so both its rows are 50 errors and zero
+measurements. The site painted them the same red as a model that ran and failed
+everything, and read out the same label to a screen reader. A combination I
+could not measure looked exactly like a combination that failed.
+
+The decode-mode bands were worse, because they contradicted a rule I had
+written myself. The site sorted rows into constrained and unconstrained
+decoding, which is the mechanism this whole article is about. It decided which
+band a row belonged to by matching the server name string. Only 6 of 32 runs
+had actually recorded their decode mode. My own README says that a missing flag
+means unverified, not unconstrained, and the page ignored that for 26 rows.
+Each row now says whether its decode mode was recorded by the run or resolved
+from a documented mapping, and the mapping cites where each server's behavior
+is established.
+
+The pattern here is the same one as the retraction, one level up. I trusted a
+label instead of the thing it named. The file name looked like an identity, the
+server name looked like a decode mode, and both were close enough to correct
+that nothing broke loudly.
+
 ## Where it stands
 
 The matrix currently covers 32 published rows across three servers (llama.cpp,
@@ -228,6 +286,10 @@ alone. Every red cell links its transcript. The corpus, the CLI, and the site
 generator are one repo, and a result file from your machine is a PR away from
 being a row - the scenario format is plain TOML, and the schema validates in
 CI.
+
+The site also publishes the whole result set as JSON and CSV, so you do not
+have to scrape the page to check my arithmetic. I would rather you did not
+trust it.
 
 If you run local models for agent work, the practical takeaways are three:
 
