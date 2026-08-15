@@ -2,6 +2,7 @@
 title: "Eight Submissions, Zero Promotions: A Week Inside mlx.fast on the Wrong Hardware"
 description: What I learned competing in an open ML-optimization competition where the ranked machine was an M5 Max and mine was not - the oracle I found, the levers I priced dead, and why measurement bandwidth decided everything
 pubDate: 2026-08-05
+updatedDate: 2026-08-14
 tags:
   - performance
   - measurement
@@ -133,6 +134,14 @@ And one competitor took +2.19 percent by doing archaeology: the promotion race m
 The competition is open-ended and the frontier is still moving. I have paused rather than quit: my verification tooling, the shelved patches, and the full ledger are ready if a pricing channel opens up for solvers without ranked hardware - I have asked the operators for exactly that. If the platform resets or migrates models, the early cheap optimizations reappear, and this time I would be starting with a working process instead of building one mid-race.
 
 Zero promotions is the honest headline. But I came out with a correctness oracle the field uses, a transfer ledger I have not seen anyone else write down, and a much sharper sense of what independent verification is worth when you are the one without the reference machine. I have been on the other side of this - my TabFM evaluation was exactly the reference-machine role - and it is useful to have now felt both sides of that asymmetry.
+
+---
+
+## Update, August 14
+
+My last submission here was July 31. The mlx.fast frontier has since reached 2.62.
+
+I cloned the repository for the next competition in the same series on the day this post went up, and I lost that one the same way. The lever that won it moves work out of the timed window, which is the question this post ends by saying I did not ask. That write-up is [The Work You Don't Do](/writing/the-work-you-dont-do).
 
 ---
 
