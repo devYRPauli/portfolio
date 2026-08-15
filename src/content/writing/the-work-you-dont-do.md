@@ -139,6 +139,55 @@ At 116 seconds the work was under 10 percent of the run. As the frontier sped up
 
 ---
 
+## What transfers outside the competition
+
+I read the winning submission notes afterwards. Most of what is in them is not
+competition-specific at all. These are the ones I expect to use again on ordinary
+performance work.
+
+**Multiply count is not the cost model.** One promotion reordered the addition
+chain for `x^7`. Same number of multiplies, shorter dependency chain, faster. The
+dependency graph is the thing to look at.
+
+**On AArch64, SIMD is often the wrong tool for 64-bit integer math.** A scalar
+`mul` plus `umulh` produces a 128-bit product in two instructions, and no NEON
+instruction beats that. What does help is interleaving several independent scalar
+chains in one assembly block to fill the pipeline. The winners wrapped that in the
+codebase's existing packed-field type, so every consumer of that abstraction got
+faster at once. I dismissed this whole family because I asked whether the vector
+unit could do the multiply, which was the wrong question.
+
+**Delete correction rounds your data can never reach.** Modular reduction is
+written for the general case. Prove the range your workload actually produces and
+whole branches disappear. Two of those were worth real points.
+
+**Let accumulators carry lazily.** Normalize once at the end rather than at every
+step.
+
+**Bound your in-flight window and name it in a constant.** The winning scheduler
+kept exactly two proofs in flight. Not "as many as the thread pool wants," which
+is what I did and what cost me a submission.
+
+**Run ahead by one.** Split generation from consumption so item N+1 is produced
+while item N is consumed. That hid almost all of the generator cost.
+
+**Offload asynchronously with an all-or-nothing fallback.** Start the GPU work,
+let the CPU do the rest concurrently, and if anything fails recompute the whole
+thing on the CPU. Performance changes, semantics never do. That structure is what
+makes aggressive offload safe enough to ship.
+
+**Build a differential mode behind an environment flag.** The frontier shipped one
+that recomputes the entire result with the optimization disabled and asserts
+equality. Build it once and every later optimization becomes cheap to verify. I
+wrote a bespoke equivalence test for one change instead, and got no leverage from
+it.
+
+Two smaller ones I liked. Test field code at noncanonical boundary values, because
+an implementation that silently canonicalizes passes random testing. And release
+memory where the last reader finishes rather than at the end of scope.
+
+---
+
 ## Why I keep missing this
 
 It would be easy to call this carelessness. I do not think that is what it is. The failure was the same in two competitions with different domains and a published lesson in between.

@@ -143,6 +143,8 @@ My last submission here was July 31. The mlx.fast frontier has since reached 2.6
 
 I cloned the repository for the next competition in the same series on the day this post went up, and I lost that one the same way. The lever that won it moves work out of the timed window, which is the question this post ends by saying I did not ask. That write-up is [The Work You Don't Do](/writing/the-work-you-dont-do).
 
+That post also carries something this one does not. I went back and read the winning submission notes properly, and most of what is in them is ordinary performance craft rather than anything competition-specific: why multiply count is the wrong cost model, why SIMD is usually the wrong tool for 64-bit integer math on AArch64, how to structure GPU offload so it can fail safely, and how to build a differential mode once and verify every later optimization cheaply. Reading the winners' notes was worth more than the week I spent generating my own candidates.
+
 ---
 
 ### Credits
