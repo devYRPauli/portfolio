@@ -91,7 +91,11 @@ The 52 percent one taught me the most. The GPU path allowed one user at a time. 
 
 The waiting is not waste. The GPU is so much faster for the large trees that qualify that waiting for it beats doing them on the CPU by a wide margin. I had built a story about the mechanism and the machine disagreed with me by 20 seconds.
 
-Those five results have a shape. Widening GPU concurrency hurt. Declining GPU work hurt. Batching GPU work hurt. The GPU was compute-bound, which closes the whole offload direction. I should have worked that out after the second result, not the fifth.
+Those five results have a shape. Widening GPU concurrency hurt. Declining GPU work hurt. Batching GPU work hurt. I concluded that the GPU was compute-bound and that the whole offload direction was closed, and I stopped.
+
+That conclusion was wrong, and reading the winning submissions afterwards showed me how. Another solver later moved a completely different kind of work onto the same GPU. They offloaded the quotient gate constraint evaluation, which was the second largest cost in my own profile, and it was worth 75 percent. The CPU kept evaluating the remaining gates while the GPU worked on those, so the two were not competing.
+
+What I had actually measured was that the *Merkle hashing* offload was saturated. I generalized that to "the GPU is full." The question I should have asked was which CPU work could move there next, not whether the GPU had room for more of the same work.
 
 ---
 
@@ -103,7 +107,13 @@ The top lever is a build script. Its own doc comment says it plainly:
 
 > Compilation runs in the benchmark's untimed CI job, so the multi-second circuit construction here is free; the scored worker process then loads the blobs in a fraction of the build time.
 
-The winners build the five proving circuits at **compile time**, serialize them, and embed the bytes in the binary with `include_bytes!`. The scored process deserializes instead of constructing. The same idea shows up twice more in that tree. There is a precompiled Metal shader library, so no shader compilation happens at runtime. There are precomputed dummy recursion proofs committed as binary blobs.
+The winners build the five proving circuits at **compile time**, serialize them, and embed the bytes in the binary with `include_bytes!`. The scored process deserializes instead of constructing. The same idea shows up again in the same tree, where the dummy recursion proofs are precomputed and committed as binary blobs.
+
+The best example of the whole pattern came later, from the solver with the most promotions. The prover compiles its Metal shaders at runtime. On a developer machine that costs about 20 milliseconds, because the operating system's shader cache absorbs it. They measured it under the benchmark's own sandbox profile and it cost **2.751 seconds per worker**, because the sandbox denies writes to the shader cache directory, which turns the cache off entirely. Five fixtures per ranked run means about 13.8 seconds of scored time that nobody had priced. They proved the mechanism with a three-way control: cache allowed 21.7 milliseconds, writes denied 2,751 milliseconds, reads and writes denied 2,540 milliseconds.
+
+Their fix was to lower the eight compute pipelines on eight threads and start that work in the first statement of `main`, so it overlaps circuit loading instead of blocking the first GPU use. That took startup from 2.751 seconds to 1.132. It was worth 27 percent.
+
+That cost is invisible if you profile on your own machine. It only appears if you measure inside the sandbox the scorer actually uses.
 
 The second winning family is a packed field type for Apple silicon. I had ruled this out early. My reasoning was that NEON has no 64-by-64-to-128 widening multiply, while a scalar multiply plus high-multiply pair already produces one in two instructions. So a vectorized version has to lose.
 
