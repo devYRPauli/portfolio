@@ -188,6 +188,55 @@ memory where the last reader finishes rather than at the end of scope.
 
 ---
 
+## Then I read all 145 winning notes
+
+Every promoted submission carries a required public write-up. I fetched all 145
+from the lighter competition and all 146 from mlx.fast and read them properly. I
+expected a catalog of clever optimizations. About half of them are not that.
+
+Counting from the titles of the 145 promoted lighter submissions:
+
+| What the promotion was | Count |
+|---|---|
+| A redraw of an unchanged or near-unchanged tree | 18 |
+| Restoration or composition of work that already existed | 47 |
+| A genuinely new mechanism | the remaining 80 |
+
+The redraws are the part I did not see coming. Real titles: "Redraw 300 of the
+27.23 frontier." "Round 21, sixth draw on `a8ca9c9`." "Tip redraw marker 201."
+And one submitted by a solver who credits a different solver for the method:
+"Pure tip multi-draw for #1 (pepedesigner playbook)."
+
+The ranked score is noisy. Resubmitting the current frontier unchanged sometimes
+measures above the recorded frontier value, and that counts as a promotion. People
+track this with round numbers and markers, and some of them model the draw
+distribution of the tip itself.
+
+It is worth being precise about why this works here and not in the other
+competition. In mlx.fast the noise caused validity failures, so you got no score
+at all and had to resubmit; the payload still had to be better than the baseline.
+In lighter the noise is in the score itself, so an unchanged tree can win. Those
+are different games and I did not check which one I was in.
+
+The restorations are more interesting to me. A promotion replaces the editable
+paths wholesale, so any candidate built on a slightly stale base silently reverts
+everything that landed in between, and nothing warns anyone. Forty-seven
+promotions are people finding that wreckage and putting it back. One note states
+the rule plainly: diff your base against the tip you are about to displace, not
+only the tip you built on. That check takes minutes and I never ran it once.
+
+The mlx.fast corpus showed a different pattern I also missed. Instead of shipping
+"convert all 40 layers", solvers ship a band at a time: first 16 layers, then 16
+to 24, then 24 to 32, then finish. One mechanism, four or five promotions. Each
+step only has to beat the current bar, each is small enough to verify, and each is
+a separate draw. I would have shipped that as one submission and taken one result.
+
+So the honest accounting of my week is worse than I first wrote. I spent all of it
+on the category that is hardest and slowest, while roughly half the available
+promotions were going to people doing diffs and resubmissions.
+
+---
+
 ## Why I keep missing this
 
 It would be easy to call this carelessness. I do not think that is what it is. The failure was the same in two competitions with different domains and a published lesson in between.
@@ -224,6 +273,9 @@ Neither of these is the agent being careless. They are the same class of problem
 - **Two well-reasoned negatives in a row means go back and re-read the problem statement.** I ran five. The answer was in the documentation the whole time.
 - **Prefer changes that reduce work over changes that reschedule it.** Rescheduling wins are the ones that flip sign between machines.
 - **Latency is a real cost in a race.** Two of my implementations were finished and correct, and someone else shipped the same idea while mine sat in the validation queue. With a one-hour queue and one submission in flight at a time, second place scores zero.
+- **Learn the noise distribution of the scoring rule on day one.** Whether an unchanged resubmission can win is a property of the harness, it is knowable immediately, and it decides how you should spend your time.
+- **Run a restoration diff after every frontier move.** Promotions silently revert each other. Checking takes minutes and it was worth 47 promotions to other people.
+- **Slice a rollout into bands.** Never ship "all 40 layers" when "the first 16" would also promote.
 - **Write acceptance conditions that cannot be satisfied by skipping.** "Tests pass" is not one of them when the tests can skip.
 
 ---
