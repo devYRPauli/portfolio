@@ -141,7 +141,7 @@ The result cut both ways. First, the good news: **TabFM is remarkably stable.** 
 Now the catch. Being stable does not mean the thin wins are real. When a margin is +0.001 and sits within test-set granularity, you cannot claim it. So I **demoted the two thinnest results to ties**:
 
 - **concrete vs TabPFN (+0.0011): a genuine near-tie.** Reported as a tie.
-- **MIC vs TabPFN (+0.0022) and vs Optuna (+0.0029):** too close to call a robust win. Ties. (Optuna on MIC actually got slightly *worse* across seeds, 0.890 to 0.889.)
+- **MIC vs TabPFN (+0.0022) and vs Optuna (+0.0029):** too close to call a win. Ties. (Optuna on MIC actually got slightly *worse* across seeds, 0.890 to 0.889.)
 - **blood-transfusion (+0.0089) and concrete vs Optuna (+0.0157):** comfortably outside the noise. Real edges.
 
 I also hit a wall I could not climb: **TabPFN would not run at seeds 1 and 2.** It hangs on a C-level network call in my environment no matter how I invoke it (backgrounded, pseudo-TTY, real TTY - all hang). Rather than pretend, I documented the gap: the two TabPFN margins rest on TabFM's measured variance plus TabPFN's single seed-0 point. An unmeasured thing reported as unmeasured is worth more than a number I made up.
@@ -227,10 +227,10 @@ That is the outcome I care about most. A careful reproduction is not about passi
 
 ## What I actually learned
 
-- **Fold-matched comparison is non-negotiable.** The single biggest source of misleading benchmarks is quietly dropping the folds where your method struggles.
+- **Always compare on matched folds.** The single biggest source of misleading benchmarks is quietly dropping the folds where your method struggles.
 - **Measure your own noise before claiming a win.** A +0.001 margin is a rounding error until you have shown your run-to-run spread is smaller than it. Sometimes the honest answer is "tie."
 - **Distrust flat numbers.** A metric that does not move across a 100x change in input is usually measuring the harness, not the model. The flat 22.75 GB was half real, half allocator.
-- **Reproduce configurations the authors might not have.** The multi-GPU crash only shows up on a multi-GPU box. That is exactly where independent reproduction earns its keep.
+- **Reproduce configurations the authors might not have.** The multi-GPU crash only shows up on a multi-GPU box. That is exactly what independent reproduction is for.
 - **Fix your harness before you blame the model.** Most of my "the model is broken" moments were my measurement being broken.
 - **Build the kill-switch before you probe the limits.** One restarted laptop is a good teacher.
 

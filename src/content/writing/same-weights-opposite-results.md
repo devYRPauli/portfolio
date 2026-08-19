@@ -15,10 +15,10 @@ tags:
 Tool calling on local stacks breaks silently: the same model, at the same
 quantization, with the same prompt, can execute tool calls perfectly on one
 inference server and fail completely on another. I built [willitcall](https://github.com/devYRPauli/willitcall)
-to measure this: a Rust CLI that runs 50 tool-calling scenarios against any
-OpenAI-compatible endpoint, and a
+to measure this. It is a Rust CLI that runs 50 tool-calling scenarios against
+any OpenAI-compatible endpoint. It also publishes a
 [public red/green matrix](https://devyrpauli.github.io/willitcall/) of
-model x quant x server results where every red cell links to the full
+model x quant x server results, where every red cell links to the full
 request/response transcript that produced it.
 
 Three findings survived replication, and one of my own headline claims did not:
@@ -66,10 +66,11 @@ hedge. By the end it was the main finding.
 
 The CLI runs a corpus of 50 scenarios in six categories: single calls across
 argument shapes, parallel calls, streaming (SSE delta reassembly), tool_choice
-modes, multi-turn (a tool result is fed back and the follow-up call must use a
-value that only exists in that result), and negative traps - cases where the
-correct behavior is to NOT call a tool. Scoring is deterministic; there is no
-LLM judge, because a published failure reason has to be defensible.
+modes, multi-turn, and negative traps. A multi-turn case feeds a tool result
+back, and the follow-up call must use a value that only exists in that result.
+A negative trap is a case where the correct behavior is to NOT call a tool.
+Scoring is deterministic; there is no LLM judge, because a published failure
+reason has to be defensible.
 
 Two design rules did the most work:
 
@@ -87,10 +88,10 @@ the retraction below was possible at all, and why the project survived it.
 
 ## The bug report I had to retract
 
-Early seeding produced a striking result: a scenario where Qwen2.5-7B, served
-through llama.cpp, emitted a correct tool call six times out of six - and the
-same weights through Ollama returned an empty response ten times out of ten,
-while still billing about 40 completion tokens. Tokens were generated and
+Early seeding produced a striking result. Qwen2.5-7B, served through
+llama.cpp, emitted a correct tool call six times out of six. The same weights
+through Ollama returned an empty response ten times out of ten, while still
+billing about 40 completion tokens. Tokens were generated and
 nothing came back. I read that as Ollama's parser discarding a well-formed
 call, wrote it up, and filed it upstream.
 
@@ -139,9 +140,9 @@ n=1 per arm.
 
 Project rule: no verdict below five runs per arm. So I re-ran every arm five
 times, and got the same numbers. Exactly the same numbers. Identical scores,
-identical failing scenario ids, forty-five runs reproducing byte-for-byte -
-which looked like the strongest replication imaginable and was actually the
-weakest: the runs were greedy (temperature 0, fixed seed), so all five
+identical failing scenario ids, forty-five runs reproducing byte-for-byte.
+That looked like the strongest replication imaginable and was actually the
+weakest. The runs were greedy (temperature 0, fixed seed), so all five
 "replications" were the same computation. n=5 of the same coin flip is n=1.
 
 Replication that means anything has to vary what should not matter. Under five

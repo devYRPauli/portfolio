@@ -22,9 +22,9 @@ Short case study: **[Baton](/work/baton/)**
 
 ## Why I built this
 
-The setup I wanted is simple to state: a capable planning model acts as the orchestrator (it writes the brief, reviews the diff, and verifies the result), and a strong coding model acts as the executor (it writes the code in its own runtime). The orchestrator should not write the application code itself; it should delegate and check.
+The setup I wanted is simple to state. A capable planning model acts as the orchestrator: it writes the brief, reviews the diff, and verifies the result. A strong coding model acts as the executor, and writes the code in its own runtime. The orchestrator should not write the application code itself; it should delegate and check.
 
-That division works right up until you send a long job to the background. In practice the background path was the flaky part. A job would launch, the launching session would end, and nothing was retrievable afterward. Some of this traces to known upstream behavior (a background flag getting stripped, a session-end hook killing in-flight jobs), but the root problem is general: a background process whose lifetime is tied to the agent session is not actually durable.
+That division works right up until you send a long job to the background. In practice the background path was the flaky part. A job would launch, the launching session would end, and nothing was retrievable afterward. Some of this traces to known upstream behavior: a background flag getting stripped, a session-end hook killing in-flight jobs. But the root problem is general. A background process whose lifetime is tied to the agent session is not actually durable.
 
 I did not want a clever prompt. I wanted a job runner that a coding agent could hand work to and trust, plus a small amount of discipline around it so the delegation was worth doing at all.
 
@@ -36,11 +36,11 @@ Before writing anything, I settled the questions that are expensive to change la
 
 **Standalone, not plugin-dependent.** My personal workflow routes through an official Codex plugin, but that plugin is exactly where the background bugs live. For something other people would install, tying it to a component with known reliability issues is the wrong foundation. Baton calls the executor CLI directly and depends on nothing but bash and coreutils. It coexists with the plugin but never requires it.
 
-**Template the models, hard-code the invariants.** The kit is meant to be shared, and model names go stale fast. "Use this specific model at this specific effort" is my opinion for this month, not a durable design. So the installer fills in model, effort, and paths from an interview, while the things that are actually the product stay fixed text: every brief ends with a smallest-diff constraint, every result is verified before it is called done, and a detached job is confirmed alive before anyone assumes it is running. If those were optional, you could interview your way into a kit that just runs an executor sometimes.
+**Template the models, hard-code the invariants.** The kit is meant to be shared, and model names go stale fast. "Use this specific model at this specific effort" is my opinion for this month, not a durable design. So the installer fills in model, effort, and paths from an interview. The things that are actually the product stay fixed text. Every brief ends with a smallest-diff constraint. The kit verifies every result before it calls the work done. It confirms a detached job is alive before anyone assumes it is running. If those were optional, you could interview your way into a kit that just runs an executor sometimes.
 
 I ran the design past a stronger reasoning model as a critic before committing. The sharpest note it gave me: make the installer verify itself. An installer that does not prove it worked is exactly the failure mode the tool exists to prevent. That became a rule - the last thing setup does is run a live job end to end and show you the real output before it declares success.
 
-The rest fell out of those: an agent-driven `SETUP.md` installer instead of a shell script (the interview needs judgment a script cannot fake), a per-scope config that defines the executor invocation as a small shell function (which is what lets you swap in a non-Codex executor), and two policy presets so the kit is not opinionated about other people's API bills - quality-first for maximum effort, balanced for a lighter default.
+The rest fell out of those. The installer is agent-driven through `SETUP.md` rather than a shell script, because the interview needs judgment a script cannot fake. A per-scope config defines the executor invocation as a small shell function, which is what lets you swap in a non-Codex executor. Two policy presets keep the kit from being opinionated about other people's API bills: quality-first for maximum effort, balanced for a lighter default.
 
 ---
 
@@ -111,7 +111,7 @@ Both were two-line fixes, and I fixed them in the plan as well as the code so th
 
 ## How you use it
 
-You do not run a script. You read `SETUP.md` first (it is short, and it is a stranger's repo telling your agent to write files, so you should), then you tell your agent to set up Baton from the repo. The agent detects your executor, asks whether you are on a subscription or an API key (and has you authenticate yourself - the kit never touches your credentials), asks which models to use and at what effort, picks a policy preset, and chooses global or project scope. It lists every file it will write and asks once before writing anything. Then it installs and runs that live acceptance test.
+You do not run a script. You read `SETUP.md` first (it is short, and it is a stranger's repo telling your agent to write files, so you should), then you tell your agent to set up Baton from the repo. The agent detects your executor. It asks whether you are on a subscription or an API key, and has you authenticate yourself, because the kit never touches your credentials. It asks which models to use and at what effort, picks a policy preset, and chooses global or project scope. It lists every file it will write and asks once before writing anything. Then it installs and runs that live acceptance test.
 
 After that, "delegate this to the executor" just works, with a brief, a durable run, and a verification step, every time.
 

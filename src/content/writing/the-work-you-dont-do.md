@@ -179,8 +179,8 @@ makes aggressive offload safe enough to ship.
 **Build a differential mode behind an environment flag.** The frontier shipped one
 that recomputes the entire result with the optimization disabled and asserts
 equality. Build it once and every later optimization becomes cheap to verify. I
-wrote a bespoke equivalence test for one change instead, and got no leverage from
-it.
+wrote a bespoke equivalence test for one change instead, and got nothing reusable
+from it.
 
 Two smaller ones I liked. Test field code at noncanonical boundary values, because
 an implementation that silently canonicalizes passes random testing. And release

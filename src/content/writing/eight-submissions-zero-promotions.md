@@ -27,7 +27,7 @@ Everything below is from the public record: submission ids, public run logs, and
 
 Phil from EigenLabs emailed me an early invite based on my mlx contributions. The pitch: a live leaderboard, every promoted optimization becomes the new baseline, all submission notes are public so the field builds on each other's work. The previous competition in the series had 100+ people beating an unpublished Google quantum circuit in 72 hours.
 
-The target model is Laguna XS 2.1, a 40-layer MoE with 256 routed experts per layer, quantized to NVFP4. Submissions run a gauntlet: an LLM reviews your diff for benchmark bypasses, a behavior gate replays a teacher-forced trace and requires token-exact output against a golden generated on the ranked M5 Max, and then a paired timing run prices you against the current baseline. Anything that changes even one token fails.
+The target model is Laguna XS 2.1, a 40-layer MoE with 256 routed experts per layer, quantized to NVFP4. Submissions run a gauntlet. An LLM reviews your diff for benchmark bypasses. A behavior gate replays a teacher-forced trace and requires token-exact output against a golden generated on the ranked M5 Max. Then a paired timing run prices you against the current baseline. Anything that changes even one token fails.
 
 I had a Mac Studio with an M4 Max. That mattered more than I understood at the start.
 
@@ -133,7 +133,7 @@ And one competitor took +2.19 percent by doing archaeology: the promotion race m
 
 The competition is open-ended and the frontier is still moving. I have paused rather than quit: my verification tooling, the shelved patches, and the full ledger are ready if a pricing channel opens up for solvers without ranked hardware - I have asked the operators for exactly that. If the platform resets or migrates models, the early cheap optimizations reappear, and this time I would be starting with a working process instead of building one mid-race.
 
-Zero promotions is the honest headline. But I came out with a correctness oracle the field uses, a transfer ledger I have not seen anyone else write down, and a much sharper sense of what independent verification is worth when you are the one without the reference machine. I have been on the other side of this - my TabFM evaluation was exactly the reference-machine role - and it is useful to have now felt both sides of that asymmetry.
+Zero promotions is the honest headline. But I came out with a correctness oracle the field uses, and a transfer ledger I have not seen anyone else write down. I also came out with a much sharper sense of what independent verification is worth when you are the one without the reference machine. I have been on the other side of this - my TabFM evaluation was exactly the reference-machine role - and it is useful to have now felt both sides of that asymmetry.
 
 ---
 
@@ -143,7 +143,7 @@ My last submission here was July 31. The mlx.fast frontier has since reached 2.6
 
 I cloned the repository for the next competition in the same series on the day this post went up, and I lost that one the same way. The lever that won it moves work out of the timed window, which is the question this post ends by saying I did not ask. That write-up is [The Work You Don't Do](/writing/the-work-you-dont-do).
 
-That post also carries something this one does not. I went back and read the winning submission notes properly, and most of what is in them is ordinary performance craft rather than anything competition-specific: why multiply count is the wrong cost model, why SIMD is usually the wrong tool for 64-bit integer math on AArch64, how to structure GPU offload so it can fail safely, and how to build a differential mode once and verify every later optimization cheaply. Reading the winners' notes was worth more than the week I spent generating my own candidates.
+That post also carries something this one does not. I went back and read the winning submission notes properly. Most of what is in them is ordinary performance craft, not anything competition-specific. The list covers why multiply count is the wrong cost model, and why SIMD is usually the wrong tool for 64-bit integer math on AArch64. It also covers how to structure GPU offload so it can fail safely, and how to build a differential mode once and verify every later optimization cheaply. Reading the winners' notes was worth more than the week I spent generating my own candidates.
 
 ---
 

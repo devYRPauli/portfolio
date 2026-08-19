@@ -60,7 +60,7 @@ It works, cleanly:
 | Per-vector excess kurtosis (mean) | 50.98 | -0.13 | 0.00 |
 | Per-vector excess kurtosis (max) | 105.79 | 0.86 | ~0 |
 
-Excess kurtosis of 51 down to essentially 0 is the algorithm doing exactly what the paper promised. The compression codec was sound. That made the next result all the more confusing.
+Excess kurtosis of 51 down to near zero is the algorithm doing exactly what the paper promised. The compression codec was sound. That made the next result all the more confusing.
 
 ---
 
@@ -100,7 +100,7 @@ The paper's pairing of a Gaussian matrix with the `1/d` scale is not a bug. It i
 
 So what actually fixed it? Not a corrected formula. A variance reduction. The paper-faithful estimator is unbiased but so noisy at head dimension 128 that attention collapses. The orthogonal variant has the same expectation but far lower variance, and that is what makes generation stable.
 
-This distinction matters, and getting it right is the difference between "the original authors made a mistake" (false, and a bad look) and "the paper is correct in expectation, but its variance bound is loose enough that a naive implementation degenerates in practice, and here is a variance-reducing modification that fixes it" (true, and far more interesting).
+This distinction matters. The wrong version is "the original authors made a mistake," which is false and a bad look. The right version is that the paper is correct in expectation, but its variance bound is loose enough that a naive implementation degenerates in practice. My change reduces that variance and fixes it. That version is true, and far more interesting.
 
 ### Proving it with an ablation
 
@@ -132,7 +132,7 @@ Keys are far more sensitive to quantization noise than values, and the reason is
 
 The fix is asymmetric bit allocation, which I called **Hybrid K5/V4**: give keys 5 bits (4-bit MSE base plus the 1-bit QJL correction) and values 4 bits (MSE only). Average rate 4.5 bits per element, still roughly 3.5x smaller than FP16. This asymmetry is not in the paper; the paper treats K and V uniformly. It was the single most important configuration choice for retrieval.
 
-With correct QJL math plus Hybrid K5/V4, the MSE improvement was measurable: the QJL correction dropped reconstruction MSE from 0.00023 to 0.000129 (a 44% reduction, which matches the theoretical `pi/2 - 1` for the undamped estimator) and lifted cosine similarity to 99.7% on real activations.
+With correct QJL math plus Hybrid K5/V4, the MSE improvement was measurable. The QJL correction dropped reconstruction MSE from 0.00023 to 0.000129, a 44% reduction that matches the theoretical `pi/2 - 1` for the undamped estimator. It also lifted cosine similarity to 99.7% on real activations.
 
 ---
 
@@ -185,7 +185,7 @@ Two things in this project could easily have been wrong and gone unnoticed, so I
 
 2. **The QJL framing.** Ablated ingredient by ingredient, which is what let me correct my own "two bugs" story into the accurate "one coupled variance-reducing substitution" story before the wrong version stuck.
 
-I mention this because it is the part I am most proud of. The flashy result is 0% to 100%. The result I actually care about is catching my own mischaracterization by re-reading the source and running a controlled experiment, then correcting the public record, including a clarification comment on the merged upstream pull request whose commit message carried the wrong framing.
+I mention this because it is the part I am most proud of. The flashy result is 0% to 100%. The result I actually care about is catching my own mischaracterization. I re-read the source, ran a controlled experiment, and then corrected the public record. That included a clarification comment on the merged upstream pull request, whose commit message carried the wrong framing.
 
 ---
 
