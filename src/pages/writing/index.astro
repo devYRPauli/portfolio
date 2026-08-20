@@ -1,24 +1,31 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import PostList from '../../components/PostList.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import EntryList from '../../components/EntryList.astro';
+import { postMeta } from '../../lib/reading';
 
 const posts = (await getCollection('writing'))
   .filter((p) => !p.data.draft)
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const entries = posts.map((p) => ({
+  href: `/writing/${p.id}/`,
+  title: p.data.title,
+  meta: postMeta(p.data.pubDate, p.body),
+  summary: p.data.description,
+  transitionName: `post-${p.id}`,
+}));
 ---
 <BaseLayout
   title="Writing - Yash Raj Pandey"
   description="Essays and playbooks on local-first AI, RAG, LLM evals, and systems engineering."
 >
-  <section>
-    <a class="back" href="/">&larr; Home</a>
-    <h1>Writing</h1>
-    <PostList posts={posts} />
-  </section>
+  <PageHeader
+    eyebrow="Writing"
+    count={`${posts.length} posts`}
+    title="Writing"
+    lede="Reproductions, post-mortems, and debugging stories. Every claim carries the measurement behind it, including the ones I got wrong."
+  />
+  <EntryList entries={entries} />
 </BaseLayout>
-
-<style>
-  section { margin-top: 3rem; }
-  h1 { margin-bottom: 1.5rem; }
-</style>

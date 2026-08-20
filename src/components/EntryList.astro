@@ -1,0 +1,56 @@
+---
+export interface Entry {
+  href: string;
+  title: string;
+  /** Measured facts. Rendered in the mono voice, figures flagged. */
+  meta: string[];
+  summary: string;
+  transitionName?: string;
+}
+
+interface Props { entries: Entry[] }
+const { entries } = Astro.props;
+---
+<ul>
+  {entries.map((e) => (
+    <li>
+      <a href={e.href}>
+        <strong transition:name={e.transitionName}>{e.title}</strong>
+        <span class="meta">
+          {e.meta.map((m, i) => (
+            <>
+              {i > 0 && <span class="sep" aria-hidden="true">/</span>}
+              <span>{m}</span>
+            </>
+          ))}
+        </span>
+        <span class="summary">{e.summary}</span>
+      </a>
+    </li>
+  ))}
+</ul>
+
+<style>
+  ul { list-style: none; padding: 0; display: grid; gap: var(--space-2); }
+  li { min-width: 0; }
+  a {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-4);
+    margin-inline: calc(-1 * var(--space-4));
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--ink);
+  }
+  a:hover { background: var(--bg-raised); }
+  strong {
+    font-weight: 600;
+    font-size: var(--t-body);
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+  }
+  a:hover strong { color: var(--accent); }
+  .meta { display: flex; flex-wrap: wrap; gap: 0 var(--space-2); }
+  .sep { color: var(--line); }
+  .summary { font-size: var(--t-read); color: var(--ink-soft); line-height: 1.6; }
+</style>

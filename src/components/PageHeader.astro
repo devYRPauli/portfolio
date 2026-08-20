@@ -1,0 +1,30 @@
+---
+interface Props {
+  /** Section name, e.g. "Writing". Rendered as the mono eyebrow. */
+  eyebrow: string;
+  /** The measured size of what follows, e.g. "6 posts". Encodes real information. */
+  count?: string;
+  title: string;
+  lede?: string;
+  backHref?: string;
+  backLabel?: string;
+}
+
+const { eyebrow, count, title, lede, backHref = '/', backLabel = 'Home' } = Astro.props;
+---
+<header>
+  <a class="back" href={backHref}>&larr; {backLabel}</a>
+  <p class="eyebrow">
+    {eyebrow}{count && <><span class="rule" aria-hidden="true">/</span><span class="count">{count}</span></>}
+  </p>
+  <h1>{title}</h1>
+  {lede && <p class="lede">{lede}</p>}
+</header>
+
+<style>
+  header { margin-top: var(--space-7); margin-bottom: var(--space-7); }
+  .eyebrow { margin-top: var(--space-5); }
+  .rule { margin-inline: 0.5em; color: var(--line); }
+  h1 { margin-top: var(--space-3); }
+  .lede { margin-top: var(--space-4); max-width: 34rem; }
+</style>

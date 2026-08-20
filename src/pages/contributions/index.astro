@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
 import { totals, searchUrl, notable, ecosystem } from '../../data/contributions';
 
 const repoUrl = (repo: string) => `https://github.com/${repo}`;
@@ -10,21 +11,19 @@ const prUrl = (repo: string) =>
   title="Open Source - Yash Raj Pandey"
   description="Merged pull requests across llama.cpp, Apple MLX, Google Research's TabFM, RAGFlow, mem0, and litellm. Mostly correctness fixes, each one verifiable."
 >
+  <PageHeader
+    eyebrow="Open Source"
+    count={`${totals.merged} merged`}
+    title="Open Source"
+    lede="Almost all of them are correctness fixes: a parser that drops data, a bill computed at 1/1000 of the real price, a kernel that returns the wrong answer when its input aliases. I find most of them while using the tool for something else."
+  />
   <section>
-    <a class="back" href="/">&larr; Home</a>
-    <h1>Open Source</h1>
-    <p class="intro">
-      {totals.merged} pull requests merged across {totals.projects} projects I do not own.
-      Almost all of them are correctness fixes: a parser that drops data, a bill computed at
-      1/1000 of the real price, a kernel that returns the wrong answer when its input aliases.
-      I find most of them while using the tool for something else.
-    </p>
-    <p class="verify">
-      <a href={searchUrl}>See every merged pull request on GitHub</a>. Counts below exclude my own
-      repositories and student-era merges, and were last checked on {totals.updated}.
+    <p class="verify meta">
+      <a href={searchUrl}>See every merged pull request on GitHub</a>. Counts exclude my own
+      repositories and student-era merges. Last checked {totals.updated}.
     </p>
 
-    <h2 class="section-label">Notable projects</h2>
+    <h2 class="eyebrow">Notable projects</h2>
     <ul class="projects">
       {notable.map((p) => (
         <li>
@@ -40,7 +39,7 @@ const prUrl = (repo: string) =>
       ))}
     </ul>
 
-    <h2 class="section-label eco-heading">Developer tooling</h2>
+    <h2 class="eyebrow eco-heading">Developer tooling</h2>
     <p class="what eco-intro">
       {ecosystem.count} merged across {ecosystem.repos} repositories in one maintainer's
       ecosystem (<a href={`https://github.com/${ecosystem.owner}`}>{ecosystem.owner}</a>).
@@ -64,11 +63,8 @@ const prUrl = (repo: string) =>
 </BaseLayout>
 
 <style>
-  section { margin-top: 3rem; }
-  h1 { margin-bottom: 0.75rem; }
-  .intro { color: var(--ink-soft); margin-bottom: var(--space-4); }
-  .verify { font-size: 0.9375rem; color: var(--ink-soft); margin-bottom: var(--space-7); }
-  .section-label { margin-bottom: var(--space-4); }
+  .verify { margin-bottom: var(--space-7); }
+  h2 { margin-bottom: var(--space-4); }
   .eco-heading { margin-top: var(--space-8); }
 
   .projects { list-style: none; padding: 0; display: grid; gap: var(--space-6); }
@@ -80,25 +76,29 @@ const prUrl = (repo: string) =>
   }
   .repo {
     font-family: var(--font-mono);
-    font-size: 0.9375rem;
+    font-size: var(--t-read);
+    font-weight: 500;
     color: var(--ink);
     text-decoration: none;
     overflow-wrap: anywhere;
   }
   .repo:hover { color: var(--accent); }
   .count {
-    color: var(--ink-soft);
-    font-size: 0.8125rem;
+    font-family: var(--font-mono);
+    color: var(--flag);
+    font-size: var(--t-meta);
     white-space: nowrap;
     text-decoration: none;
     font-variant-numeric: tabular-nums;
   }
   .count:hover { color: var(--accent); }
-  .what { color: var(--ink-soft); font-size: 0.9375rem; margin-top: var(--space-2); }
+  .what { color: var(--ink-soft); font-size: var(--t-read); margin-top: var(--space-2); }
   .highlights {
-    margin-top: var(--space-2);
+    margin-top: var(--space-3);
     padding-left: 1.1rem;
-    font-size: 0.9375rem;
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    line-height: 1.6;
     color: var(--ink-soft);
   }
   .highlights li + li { margin-top: var(--space-1); }
@@ -110,7 +110,8 @@ const prUrl = (repo: string) =>
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
     gap: var(--space-1) var(--space-4);
-    font-size: 0.9375rem;
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
   }
   .eco li { display: flex; justify-content: space-between; gap: var(--space-2); }
   .eco a { color: var(--ink); text-decoration: none; overflow-wrap: anywhere; }
