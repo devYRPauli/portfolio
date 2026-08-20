@@ -1,6 +1,6 @@
 ---
 title: "Eight Submissions, Zero Promotions: A Week Inside mlx.fast on the Wrong Hardware"
-description: What I learned competing in an open ML-optimization competition where the ranked machine was an M5 Max and mine was not - the oracle I found, the levers I priced dead, and why measurement bandwidth decided everything
+description: Competing in an open ML-optimization competition on hardware that could not run the ranked benchmark, and why measurement bandwidth decided everything.
 pubDate: 2026-08-05
 updatedDate: 2026-08-14
 tags:

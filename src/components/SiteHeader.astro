@@ -2,12 +2,14 @@
 const nav = [
   { href: '/work/', label: 'Work' },
   { href: '/writing/', label: 'Writing' },
+  { href: '/contributions/', label: 'Open Source' },
 ];
 
 const path = Astro.url.pathname;
 const isCurrent = (href: string) =>
   (href === '/writing/' && path.startsWith('/writing')) ||
-  (href === '/work/' && path.startsWith('/work'));
+  (href === '/work/' && path.startsWith('/work')) ||
+  (href === '/contributions/' && path.startsWith('/contributions'));
 ---
 <header>
   <div class="container bar">
@@ -56,7 +58,13 @@ const isCurrent = (href: string) =>
     padding-block: var(--space-3);
   }
   .brand { font-weight: 600; color: var(--ink); text-decoration: none; }
-  .main-nav { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-4); }
+  .main-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-1) var(--space-4);
+  }
   .nav-link {
     color: var(--ink-soft);
     text-decoration: none;
@@ -78,7 +86,7 @@ const isCurrent = (href: string) =>
   @media (max-width: 640px) {
     .bar { grid-template-columns: 1fr; padding-block: var(--space-3); gap: var(--space-2); }
     .brand { font-size: 0.9375rem; white-space: nowrap; }
-    .main-nav { grid-row: 2; justify-content: flex-start; gap: var(--space-4); }
+    .main-nav { grid-row: 2; justify-content: flex-start; gap: 0 var(--space-3); }
     .nav-link { display: flex; align-items: center; min-height: 2.5rem; font-size: 0.9375rem; }
   }
   button {

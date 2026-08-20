@@ -33,7 +33,8 @@ const { projects } = Astro.props;
   .kind { color: var(--ink-soft); font-size: 0.8125rem; white-space: nowrap; }
   .summary { color: var(--ink-soft); font-size: 0.9375rem; }
   @media (max-width: 520px) {
-    .row { align-items: flex-start; }
-    .kind { margin-top: 0.15rem; }
+    li { min-width: 0; }
+    .row { flex-direction: column; align-items: flex-start; gap: 0; }
+    .kind { margin-top: 0.15rem; white-space: normal; }
   }
 </style>

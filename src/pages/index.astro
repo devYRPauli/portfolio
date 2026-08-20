@@ -60,7 +60,7 @@ const jsonLd = {
     <h1>Yash Raj Pandey</h1>
     <p class="tagline"><em>AI systems engineer.</em> I build local-first LLM infrastructure, agent platforms, evaluation systems, and developer tools.</p>
     <p class="intro">At UF IFAS, I lead the AI systems function I proposed. I also reproduce new model research, contribute fixes upstream, and write about what broke. Outside work, I follow football and build small tools I want to use myself.</p>
-    <p class="proof">60+ pull requests merged across 30+ open-source projects, including llama.cpp, Apple MLX, and Google Research's TabFM. <a href="https://github.com/devYRPauli?tab=pullrequests">See the pull requests</a>.</p>
+    <p class="proof">60+ pull requests merged across 28 open-source projects, including llama.cpp, Apple MLX, and Google Research's TabFM. <a href="/contributions/">See the contributions</a>.</p>
   </section>
 
   <section id="work" aria-labelledby="work-h">
@@ -75,6 +75,19 @@ const jsonLd = {
     <a class="more" href="/writing/">All writing -&gt;</a>
   </section>
 
+  <section id="about" aria-labelledby="about-h">
+    <h2 id="about-h" class="section-label">About</h2>
+    <p>I joined UF IFAS in March 2025 as a software engineer. I am now the AI Agents Architect, leading the AI systems function I proposed. That is three roles in thirteen months.</p>
+    <p>I started on Blue Omics, a genomics data platform I designed and built. It became the system of record for 30+ researchers across 5 labs, and it holds 5M+ records across 32 data models and 58 API endpoints. I was promoted to lead it, hired two engineers, and grew the team from one to three.</p>
+    <p>Today I build local-first LLM infrastructure on institutional GPUs, so sensitive research data never leaves the university. That means a self-hosted open-weight model, retrieval over 10,000+ technical documents, and a regression suite that gates every model and pipeline change.</p>
+    <p>I studied computer science at Jaypee University of Engineering and Technology, came to Florida as an exchange student, and stayed for a master's at UF. I live in Gainesville.</p>
+  </section>
+
+  <section id="contact" aria-labelledby="contact-h">
+    <h2 id="contact-h" class="section-label">Contact</h2>
+    <p>Email me at <a href="mailto:yashpn62@gmail.com">yashpn62@gmail.com</a>. You can also find me on <a href="https://www.linkedin.com/in/yashrajpandeyy/">LinkedIn</a>, or read my <a href="/Resume_YashRaj.pdf">resume</a>.</p>
+  </section>
+
 </BaseLayout>
 
 <style>
@@ -87,4 +100,5 @@ const jsonLd = {
   .section-label { margin-bottom: var(--space-4); }
   .more { display: inline-block; margin-top: var(--space-3); font-size: 0.9375rem; }
   .proof { margin-top: var(--space-4); }
+  #about p + p, #contact p { margin-top: var(--space-4); }
 </style>

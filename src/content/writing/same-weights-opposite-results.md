@@ -1,6 +1,6 @@
 ---
 title: Same Weights, Same Prompt, Opposite Results - Why Local Tool Calling Breaks
-description: I built willitcall, a conformance suite and public matrix for tool calling on local models. The findings that survived replication, the ones that did not, and the bug report I had to retract.
+description: I built willitcall, a conformance suite and public matrix for tool calling on local models. The findings that survived replication, and the one I retracted.
 pubDate: 2026-07-21
 updatedDate: 2026-08-06
 tags:

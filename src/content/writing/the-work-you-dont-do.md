@@ -1,6 +1,6 @@
 ---
 title: "The Work You Don't Do: Losing Two Optimization Competitions the Same Way"
-description: I published a post-mortem naming the exact question I failed to ask, then entered another competition the same day and failed to ask it again. What actually wins these competitions, and why I keep missing it.
+description: I named the question I failed to ask, then entered another competition and failed to ask it again. What actually wins these races, and why I keep missing it.
 pubDate: 2026-08-14
 tags:
   - performance

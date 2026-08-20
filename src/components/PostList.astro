@@ -36,7 +36,8 @@ const fmt = (d: Date) =>
   time { color: var(--ink-soft); font-size: 0.875rem; white-space: nowrap; }
   .summary { color: var(--ink-soft); font-size: 0.9375rem; }
   @media (max-width: 520px) {
-    .row { align-items: flex-start; }
+    li { min-width: 0; }
+    .row { flex-direction: column; align-items: flex-start; gap: 0; }
     time { margin-top: 0.15rem; }
   }
 </style>
