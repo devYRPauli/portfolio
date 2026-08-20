@@ -14,10 +14,13 @@ npm run dev
 The local site runs at `http://localhost:4321/` by default.
 
 ```sh
-npm run check       # Validate Astro, TypeScript, and content schemas
-npm run build       # Validate, build to dist/, and check internal links
-npm run preview     # Serve the production build locally
+npm run check                 # Validate Astro, TypeScript, and content schemas
+npm run build                 # Validate, build to dist/, and check internal links
+npm run preview               # Serve the production build locally
+npm run sync:contributions    # Refresh merged pull request counts from the GitHub API
 ```
+
+Astro runs the dev server as a background daemon, so `npm run dev` returns immediately. Use `npx astro dev status`, `npx astro dev logs`, and `npx astro dev stop` to manage it.
 
 ## Content
 
@@ -41,10 +44,18 @@ Collection schemas are defined in `src/content.config.ts`. Invalid or incomplete
 ## Generated pages and feeds
 
 - `/work/` and `/writing/` provide the complete indexes.
+- `/about/` covers background, role history, and contact.
+- `/contributions/` lists merged pull requests to projects I do not own.
 - `/rss.xml` publishes writing as an RSS feed.
 - `/sitemap-index.xml` is generated during the production build.
 - `/llms.txt` provides a plain-text site summary.
-- `/og/default.png`, `/og/work/[slug].png`, and `/og/writing/[slug].png` generate social cards at build time.
+- `/og/default.png`, `/og/page/[slug].png`, `/og/work/[slug].png`, and `/og/writing/[slug].png` generate social cards at build time.
+
+## Contribution counts
+
+The figures on `/contributions/` come from `src/data/contributions.generated.json`, written by `scripts/sync-contributions.mjs` and refreshed by a weekly GitHub Action. That file is generated and should not be edited by hand.
+
+Project descriptions in `src/data/contributions.ts` are hand-written, and the sync never touches them. Every surface that states a count derives it from `totals`, so a refreshed number updates the page, the home record row, `llms.txt`, and the social card together.
 
 Static files that must retain stable public URLs, including the resume, favicons, manifest, robots file, and custom domain file, live in `public/`. Transformable page images live in `src/assets/` and use Astro's image pipeline.
 
