@@ -6,26 +6,33 @@ kind: Browser extension
 year: "2026"
 stack:
   - JavaScript
-  - Chrome Extension APIs
+  - Chrome Extension APIs (MV3)
   - Shadow DOM scraping
   - LLM APIs (BYO-key)
 links:
   - { label: Site, href: https://chromewebstore.google.com/detail/applyscore/ibecekikdjelajpnjnmapejhahgcplim }
-order: 8
+order: 9
 ---
 
-A published Chrome extension that scores how well a resume matches any job posting on the web, with evidence-linked gaps and no fluff.
+A published Chrome extension that scores how well a resume matches any job posting on the web, with every claim linked to the evidence behind it.
 
 ## Problem
 
-Most AI resume tools hallucinate skills and rewrite bullets with confident fluff that recruiters see through instantly. The honest question, how well does this resume actually match this job, went unanswered.
+Most AI resume tools rewrite your bullets. They invent skills you never had and pad the result with confident language recruiters see through in seconds. The honest question, how well does this resume actually match this job, went unanswered.
+
+Scraping job postings is also harder than it looks. Every board renders differently, several bury the description inside Shadow DOM, and single-page apps swap the posting without a page load.
 
 ## Approach
 
-- Built a universal scraper that reads job postings across LinkedIn, Greenhouse, Ashby, Lever, Workday and more, piercing Shadow DOM to work on virtually any board.
-- Runs a strict, evidence-based gap analysis: a confidence-weighted 0-100 fit score, top requirement matches linked to the exact resume bullets that prove them, and a prioritized list of what is missing.
-- Privacy-first by design: the resume is cached locally and the user brings their own API key (OpenAI, Anthropic, or Google), so data and model choice stay fully in their control.
+- **Read the posting anywhere.** Dedicated extractors handle LinkedIn, Greenhouse, Lever, Ashby, Workday, Indeed, and Glassdoor, with a generic fallback for everything else. The content script pierces Shadow DOM, and a validator confirms the page really is a job posting before scoring runs.
+- **Score against evidence, not vibes.** The analysis returns a confidence-weighted 0-100 fit score, the top requirements matched to the exact resume bullets that prove them, and a prioritized list of what is missing.
+- **Bring your own key.** Three providers are supported: OpenAI, Anthropic, and Google. The resume is cached locally, and the key stays in the user's own storage, so the data and the model choice both stay with them.
+- **Manifest V3 throughout.** A service worker handles the API calls, the popup holds settings and results, and host permissions are limited to the three provider endpoints, with wider access requested only when a board needs it.
+
+About 2,800 lines of JavaScript across 22 files, shipped to the Chrome Web Store as v1.0.
 
 ## Trade-offs
 
-Deliberately a gap analyzer, not a rewriter: it tells you what matches and what is missing, and never generates resume bullets, which is exactly what keeps it honest. The BYO-key model trades one-click convenience for the user keeping full control of their data and cost.
+It is a gap analyzer, not a rewriter. It will tell you what matches and what is missing, and it will never generate a resume bullet for you. That restraint is the whole point, and it is also why it will never be the tool that promises to write your application for you.
+
+Bring-your-own-key trades one-click convenience for control. The user pays their own inference cost and picks their own provider, which rules out a frictionless install and rules out ever holding someone else's resume on a server I run.
