@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { renderOgCard } from '../../../lib/og-image';
+import { totals } from '../../../data/contributions';
 
 /**
  * OG cards for the standalone pages. Posts and case studies generate their own
@@ -24,10 +25,11 @@ const pages = {
   },
   contributions: {
     kicker: 'Open Source',
-    title: 'Merged pull requests across 28 projects',
+    // Derived, so the card cannot drift when the weekly sync moves the count.
+    title: `Merged pull requests across ${totals.projects} projects`,
     meta: 'llama.cpp | Apple MLX | TabFM | RAGFlow | mem0 | litellm',
   },
-} as const;
+};
 
 export function getStaticPaths() {
   return Object.entries(pages).map(([slug, card]) => ({ params: { slug }, props: { card } }));

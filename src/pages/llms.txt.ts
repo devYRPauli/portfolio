@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
+import { totals } from '../data/contributions';
 
 export const GET: APIRoute = async ({ site }) => {
   const posts = (await getCollection('writing', ({ data }) => !data.draft)).sort(
@@ -26,7 +27,7 @@ export const GET: APIRoute = async ({ site }) => {
     '',
     '## Open Source',
     '',
-    `- [Merged pull requests](${abs('/contributions/')}): 60+ pull requests merged across 28 projects I do not own, including llama.cpp, Apple MLX, Google Research's TabFM, RAGFlow, mem0, and litellm.`,
+    `- [Merged pull requests](${abs('/contributions/')}): ${totals.merged} pull requests merged across ${totals.projects} projects I do not own, including llama.cpp, Apple MLX, Google Research's TabFM, RAGFlow, mem0, and litellm.`,
     '',
     '## Links',
     '',
