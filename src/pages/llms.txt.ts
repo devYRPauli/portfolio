@@ -30,6 +30,7 @@ export const GET: APIRoute = async ({ site }) => {
     '',
     '## Links',
     '',
+    `- About: ${abs('/about/')}`,
     '- GitHub: https://github.com/devYRPauli',
     '- LinkedIn: https://www.linkedin.com/in/yashrajpandeyy',
     '- Email: yashpn62@gmail.com',

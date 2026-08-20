@@ -2,19 +2,43 @@
 import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import WorkList from '../components/WorkList.astro';
-import PostList from '../components/PostList.astro';
+import EntryList from '../components/EntryList.astro';
 import memoji from '../assets/memoji.png';
+import { totals } from '../data/contributions';
+import { postMeta } from '../lib/reading';
 
 const projects = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
 const selectedProjects = projects
   .filter((project) => project.data.featuredOrder !== undefined)
   .sort((a, b) => (a.data.featuredOrder ?? Infinity) - (b.data.featuredOrder ?? Infinity))
   .slice(0, 3);
-const posts = (await getCollection('writing'))
+const allPosts = (await getCollection('writing'))
   .filter((p) => !p.data.draft)
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-  .slice(0, 3);
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const posts = allPosts.slice(0, 3);
+
+const workEntries = selectedProjects.map((p) => ({
+  href: `/work/${p.id}/`,
+  title: p.data.title,
+  meta: [p.data.kind, p.data.year],
+  summary: p.data.summary,
+  transitionName: `work-${p.id}`,
+}));
+
+const postEntries = posts.map((p) => ({
+  href: `/writing/${p.id}/`,
+  title: p.data.title,
+  meta: postMeta(p.data.pubDate, p.body),
+  summary: p.data.description,
+  transitionName: `post-${p.id}`,
+}));
+
+const record = [
+  { figure: `${totals.merged}`, label: 'pull requests merged', href: '/contributions/' },
+  { figure: `${totals.projects}`, label: 'projects contributed to', href: '/contributions/' },
+  { figure: `${projects.length}`, label: 'case studies', href: '/work/' },
+  { figure: `${allPosts.length}`, label: 'writeups', href: '/writing/' },
+];
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -38,7 +62,7 @@ const jsonLd = {
   sameAs: [
     'https://github.com/devYRPauli',
     'https://www.linkedin.com/in/yashrajpandeyy/',
-    'https://x.com/I_AM_YRP',
+    'https://x.com/devYRPauli',
   ],
 };
 ---
@@ -51,54 +75,102 @@ const jsonLd = {
     <Image
       src={memoji}
       alt="Yash's memoji, waving"
-      width={88}
+      width={80}
       format="webp"
       quality={85}
       loading="eager"
       fetchpriority="high"
     />
-    <h1>Yash Raj Pandey</h1>
-    <p class="tagline"><em>AI systems engineer.</em> I build local-first LLM infrastructure, agent platforms, evaluation systems, and developer tools.</p>
-    <p class="intro">At UF IFAS, I lead the AI systems function I proposed. I also reproduce new model research, contribute fixes upstream, and write about what broke. Outside work, I follow football and build small tools I want to use myself.</p>
-    <p class="proof">60+ pull requests merged across 28 open-source projects, including llama.cpp, Apple MLX, and Google Research's TabFM. <a href="/contributions/">See the contributions</a>.</p>
+    <p class="eyebrow">AI Systems Engineer</p>
+    <h1 class="display-xl">Yash Raj Pandey</h1>
+    <p class="tagline">
+      I build local-first LLM infrastructure, agent platforms, evaluation systems, and developer tools.
+    </p>
+    <p class="intro">
+      I reproduce new model research, publish what broke, and send the fixes upstream.
+    </p>
+
+    <ul class="record">
+      {record.map((r) => (
+        <li>
+          <a href={r.href}>
+            <span class="figure">{r.figure}</span>
+            <span class="label">{r.label}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
   </section>
 
   <section id="work" aria-labelledby="work-h">
-    <h2 id="work-h" class="section-label">Selected Work</h2>
-    <WorkList projects={selectedProjects} />
-    <a class="more" href="/work/">All work -&gt;</a>
+    <h2 id="work-h" class="eyebrow">
+      Selected Work<span class="rule" aria-hidden="true">/</span><span class="count">{projects.length} projects</span>
+    </h2>
+    <EntryList entries={workEntries} />
+    <a class="more" href="/work/">All work &rarr;</a>
   </section>
 
   <section id="writing" aria-labelledby="writing-h">
-    <h2 id="writing-h" class="section-label">Writing</h2>
-    <PostList posts={posts} />
-    <a class="more" href="/writing/">All writing -&gt;</a>
-  </section>
-
-  <section id="about" aria-labelledby="about-h">
-    <h2 id="about-h" class="section-label">About</h2>
-    <p>I joined UF IFAS in March 2025 as a software engineer. I am now the AI Agents Architect, leading the AI systems function I proposed. That is three roles in thirteen months.</p>
-    <p>I started on Blue Omics, a genomics data platform I designed and built. It became the system of record for 30+ researchers across 5 labs, and it holds 5M+ records across 32 data models and 58 API endpoints. I was promoted to lead it, hired two engineers, and grew the team from one to three.</p>
-    <p>Today I build local-first LLM infrastructure on institutional GPUs, so sensitive research data never leaves the university. That means a self-hosted open-weight model, retrieval over 10,000+ technical documents, and a regression suite that gates every model and pipeline change.</p>
-    <p>I studied computer science at Jaypee University of Engineering and Technology, came to Florida as an exchange student, and stayed for a master's at UF. I live in Gainesville.</p>
-  </section>
-
-  <section id="contact" aria-labelledby="contact-h">
-    <h2 id="contact-h" class="section-label">Contact</h2>
-    <p>Email me at <a href="mailto:yashpn62@gmail.com">yashpn62@gmail.com</a>. You can also find me on <a href="https://www.linkedin.com/in/yashrajpandeyy/">LinkedIn</a>, or read my <a href="/Resume_YashRaj.pdf">resume</a>.</p>
+    <h2 id="writing-h" class="eyebrow">
+      Writing<span class="rule" aria-hidden="true">/</span><span class="count">{allPosts.length} posts</span>
+    </h2>
+    <EntryList entries={postEntries} />
+    <a class="more" href="/writing/">All writing &rarr;</a>
   </section>
 
 </BaseLayout>
 
 <style>
-  section { margin-top: var(--space-8); }
-  .hero img { border-radius: 20px; }
-  .hero h1 { margin-top: var(--space-4); }
-  .tagline { font-size: 1.25rem; margin-top: var(--space-2); }
-  .tagline em { font-family: var(--font-serif); font-style: italic; font-size: 1.15em; }
-  .intro { color: var(--ink-soft); margin-top: var(--space-4); }
-  .section-label { margin-bottom: var(--space-4); }
-  .more { display: inline-block; margin-top: var(--space-3); font-size: 0.9375rem; }
-  .proof { margin-top: var(--space-4); }
-  #about p + p, #contact p { margin-top: var(--space-4); }
+  .hero { margin-top: var(--space-7); }
+  .hero img { border-radius: 18px; }
+  .hero .eyebrow { margin-top: var(--space-5); }
+  .hero h1 { margin-top: var(--space-2); }
+  .tagline {
+    margin-top: var(--space-4);
+    font-size: var(--t-lead);
+    line-height: 1.5;
+    max-width: 32rem;
+    text-wrap: pretty;
+  }
+  .intro { margin-top: var(--space-4); color: var(--ink-soft); max-width: 34rem; }
+
+  /* The record: every figure is a link to the evidence behind it. */
+  .record {
+    list-style: none;
+    padding: var(--space-5) 0 0;
+    margin-top: var(--space-5);
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-5) var(--space-6);
+  }
+  .record a { text-decoration: none; display: grid; gap: 0.1rem; }
+  .record .figure {
+    font-family: var(--font-mono);
+    font-size: var(--t-figure);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: var(--flag);
+    line-height: 1;
+  }
+  .record .label {
+    font-family: var(--font-mono);
+    font-size: var(--t-micro);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .record a:hover .label { color: var(--ink); }
+
+  section:not(.hero) { margin-top: var(--space-8); }
+  section:not(.hero) > .eyebrow { margin-bottom: var(--space-4); }
+  .rule { margin-inline: 0.5em; color: var(--line); }
+  .more {
+    display: inline-block;
+    margin-top: var(--space-4);
+    font-family: var(--font-mono);
+    font-size: var(--t-meta);
+    text-decoration: none;
+  }
+  .more:hover { text-decoration: underline; }
 </style>

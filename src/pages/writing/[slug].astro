@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import PostLayout from '../../layouts/PostLayout.astro';
+import { wordCount, readMinutes } from '../../lib/reading';
 
 export async function getStaticPaths() {
   const posts = await getCollection('writing', ({ data }) => !data.draft);
@@ -10,8 +11,7 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const { Content } = await render(post);
 
-const words = post.body ? post.body.split(/\s+/).length : 0;
-const readTime = `${Math.max(1, Math.ceil(words / 220))} min read`;
+const words = wordCount(post.body);
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -31,7 +31,7 @@ const jsonLd = {
   date={post.data.pubDate}
   updated={post.data.updatedDate}
   tags={post.data.tags}
-  meta={readTime}
+  metaParts={[`${words.toLocaleString('en-US')} words`, `${readMinutes(words)} min`]}
   ogImage={`/og/writing/${post.id}.png`}
   jsonLd={jsonLd}
   transitionName={`post-${post.id}`}

@@ -1,0 +1,31 @@
+---
+interface Props {
+  /**
+   * Measured context for what follows, e.g. "6 posts" or "61 merged".
+   * Deliberately not the section name: the h1 already says that.
+   */
+  eyebrow?: string;
+  title: string;
+  lede?: string;
+  backHref?: string;
+  backLabel?: string;
+}
+
+const { eyebrow, title, lede, backHref = '/', backLabel = 'Home' } = Astro.props;
+---
+<header>
+  <a class="back" href={backHref}>&larr; {backLabel}</a>
+  {eyebrow && <p class="eyebrow"><span class="count">{eyebrow}</span></p>}
+  <h1>{title}</h1>
+  {lede && <p class="lede">{lede}</p>}
+</header>
+
+<style>
+  header { margin-top: var(--space-7); margin-bottom: var(--space-7); }
+  .eyebrow { margin-top: var(--space-5); }
+  h1 { margin-top: var(--space-3); }
+  /* With no eyebrow the title would sit tight under the back link,
+     so it takes over the spacing the eyebrow would have provided. */
+  .back + h1 { margin-top: var(--space-5); }
+  .lede { margin-top: var(--space-4); max-width: 34rem; }
+</style>

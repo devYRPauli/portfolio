@@ -7,7 +7,8 @@ interface Props {
   date?: Date;
   updated?: Date;
   tags?: string[];
-  meta?: string;
+  /** Measured facts for the byline, rendered in the mono voice. */
+  metaParts?: string[];
   ogImage?: string;
   jsonLd?: object;
   transitionName?: string;
@@ -21,7 +22,7 @@ const {
   date,
   updated,
   tags,
-  meta,
+  metaParts = [],
   ogImage,
   jsonLd,
   transitionName,
@@ -29,8 +30,7 @@ const {
   backLabel = 'Home',
 } = Astro.props;
 
-const fmt = (d: Date) =>
-  d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+const fmt = (d: Date) => d.toISOString().slice(0, 10);
 ---
 <BaseLayout
   title={title}
@@ -47,11 +47,12 @@ const fmt = (d: Date) =>
   <article>
     <header>
       <a class="back" href={backHref}>&larr; {backLabel}</a>
+      <p class="eyebrow">{backLabel}</p>
       <h1 transition:name={transitionName}>{title}</h1>
-      <p class="byline">
-        {date && <time class="numeric" datetime={date.toISOString()}>{fmt(date)}</time>}
-        {updated && <span> (updated {fmt(updated)})</span>}
-        {meta && <span>{meta}</span>}
+      <p class="byline meta">
+        {date && <time datetime={date.toISOString()}>{fmt(date)}</time>}
+        {metaParts.map((m) => <span>{m}</span>)}
+        {updated && <span class="updated">updated {fmt(updated)}</span>}
       </p>
     </header>
     <div class="prose">
@@ -105,13 +106,20 @@ const fmt = (d: Date) =>
 </BaseLayout>
 
 <style>
-  article { margin-top: 3rem; }
-  header { margin-bottom: 2.5rem; }
+  article { margin-top: var(--space-7); }
+  header { margin-bottom: var(--space-7); }
+  .eyebrow { margin-top: var(--space-5); }
+  h1 { margin-top: var(--space-3); }
   .byline {
-    color: var(--ink-soft);
-    font-size: 0.9375rem;
-    margin-top: 0.75rem;
+    margin-top: var(--space-4);
     display: flex;
-    gap: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0 var(--space-4);
+  }
+  /* The one place amber means something other than a measured value:
+     a post that has been corrected or updated after publishing. */
+  .updated {
+    color: var(--flag);
+    font-weight: 500;
   }
 </style>

@@ -1,11 +1,40 @@
+/* ---------------------------------------------------------------
+   Design system
+
+   Ground: cool paper, not warm cream. This is a reading site first.
+   Colour: two chromatic values, each with exactly one job.
+     --accent  interaction only: links, focus, current page.
+     --flag    measurement only: figures, counts, dates, verdicts.
+   Type: three families, three jobs.
+     serif  display     page and post titles. One weight, large.
+     sans   structure    headings, prose, interface.
+     mono   measurement  every number, date, count, and label.
+   --------------------------------------------------------------- */
+
 :root {
-  --bg: oklch(97.5% 0.01 95);
-  --bg-raised: oklch(99.2% 0.005 95);
-  --ink: oklch(24% 0.02 60);
-  --ink-soft: oklch(46% 0.015 60);
-  --line: oklch(89% 0.01 90);
-  --accent: oklch(60% 0.13 65);
-  --accent-soft: oklch(60% 0.13 65 / 0.12);
+  /* Paper, not printer paper. Warm and a little soft so long reads do not
+     glare, but the ink stays cool so this does not become a cosy serif page. */
+  --bg: oklch(96.6% 0.008 82);
+  --bg-raised: oklch(93.8% 0.011 82);
+  --ink: oklch(26% 0.018 250);
+  --ink-soft: oklch(50% 0.014 250);
+  --line: oklch(87% 0.01 82);
+  --accent: oklch(50% 0.13 233);
+  --accent-soft: oklch(50% 0.13 233 / 0.1);
+  --flag: oklch(53% 0.13 58);
+
+  /* type scale - no two tiers sit closer than a noticeable step */
+  --t-display: clamp(2.5rem, 7vw, 3.75rem);
+  --t-h1: clamp(1.875rem, 5vw, 2.625rem);
+  --t-h2: 1.375rem;
+  --t-figure: 1.5rem;
+  --t-lead: 1.1875rem;
+  --t-h3: 1.0625rem;
+  --t-body: 1.0625rem;
+  --t-read: 1rem;
+  --t-meta: 0.8125rem;
+  --t-micro: 0.6875rem;
+
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -18,13 +47,16 @@
 }
 
 html[data-theme='dark'] {
-  --bg: oklch(17.5% 0.012 270);
-  --bg-raised: oklch(21% 0.012 270);
-  --ink: oklch(90% 0.008 90);
-  --ink-soft: oklch(66% 0.012 270);
-  --line: oklch(28% 0.012 270);
-  --accent: oklch(76% 0.12 70);
-  --accent-soft: oklch(76% 0.12 70 / 0.14);
+  /* Slate, not a black hole. Lifted well off pure black so the page reads as a
+     surface with weight rather than a void with text floating on it. */
+  --bg: oklch(27% 0.013 258);
+  --bg-raised: oklch(31.5% 0.015 258);
+  --ink: oklch(93% 0.008 250);
+  --ink-soft: oklch(73% 0.013 250);
+  --line: oklch(38% 0.015 258);
+  --accent: oklch(80% 0.11 225);
+  --accent-soft: oklch(80% 0.11 225 / 0.16);
+  --flag: oklch(82% 0.11 70);
   color-scheme: dark;
 }
 
@@ -40,7 +72,7 @@ body {
   background: var(--bg);
   color: var(--ink);
   font-family: var(--font-sans);
-  font-size: 1.0625rem;
+  font-size: var(--t-body);
   line-height: 1.75;
   font-weight: 400;
   text-rendering: optimizeLegibility;
@@ -54,12 +86,56 @@ a:hover { text-decoration-thickness: 2px; }
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
 
-h1, h2, h3 { font-weight: 600; line-height: 1.2; text-wrap: balance; letter-spacing: -0.01em; }
-h1 { font-size: clamp(2rem, 5vw, 2.75rem); }
-h2 { font-size: 1.5rem; }
-h3 { font-size: 1.125rem; }
+/* --- display: serif, one weight, large only --- */
+.display,
+h1 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: var(--t-h1);
+  line-height: 1.08;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+.display-xl { font-size: var(--t-display); }
+
+/* --- structure: sans --- */
+h2, h3 {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+h2 { font-size: var(--t-h2); }
+h3 { font-size: var(--t-h3); }
 
 p { text-wrap: pretty; }
+
+/* --- measurement: mono. Every number on the site speaks in this voice. --- */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--t-micro);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.eyebrow .count { color: var(--flag); }
+
+.meta {
+  font-family: var(--font-mono);
+  font-size: var(--t-meta);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+/* The mono family is already the "this is measured" signal, so the default
+   measurement voice stays quiet. --flag is spent only where a figure is the
+   point: section counts, the record on the home page, and update markers. */
+.meta .fig { color: var(--ink); }
+
+.lede { font-size: var(--t-read); color: var(--ink-soft); }
 
 time, .numeric { font-variant-numeric: tabular-nums; }
 
@@ -99,23 +175,16 @@ html[data-theme='dark'] .astro-code span {
 }
 .skip-link:focus { transform: none; }
 
-.section-label {
-  font-size: 0.8125rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-}
-
+/* --- prose --- */
 .prose > * + * { margin-top: 1.1em; }
 .prose :not(pre) > code,
 .prose a { overflow-wrap: anywhere; }
-.prose h2 { margin-top: 2.2em; }
+.prose h2 { margin-top: 2.4em; }
 .prose h3 { margin-top: 1.8em; }
 .prose ul, .prose ol { padding-left: 1.4rem; }
 .prose li + li { margin-top: 0.4em; }
 .prose blockquote {
-  border-left: 2px solid var(--accent);
+  border-left: 2px solid var(--flag);
   padding-left: 1rem;
   color: var(--ink-soft);
   font-style: italic;
@@ -128,28 +197,31 @@ html[data-theme='dark'] .astro-code span {
   max-width: 100%;
   overflow-x: auto;
   border-collapse: collapse;
-  font-size: 0.9375rem;
+  font-size: var(--t-meta);
+  font-family: var(--font-mono);
   line-height: 1.5;
 }
 .prose th {
   text-align: left;
+  font-family: var(--font-sans);
   font-weight: 600;
   color: var(--ink-soft);
-  font-size: 0.8125rem;
-  letter-spacing: 0.04em;
+  font-size: var(--t-micro);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 .prose th, .prose td { padding: 0.5rem 1rem 0.5rem 0; border-bottom: 1px solid var(--line); }
 .prose td { font-variant-numeric: tabular-nums; }
 
 .back {
   display: inline-block;
+  font-family: var(--font-mono);
+  font-size: var(--t-meta);
   color: var(--ink-soft);
   text-decoration: none;
-  font-size: 0.9375rem;
-  margin-bottom: 1.25rem;
 }
-.back:hover { color: var(--ink); }
+.back:hover { color: var(--accent); }
 
 .progress {
   position: fixed;
@@ -177,12 +249,14 @@ html[data-theme='dark'] .astro-code span {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
-  font: 500 0.75rem var(--font-sans);
+  font: 500 var(--t-micro) var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--ink-soft);
   background: var(--bg-raised);
   border: 1px solid var(--line);
   border-radius: 6px;
-  padding: 0.2rem 0.55rem;
+  padding: 0.25rem 0.55rem;
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.15s ease;
