@@ -3,13 +3,12 @@ const nav = [
   { href: '/work/', label: 'Work' },
   { href: '/writing/', label: 'Writing' },
   { href: '/contributions/', label: 'Open Source' },
+  { href: '/about/', label: 'About' },
 ];
 
 const path = Astro.url.pathname;
-const isCurrent = (href: string) =>
-  (href === '/writing/' && path.startsWith('/writing')) ||
-  (href === '/work/' && path.startsWith('/work')) ||
-  (href === '/contributions/' && path.startsWith('/contributions'));
+/** A nav item is current when the URL sits at or below its section. */
+const isCurrent = (href: string) => path === href || path.startsWith(href);
 ---
 <header>
   <div class="container bar">

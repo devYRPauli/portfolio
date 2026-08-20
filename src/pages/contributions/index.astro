@@ -12,8 +12,7 @@ const prUrl = (repo: string) =>
   description="Merged pull requests across llama.cpp, Apple MLX, Google Research's TabFM, RAGFlow, mem0, and litellm. Mostly correctness fixes, each one verifiable."
 >
   <PageHeader
-    eyebrow="Open Source"
-    count={`${totals.merged} merged`}
+    eyebrow={`${totals.merged} merged`}
     title="Open Source"
     lede="Almost all of them are correctness fixes: a parser that drops data, a bill computed at 1/1000 of the real price, a kernel that returns the wrong answer when its input aliases. I find most of them while using the tool for something else."
   />

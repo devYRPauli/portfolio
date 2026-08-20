@@ -1,0 +1,95 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  name: 'About Yash Raj Pandey',
+  url: new URL('/about/', Astro.site).href,
+  mainEntity: {
+    '@type': 'Person',
+    name: 'Yash Raj Pandey',
+    jobTitle: 'AI Agents Architect',
+    worksFor: { '@type': 'Organization', name: 'University of Florida IFAS' },
+    email: 'yashpn62@gmail.com',
+    address: { '@type': 'PostalAddress', addressLocality: 'Gainesville', addressRegion: 'FL' },
+    url: 'https://yashrajpandey.com',
+  },
+};
+
+/** Role history. Dates come from the record, not from memory. */
+const roles = [
+  { period: '2026-04 - now', title: 'AI Agents Architect', org: 'UF IFAS' },
+  { period: '2025-10 - 2026-04', title: 'Lead Software Engineer', org: 'UF IFAS' },
+  { period: '2025-03 - 2025-10', title: 'Software Engineer', org: 'UF IFAS' },
+  { period: '2022-01 - 2022-06', title: 'Software Engineer Intern', org: 'Hackdev Technology' },
+];
+---
+<BaseLayout
+  title="About - Yash Raj Pandey"
+  description="AI Agents Architect at UF IFAS. Three roles in thirteen months, a 5M+ record genomics platform, and local-first LLM infrastructure on institutional GPUs."
+  jsonLd={jsonLd}
+>
+  <PageHeader
+    title="About"
+    lede="I build systems that have to be correct, and I measure them before I claim anything about them."
+  />
+
+  <section class="prose-block">
+    <p>I joined UF IFAS in March 2025 as a software engineer. I am now the AI Agents Architect, leading a function I proposed. That is three roles in thirteen months.</p>
+
+    <p>I started on Blue Omics, a genomics data platform I designed and built. It became the system of record for 30+ researchers across 5 labs, and it holds 5M+ records across 32 data models and 58 API endpoints. I was promoted to lead it, hired two engineers, and grew the team from one to three.</p>
+
+    <p>The current work runs on institutional GPUs, so sensitive research data never leaves the university. A self-hosted open-weight model, retrieval over 10,000+ technical documents, and a 24-case regression suite that gates every model and pipeline change.</p>
+
+    <p>Outside the job I reproduce new model research on my own hardware. That is where most of the writing and the merged pull requests come from. I publish the results either way, including the times my own claim was the thing that broke.</p>
+
+    <p>I studied computer science at Jaypee University of Engineering and Technology, came to Florida as an exchange student, and stayed for a master's at UF. I live in Gainesville.</p>
+  </section>
+
+  <section class="roles" aria-labelledby="roles-h">
+    <h2 id="roles-h" class="eyebrow">Roles</h2>
+    <ul>
+      {roles.map((r) => (
+        <li>
+          <span class="period meta">{r.period}</span>
+          <span class="role">
+            <strong>{r.title}</strong>
+            <span class="org">{r.org}</span>
+          </span>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="contact" aria-labelledby="contact-h">
+    <h2 id="contact-h" class="eyebrow">Contact</h2>
+    <p>
+      Email me at <a href="mailto:yashpn62@gmail.com">yashpn62@gmail.com</a>. You can also find me
+      on <a href="https://www.linkedin.com/in/yashrajpandeyy/">LinkedIn</a>, or read my
+      <a href="/Resume_YashRaj.pdf">resume</a>.
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  .prose-block { max-width: 34rem; }
+  .prose-block p + p { margin-top: var(--space-4); }
+
+  section + section { margin-top: var(--space-8); }
+  h2 { margin-bottom: var(--space-4); }
+
+  .roles ul { list-style: none; padding: 0; display: grid; gap: var(--space-3); }
+  .roles li { display: grid; grid-template-columns: 11rem 1fr; gap: var(--space-4); align-items: baseline; }
+  .period { white-space: nowrap; }
+  .role { display: flex; flex-wrap: wrap; gap: 0 var(--space-2); align-items: baseline; }
+  .role strong { font-weight: 600; }
+  .org { font-family: var(--font-mono); font-size: var(--t-meta); color: var(--ink-soft); }
+
+  .contact { max-width: 34rem; }
+
+  @media (max-width: 560px) {
+    .roles li { grid-template-columns: 1fr; gap: var(--space-1); }
+  }
+</style>
