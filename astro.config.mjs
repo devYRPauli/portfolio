@@ -47,6 +47,10 @@ export default defineConfig({
       name: 'Space Grotesk',
       cssVariable: '--font-sans',
       weights: ['300 700'],
+      // Astro only generates a metric-matched fallback when a generic family is
+      // named. Without these the serif and mono both fell back to sans-serif
+      // metrics and the page shifted on swap.
+      fallbacks: ['sans-serif'],
     },
     {
       provider: fontProviders.fontsource(),
@@ -54,12 +58,14 @@ export default defineConfig({
       cssVariable: '--font-serif',
       weights: ['400'],
       styles: ['normal', 'italic'],
+      fallbacks: ['serif'],
     },
     {
       provider: fontProviders.fontsource(),
       name: 'JetBrains Mono',
       cssVariable: '--font-mono',
       weights: ['400 700'],
+      fallbacks: ['monospace'],
     },
   ],
 });

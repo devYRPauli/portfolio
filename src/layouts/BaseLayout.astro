@@ -65,7 +65,9 @@ const socialImage = new URL(ogImage, Astro.site);
     <meta name="twitter:image" content={socialImage} />
     <meta name="twitter:image:alt" content={ogImageAlt} />
     <Font cssVariable="--font-sans" preload />
-    <Font cssVariable="--font-serif" />
+    {/* The serif sets the h1 on every page, so it is render-blocking in
+        practice. Without preload the heading reflows when it lands. */}
+    <Font cssVariable="--font-serif" preload />
     <Font cssVariable="--font-mono" />
     <ClientRouter />
     {jsonLd && <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
