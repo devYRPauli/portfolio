@@ -1,11 +1,20 @@
-// Merged pull requests to other people's repositories.
-// Counts exclude my own repos and pre-2022 student-era merges.
-// Verify any number against the live search link on /contributions/.
+/**
+ * Merged pull requests to other people's repositories.
+ *
+ * The counts come from contributions.generated.json, refreshed by
+ * `npm run sync:contributions` and by a weekly GitHub Action. The descriptions
+ * below are hand-written and are never touched by the sync, so a refresh can
+ * correct a number but cannot rewrite a sentence.
+ *
+ * Counts exclude my own repositories and pre-2022 student-era merges.
+ */
+
+import generated from './contributions.generated.json';
 
 export const totals = {
-  merged: 61,
-  projects: 28,
-  updated: '2026-08-20',
+  merged: generated.merged,
+  projects: generated.projects,
+  updated: generated.updated,
 };
 
 export const searchUrl =
@@ -18,11 +27,10 @@ export interface Project {
   highlights: string[];
 }
 
-/** Projects most people will recognize by name. */
-export const notable: Project[] = [
+/** Hand-written context, keyed by repository. Counts are filled in from the sync. */
+const described: Omit<Project, 'count'>[] = [
   {
     repo: 'ggml-org/llama.cpp',
-    count: 3,
     what: 'The C/C++ inference engine most local LLM tooling is built on.',
     highlights: [
       'ggml-cpu: fix rms_norm_back wrong output under in-place aliasing',
@@ -32,7 +40,6 @@ export const notable: Project[] = [
   },
   {
     repo: 'ml-explore/mlx',
-    count: 2,
     what: "Apple's array framework for Apple silicon.",
     highlights: [
       'Fix signed-integer overflow (UB) in roll and tile shape arithmetic',
@@ -41,7 +48,6 @@ export const notable: Project[] = [
   },
   {
     repo: 'ml-explore/mlx-lm',
-    count: 2,
     what: 'The MLX language-model runtime and server.',
     highlights: [
       'Fix mlx_lm.server 404 on short prompts (clamp negative start in think-token search)',
@@ -49,13 +55,11 @@ export const notable: Project[] = [
   },
   {
     repo: 'google-research/tabfm',
-    count: 1,
     what: "Google Research's tabular foundation model. Found during my independent evaluation.",
     highlights: ['Fix predict crashing on multi-device hosts (IndivisibleError / device mismatch)'],
   },
   {
     repo: 'infiniflow/ragflow',
-    count: 10,
     what: 'A retrieval-augmented generation engine. Every fix is a document parser correctness bug.',
     highlights: [
       'Fix QA DOCX table parser dropping cells between repeated text',
@@ -66,7 +70,6 @@ export const notable: Project[] = [
   },
   {
     repo: 'mem0ai/mem0',
-    count: 4,
     what: 'A memory layer for AI agents.',
     highlights: [
       'Fix FAISS filtered search dropping over-fetched candidates before filtering',
@@ -76,7 +79,6 @@ export const notable: Project[] = [
   },
   {
     repo: 'BerriAI/litellm',
-    count: 3,
     what: 'A gateway that calls 100+ LLM APIs in one format. Both fixes are billing correctness.',
     highlights: [
       'Bill perplexity search queries at the per-request price, not 1/1000 of it',
@@ -85,45 +87,32 @@ export const notable: Project[] = [
   },
   {
     repo: 'agno-agi/agno',
-    count: 1,
     what: 'An agent platform framework.',
     highlights: ['Fix the hackernews reader taking the user id from the wrong API field'],
   },
   {
     repo: 'TheTom/turboquant_plus',
-    count: 1,
     what: 'A TurboQuant prototype. The fix came out of my KV cache compression study.',
     highlights: ['fix(qjl): use orthogonal projection and sqrt(d) scale factor'],
   },
 ];
 
+/** Projects most people will recognize by name, with live counts attached. */
+export const notable: Project[] = described
+  .map((p) => ({ ...p, count: generated.byRepo[p.repo as keyof typeof generated.byRepo] ?? 0 }))
+  .filter((p) => p.count > 0)
+  .sort((a, b) => b.count - a.count || a.repo.localeCompare(b.repo));
+
+const ecoEntries = Object.entries(generated.ecosystem.byRepo).sort(
+  (a, b) => b[1] - a[1] || a[0].localeCompare(b[0]),
+);
+
 /** A sustained run through one maintainer's developer-tool ecosystem. */
 export const ecosystem = {
-  owner: 'steipete',
-  count: 34,
-  repos: 19,
+  owner: generated.ecosystem.owner,
+  count: generated.ecosystem.count,
+  repos: generated.ecosystem.repos,
   what: 'Menu-bar apps, CLIs, and agent tooling. Mostly edge-case correctness: malformed input, boundary values, and state that survives a restart.',
-  top: [
-    { repo: 'CodexBar', count: 8 },
-    { repo: 'poltergeist', count: 3 },
-    { repo: 'oracle', count: 3 },
-    { repo: 'RepoBar', count: 2 },
-    { repo: 'tokentally', count: 2 },
-    { repo: 'birdclaw', count: 2 },
-    { repo: 'bslog', count: 2 },
-  ],
-  rest: [
-    'TauTUI',
-    'BlackBar',
-    'ReleaseBar',
-    'Markdansi',
-    'stats-store',
-    'osc-progress',
-    'sweet-cookie',
-    'sweetlink',
-    'summarize',
-    'macos-automator-mcp',
-    'inngest',
-    'vox',
-  ],
+  top: ecoEntries.filter(([, n]) => n > 1).map(([repo, count]) => ({ repo, count })),
+  rest: ecoEntries.filter(([, n]) => n === 1).map(([repo]) => repo),
 };

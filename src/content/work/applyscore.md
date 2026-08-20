@@ -10,7 +10,7 @@ stack:
   - Shadow DOM scraping
   - LLM APIs (BYO-key)
 links:
-  - { label: Site, href: https://chromewebstore.google.com/detail/applyscore/ibecekikdjelajpnjnmapejhahgcplim }
+  - { label: Chrome Web Store, href: https://chromewebstore.google.com/detail/applyscore/ibecekikdjelajpnjnmapejhahgcplim }
 order: 9
 ---
 

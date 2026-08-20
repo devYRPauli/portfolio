@@ -11,7 +11,8 @@ stack:
   - Long-context evaluation
 links:
   - { label: GitHub, href: https://github.com/devYRPauli/turboquant-m1pro-evaluation }
-  - { label: Writeup, href: https://yashrajpandey.com/writing/turboquant-on-a-16gb-macbook/ }
+  - { label: Writeup, href: /writing/turboquant-on-a-16gb-macbook/ }
+  - { label: Merged fix, href: https://github.com/TheTom/turboquant_plus/pull/93 }
 order: 6
 ---
 
