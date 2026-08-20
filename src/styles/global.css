@@ -142,6 +142,9 @@ time, .numeric { font-variant-numeric: tabular-nums; }
 code, pre { font-family: var(--font-mono); font-size: 0.9em; }
 :not(pre) > code {
   background: var(--accent-soft);
+  /* Explicit, so code never inherits a muted parent. Inside a blockquote it
+     picked up --ink-soft and fell to 4.37 contrast, just under AA. */
+  color: var(--ink);
   padding: 0.1em 0.35em;
   border-radius: 4px;
 }
