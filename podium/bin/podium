@@ -1,0 +1,297 @@
+#!/usr/bin/env bash
+# podium - durable job runner for a roster of agent bots.
+#
+# Hands a brief to a named bot, detaches the job so it outlives this shell,
+# and keeps status and results retrievable afterwards. Zero dependencies
+# beyond bash and coreutils. macOS and Linux only.
+set -uo pipefail
+
+PODIUM_VERSION="0.1.0"
+PODIUM_HOME="${PODIUM_HOME:-$HOME/.podium}"
+PODIUM_CONF="${PODIUM_CONF:-$PODIUM_HOME/podium.conf}"
+
+# --- defaults, overridden by podium.conf ------------------------------------
+PODIUM_TIMEOUT=1800
+PODIUM_BOTS_DIR="$PODIUM_HOME/bots"
+PODIUM_JOBS_DIR="$PODIUM_HOME/jobs"
+PODIUM_LOG="$PODIUM_HOME/log.jsonl"
+PODIUM_DEFAULT_MODEL=""
+
+# The executor invocation. Overridden in podium.conf.
+# Args: $1=model $2=cwd $3=outfile $4=brieffile $5=systemfile
+podium_executor() {
+  echo "podium: no executor configured. Set podium_executor() in $PODIUM_CONF" >&2
+  return 127
+}
+
+[ -f "$PODIUM_CONF" ] && . "$PODIUM_CONF"
+
+die() { echo "podium: $*" >&2; exit 1; }
+
+json_escape() {
+  # Escape a string for embedding in JSON. Handles backslash, quote, control chars.
+  local s=${1//\\/\\\\}
+  s=${s//\"/\\\"}
+  s=${s//$'\n'/\\n}
+  s=${s//$'\r'/\\r}
+  s=${s//$'\t'/\\t}
+  printf '%s' "$s"
+}
+
+new_job_id() {
+  printf '%s-%s' "$(date -u +%Y%m%d-%H%M%S)" "$$$RANDOM"
+}
+
+bot_dir()  { printf '%s/%s' "$PODIUM_BOTS_DIR" "$1"; }
+bot_file() { printf '%s/%s/bot.md' "$PODIUM_BOTS_DIR" "$1"; }
+job_dir()  { printf '%s/%s' "$PODIUM_JOBS_DIR" "$1"; }
+
+require_bot() {
+  local bot=$1
+  case "$bot" in
+    ""|*/*|.*) die "invalid bot name: '$bot'" ;;
+  esac
+  [ -f "$(bot_file "$bot")" ] || die "unknown bot '$bot'. Run 'podium bots' to see the roster."
+}
+
+# Read a frontmatter key from a bot.md file. Returns empty if absent.
+bot_meta() {
+  local file=$1 key=$2
+  awk -v key="$key" '
+    NR==1 && $0=="---" { inside=1; next }
+    inside && $0=="---" { exit }
+    inside {
+      if (index($0, key ":") == 1) {
+        sub("^" key ":[ \t]*", "")
+        gsub(/^[ \t]+|[ \t]+$/, "")
+        print
+        exit
+      }
+    }
+  ' "$file"
+}
+
+# Strip YAML frontmatter, leaving the system prompt body.
+bot_prompt() {
+  awk 'NR==1 && $0=="---" { inside=1; next } inside && $0=="---" { inside=0; body=1; next } body || NR==1 && $0!="---"' "$1"
+}
+
+# --- worker -----------------------------------------------------------------
+# Runs detached. Executes the bot, enforces the timeout, records the outcome.
+cmd_worker() {
+  local jd=$1
+  # shellcheck disable=SC1091
+  . "$jd/meta.env"
+
+  echo "$$" > "$jd/pid"
+  echo running > "$jd/status"
+  local started; started=$(date +%s)
+
+  podium_executor "$JOB_MODEL" "$JOB_CWD" "$jd/out.txt" "$jd/brief.txt" "$jd/system.txt" &
+  local exec_pid=$!
+
+  local elapsed=0 timed_out=0
+  while kill -0 "$exec_pid" 2>/dev/null; do
+    sleep 1
+    elapsed=$(( $(date +%s) - started ))
+    if [ "$elapsed" -ge "$JOB_TIMEOUT" ]; then
+      timed_out=1
+      kill -TERM "$exec_pid" 2>/dev/null
+      sleep 2
+      kill -KILL "$exec_pid" 2>/dev/null
+      break
+    fi
+  done
+
+  wait "$exec_pid" 2>/dev/null
+  local code=$?
+  local duration=$(( $(date +%s) - started ))
+
+  echo "$code" > "$jd/exit_code"
+  echo "$duration" > "$jd/duration"
+
+  local status
+  if [ "$timed_out" -eq 1 ]; then status=timeout
+  elif [ "$code" -eq 0 ];   then status=done
+  else                            status=failed
+  fi
+  echo "$status" > "$jd/status"
+
+  mkdir -p "$(dirname "$PODIUM_LOG")"
+  printf '{"ts":"%s","id":"%s","bot":"%s","model":"%s","status":"%s","exit_code":%s,"duration_secs":%s,"timed_out":%s,"cwd":"%s"}\n' \
+    "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+    "$(json_escape "$JOB_ID")" \
+    "$(json_escape "$JOB_BOT")" \
+    "$(json_escape "$JOB_MODEL")" \
+    "$status" "$code" "$duration" \
+    "$( [ "$timed_out" -eq 1 ] && echo true || echo false )" \
+    "$(json_escape "$JOB_CWD")" \
+    >> "$PODIUM_LOG"
+}
+
+# --- run --------------------------------------------------------------------
+cmd_run() {
+  local bot="" brief="" cwd="$PWD" model="" timeout="$PODIUM_TIMEOUT" wait_for=0
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --cwd)     cwd=$2; shift 2 ;;
+      --model)   model=$2; shift 2 ;;
+      --timeout) timeout=$2; shift 2 ;;
+      --wait)    wait_for=1; shift ;;
+      --) shift; break ;;
+      -*) die "unknown flag: $1" ;;
+      *) if [ -z "$bot" ]; then bot=$1; else brief=$1; fi; shift ;;
+    esac
+  done
+
+  [ -n "$bot" ] || die "usage: podium run <bot> \"<brief>\" [--cwd DIR] [--model M] [--timeout S] [--wait]"
+  require_bot "$bot"
+  [ -d "$cwd" ] || die "cwd does not exist: $cwd"
+
+  # Brief comes from the argument or stdin.
+  if [ -z "$brief" ] && [ ! -t 0 ]; then brief=$(cat); fi
+  [ -n "$brief" ] || die "empty brief. Pass it as an argument or on stdin."
+
+  local bf; bf=$(bot_file "$bot")
+  [ -n "$model" ] || model=$(bot_meta "$bf" model)
+  [ -n "$model" ] || model="$PODIUM_DEFAULT_MODEL"
+
+  # A bot's workspace is its own directory unless the caller overrides cwd.
+  local ws; ws="$(bot_dir "$bot")/workspace"
+  mkdir -p "$ws"
+
+  local id; id=$(new_job_id)
+  local jd; jd=$(job_dir "$id")
+  mkdir -p "$jd"
+
+  printf '%s\n' "$brief" > "$jd/brief.txt"
+  bot_prompt "$bf" > "$jd/system.txt"
+
+  # A bot's durable memory is prepended to its system prompt when present.
+  local mem; mem="$(bot_dir "$bot")/memory.md"
+  if [ -s "$mem" ]; then
+    { printf '\n\n## Durable memory (yours, from previous jobs)\n\n'; cat "$mem"; } >> "$jd/system.txt"
+  fi
+
+  {
+    printf 'JOB_ID=%q\n'      "$id"
+    printf 'JOB_BOT=%q\n'     "$bot"
+    printf 'JOB_MODEL=%q\n'   "$model"
+    printf 'JOB_CWD=%q\n'     "$cwd"
+    printf 'JOB_TIMEOUT=%q\n' "$timeout"
+    printf 'JOB_WS=%q\n'      "$ws"
+  } > "$jd/meta.env"
+
+  echo queued > "$jd/status"
+  : > "$jd/out.txt"
+
+  # Detach. nohup plus an exiting parent means init adopts the worker, so the
+  # job outlives the shell (and the agent session) that launched it.
+  nohup "$0" __worker "$jd" >/dev/null 2>&1 &
+  disown 2>/dev/null
+
+  if [ "$wait_for" -eq 1 ]; then
+    while :; do
+      local s; s=$(cat "$jd/status" 2>/dev/null || echo queued)
+      case "$s" in done|failed|timeout) break ;; esac
+      sleep 1
+    done
+  fi
+
+  echo "$id"
+}
+
+# --- introspection ----------------------------------------------------------
+cmd_status() {
+  local id=${1:-}; [ -n "$id" ] || die "usage: podium status <id>"
+  local jd; jd=$(job_dir "$id"); [ -d "$jd" ] || die "unknown job: $id"
+  # shellcheck disable=SC1091
+  . "$jd/meta.env"
+  local status; status=$(cat "$jd/status" 2>/dev/null || echo unknown)
+  local code;   code=$(cat "$jd/exit_code" 2>/dev/null || echo -)
+  local dur;    dur=$(cat "$jd/duration" 2>/dev/null || echo -)
+  printf 'id=%s bot=%s model=%s status=%s duration_secs=%s exit_code=%s\n' \
+    "$id" "$JOB_BOT" "${JOB_MODEL:-default}" "$status" "$dur" "$code"
+}
+
+cmd_result() {
+  local id=${1:-}; [ -n "$id" ] || die "usage: podium result <id>"
+  local jd; jd=$(job_dir "$id"); [ -d "$jd" ] || die "unknown job: $id"
+  cat "$jd/out.txt" 2>/dev/null
+}
+
+cmd_list() {
+  local filter_bot="" filter_status=""
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --bot)    filter_bot=$2; shift 2 ;;
+      --status) filter_status=$2; shift 2 ;;
+      *) shift ;;
+    esac
+  done
+  [ -d "$PODIUM_JOBS_DIR" ] || return 0
+  local jd id bot status
+  for jd in "$PODIUM_JOBS_DIR"/*/; do
+    [ -f "$jd/meta.env" ] || continue
+    id=$(basename "$jd")
+    bot=$(grep -m1 '^JOB_BOT=' "$jd/meta.env" | cut -d= -f2- | tr -d "'\"")
+    status=$(cat "$jd/status" 2>/dev/null || echo unknown)
+    [ -n "$filter_bot" ] && [ "$bot" != "$filter_bot" ] && continue
+    [ -n "$filter_status" ] && [ "$status" != "$filter_status" ] && continue
+    printf '%s %s %s\n' "$id" "$bot" "$status"
+  done | sort
+}
+
+cmd_bots() {
+  [ -d "$PODIUM_BOTS_DIR" ] || { echo "no roster at $PODIUM_BOTS_DIR" >&2; return 1; }
+  local d name desc
+  for d in "$PODIUM_BOTS_DIR"/*/; do
+    [ -f "$d/bot.md" ] || continue
+    name=$(basename "$d")
+    desc=$(bot_meta "$d/bot.md" description)
+    printf '%-14s %s\n' "$name" "$desc"
+  done
+}
+
+cmd_cancel() {
+  local id=${1:-}; [ -n "$id" ] || die "usage: podium cancel <id>"
+  local jd; jd=$(job_dir "$id"); [ -d "$jd" ] || die "unknown job: $id"
+  local pid; pid=$(cat "$jd/pid" 2>/dev/null || echo "")
+  [ -n "$pid" ] && kill -TERM "-$pid" 2>/dev/null; kill -TERM "$pid" 2>/dev/null
+  echo cancelled > "$jd/status"
+  echo "cancelled $id"
+}
+
+cmd_help() {
+  cat <<'USAGE'
+podium - durable job runner for a roster of agent bots
+
+  podium run <bot> "<brief>"   Launch a detached job. Prints the job id.
+      --cwd DIR                Working directory (default: current)
+      --model M                Override the bot's model
+      --timeout S              Hard timeout in seconds
+      --wait                   Block until the job settles
+  podium status <id>           One line of job state
+  podium result <id>           The job's output
+  podium list [--bot B] [--status S]
+  podium bots                  Show the roster
+  podium cancel <id>
+  podium version
+
+State lives in $PODIUM_HOME (default ~/.podium). Every settled job appends one
+line to log.jsonl, so routing is auditable after the fact.
+USAGE
+}
+
+case "${1:-help}" in
+  run)       shift; cmd_run "$@" ;;
+  status)    shift; cmd_status "$@" ;;
+  result)    shift; cmd_result "$@" ;;
+  list)      shift; cmd_list "$@" ;;
+  bots)      shift; cmd_bots "$@" ;;
+  cancel)    shift; cmd_cancel "$@" ;;
+  version)   echo "$PODIUM_VERSION" ;;
+  __worker)  shift; cmd_worker "$@" ;;
+  help|-h|--help) cmd_help ;;
+  *) die "unknown command: $1 (try 'podium help')" ;;
+esac
