@@ -1,0 +1,9 @@
+# The site's root .gitignore excludes *.md so that drafts cannot leak into the
+# published site. This kit is mostly markdown - bot definitions, docs, the
+# installer - so that rule is undone here and only here.
+!*.md
+
+# Local state produced by running the kit.
+jobs/
+log.jsonl
+*/workspace/

@@ -21,7 +21,9 @@ wait_settled() {
   local id=$1 max=${2:-30} i=0 s
   while [ "$i" -lt "$max" ]; do
     s=$("$PODIUM" status "$id")
-    case "$s" in *status=done*|*status=failed*|*status=timeout*) return 0 ;; esac
+    case "$s" in
+      *status=done*|*status=failed*|*status=timeout*|*status=rejected*|*status=rate_limited*|*status=cancelled*) return 0 ;;
+    esac
     sleep 1; i=$((i+1))
   done
   return 1

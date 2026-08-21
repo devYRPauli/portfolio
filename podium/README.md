@@ -1,54 +1,92 @@
 # Podium
 
-*A chief-of-staff orchestrator and a roster of persistent bots, running on the
-subscriptions you already pay for.*
+*Verified delegation for [Pi](https://github.com/earendil-works/pi). A chief-of-staff
+agent hands work to a roster of persistent bots, and a runner - not a model -
+decides whether the work actually landed.*
 
-You talk to one agent. It decides what work needs to happen, hands each piece to
-a specialist bot, checks the results, and comes back with an answer. Jobs are
-detached, so they survive the session that launched them, and every job leaves an
-audit line behind.
+You talk to one agent. It writes a brief, hands it to a specialist bot, and comes
+back with an answer. Every job carries an acceptance check that **the runner
+executes**, so "done" is a verdict rather than a claim. Jobs are detached and
+survive the session that launched them. Every settled job leaves a receipt.
 
-This is the local, inspectable version of what xAI ships as Grok Bot - minus the
-$300/month and minus the black box.
+## Should you use this?
+
+Be honest with yourself first. There is a crowded field here and some of it is
+better than this for most people:
+
+- **[OpenMausBot](https://github.com/milind-soni/OpenMausBot)** - the closest
+  thing to an open Grok Bot. A chat app where each contact is a real Claude,
+  Codex or Grok CLI on your own subscriptions, with cloud desktops and 500+ app
+  integrations. Signed installers for macOS, Windows and Ubuntu. **If you want a
+  polished desktop Grok Bot today, install this instead.**
+- **[Rakazo](https://github.com/elie222/rakazo)** - persistent AI teammates on
+  web, desktop and mobile, with voice, routines and peer delegation. Needs
+  Postgres, Docker and a server. Excellent if you want a platform.
+- **[pi-gui](https://github.com/minghinmatthewlam/pi-gui)** - a Codex-style
+  desktop for Pi with worktrees, diffs and an integrated terminal. If you want a
+  coding IDE around Pi, this is it, and Podium's tools show up inside it because
+  they are ordinary Pi tools.
+
+Podium is for one thing those do not do: **it will not let an agent tell you the
+work is done.** A job is verified only when a shell command the runner ran exited
+zero. Everything else is recorded as unverified, permanently, and is one query
+away. If that distinction does not matter to you, use one of the above.
+
+It is also small on purpose - a few hundred lines of bash and one Pi extension,
+readable in a sitting, with no database, no daemon and no server.
+
+## What it does
+
+```
+  you ──► orchestrator ──► podium ──► detached job ──► executor ──► bot
+          chief of staff   runner         │                         │
+                                          │                         └─ prompt + memory
+                                          ├── acceptance check (run by the runner)
+                                          └── log.jsonl  (the receipts)
+```
+
+- **A bot is a directory.** `bot.md` is its system prompt, `memory.md` is durable
+  notes prepended on every future job, `workspace/` persists between jobs.
+- **The runner detaches every job** through `nohup` and an exiting parent, so
+  init adopts it and the work outlives your terminal, your editor, and the
+  orchestrator session.
+- **The runner runs the acceptance check**, not the bot and not the orchestrator.
+  A failing check turns the job `rejected`, whatever the bot reported.
+- **Throttling is not a hang.** A job killed while its output shows a rate limit
+  settles as `rate_limited`, so starvation never gets debugged as a crash.
 
 ## Status
 
-v0. The runner is complete and tested (30 assertions, including a live check
-that a job outlives its launching shell). The pi extension and installer are
-written but have not been exercised against a live model. Treat this as a
-working skeleton, not a finished product.
+v0, honestly labelled:
 
-## How it fits together
-
-```
-  you  ──►  orchestrator (pi session, chief-of-staff prompt)
-                │  roster / delegate / check / collect / remember
-                ▼
-            podium  ──►  detached job  ──►  executor (pi, codex, claude…)
-                │                              │
-                │                              └─ bot system prompt + memory
-                └─ jobs/<id>/ + log.jsonl  (state and audit)
-```
-
-- **The orchestrator** is a pi session with the discipline in
-  `templates/ORCHESTRATOR.md.tmpl` and the tools in
-  `templates/orchestrator.ts.tmpl`.
-- **A bot** is a directory: a markdown system prompt, a memory file, and a
-  workspace that persists between jobs.
-- **The runner** (`bin/podium`) is zero-dependency bash. It detaches each job
-  via `nohup` and an exiting parent, so init adopts the worker and the job keeps
-  going after you close the terminal.
+- **Runner: complete and tested.** 68 assertions, including a live check that a
+  detached worker's parent pid becomes 1 after its launching shell exits, and
+  that a failed acceptance check rejects a job whose executor exited 0.
+- **Desktop console: works, unsigned.** Boots, renders, and is smoke-tested
+  headless with screenshots on every view. Not notarized, so macOS will need a
+  right-click → Open the first time.
+- **Never run against a live model.** Everything is proved with a fake executor.
+  The first real run is yours.
 
 ## Requirements
 
-- macOS or Linux, bash and coreutils. The durability guarantee rests on `nohup`,
-  `ps`, and process reparenting, so Windows is out rather than faked.
-- [pi](https://github.com/earendil-works/pi-mono) as the harness:
-  `npm i -g @earendil-works/pi-coding-agent`
-- An executor you have authenticated yourself. `pi /login` covers ChatGPT
-  Plus/Pro (Codex), GitHub Copilot, xAI, and others on subscription.
+macOS or Linux with bash and coreutils. The durability guarantee rests on
+`nohup`, `ps` and process reparenting, so Windows is out rather than faked.
 
-Podium never reads, stores, or passes a credential. You run the login command.
+[Pi](https://github.com/earendil-works/pi) as the harness:
+
+```sh
+npm i -g @earendil-works/pi-coding-agent
+pi           # then /login
+```
+
+Pi's `/login` covers ChatGPT Plus/Pro (Codex), GitHub Copilot, xAI, Claude,
+OpenRouter and others. **Codex is the recommended executor** - OpenAI endorses
+third-party harness use under Codex for OSS. See
+[docs/research.md §5](docs/research.md) for what each subscription actually costs
+you, including the Claude caveat.
+
+Podium never reads, stores or passes a credential. You run the login command.
 
 ## Install
 
@@ -57,49 +95,77 @@ your configuration. Then point your agent at this directory:
 
 > Set up Podium from this repo.
 
-It interviews you, lists every file it will write, asks once, installs, and runs
-a live acceptance test.
+It interviews you, lists every file it will write, asks once, installs, and ends
+with a live acceptance test.
 
-## The runner by hand
-
-The orchestrator drives it, but `podium` is a plain CLI:
+## Using the runner directly
 
 ```
 $ podium bots
-scout          Fast codebase recon. Returns compressed context for another bot.
+scout          Fast codebase recon. Returns compressed, structured context.
 implementer    Writes code against a brief. Smallest change that passes.
 reviewer       Reviews a change for correctness and scope creep.
 
-$ podium run scout "Find every place the session store is written to"
-20260821-044210-31337
+$ podium run implementer "Add a null check to parse() in src/parser.ts" \
+    --check "npm test -- parser"
+20260821-052308-155126519
 
-$ podium status 20260821-044210-31337
-id=20260821-044210-31337 bot=scout model=... status=running duration_secs=6 exit_code=-
+$ podium status 20260821-052308-155126519
+id=… bot=implementer status=done verdict=verified duration_secs=41 exit_code=0
 
-$ podium result 20260821-044210-31337
-<the bot's report>
-
-$ podium list --status done
+$ podium ledger --unverified
+20260821-052315-157325573  researcher   rate_limited  unverified
+20260821-052313-1565818314 implementer  rejected      failed_check  exit 1
+20260821-052311-155861591  reviewer     done          unverified
 ```
 
-Every settled job appends one line to `~/.podium/log.jsonl` - bot, model,
-duration, exit code, timeout flag - so you can audit routing after the fact and
-catch a bot that is quietly failing.
+That last command is the point of the whole project. The third row is a job that
+finished successfully and proved nothing.
+
+`podium doctor` preflights everything. `podium verify <id>` re-runs a recorded
+check by hand. Set `PODIUM_REQUIRE_CHECK=1` to refuse any job launched without
+one.
+
+## The desktop console
+
+```sh
+cd desktop && npm install && npm start
+```
+
+Three views: **Talk** to the orchestrator, the **Roster** of bots and their
+memory, and **Receipts** - every settled job with the check that ran and the
+verdict it produced. Delegated jobs appear live on the right with their verdict
+badge.
+
+The conversation is the front door; the receipts are why it exists.
 
 ## Tests
 
 ```sh
-./test/run.sh
+./test/run.sh                 # runner: 68 assertions, fake executor
+cd desktop && npm test        # bridges and view model: 47 assertions
 ```
 
-Runs against a throwaway `PODIUM_HOME` and a fake executor. It never calls a real
-model and never touches your roster.
+Neither calls a real model or touches your roster. The desktop smoke test drives
+every view in a headless Electron and writes screenshots:
+
+```sh
+cd desktop
+PODIUM_HOME=/path/to/home PODIUM_SMOKE=/tmp/shot \
+  xvfb-run -a ./node_modules/.bin/electron . --no-sandbox
+```
 
 ## Boundaries
 
 - macOS and Linux only.
 - Podium never handles secrets. Authentication is you, running the command.
-- Bots share your filesystem. There is no sandbox in v0; if you want one, run pi
-  under [Gondolin](https://github.com/earendil-works/gondolin) or a container.
-- The verification step is the orchestrator's job and it is a prompt, not a
-  mechanism. It holds as well as the model holds it.
+- Bots share your filesystem. There is no sandbox in v0; run Pi under
+  [Gondolin](https://github.com/earendil-works/gondolin) or a container if you
+  need one.
+- **An acceptance check is only as good as the person who wrote it.** The runner
+  proves the check passed; it cannot prove the check was worth running. The
+  ledger stores every check verbatim so a worthless one is visible rather than
+  laundered.
+- Fanning out multiplies token spend against a subscription priced for one
+  person. Expect throttling before you expect failure, and read `rate_limited`
+  in the ledger as exactly that.

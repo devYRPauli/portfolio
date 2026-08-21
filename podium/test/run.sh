@@ -112,4 +112,156 @@ echo "== --wait =="
 wid=$("$PODIUM" run tester "FAKE_SLEEP=2 blocking" --wait 2>/dev/null)
 assert_contains "--wait returns only once settled" "$("$PODIUM" status "$wid")" "status=done"
 
+
+echo
+echo "== machine-readable output =="
+jid=$("$PODIUM" run tester "json shape check" --wait 2>/dev/null)
+sj=$("$PODIUM" status --json "$jid")
+if command -v python3 >/dev/null 2>&1; then
+  parsed=$(printf '%s' "$sj" | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+print(d['bot'], d['status'], d['exit_code'], d['model'])
+" 2>&1)
+  assert_eq "status --json parses and carries fields" "$parsed" "tester done 0 test-model-1"
+
+  lj=$("$PODIUM" list --json)
+  n=$(printf '%s' "$lj" | python3 -c "import json,sys; print(len(json.load(sys.stdin)))" 2>&1)
+  assert_ne "list --json parses as an array" "$n" ""
+  case "$n" in ''|*[!0-9]*) bad "list --json returns jobs" "got '$n'" ;; *) [ "$n" -ge 6 ] && ok "list --json returns every job" || bad "list --json returns every job" "got $n" ;; esac
+
+  showj=$("$PODIUM" show "$jid")
+  fields=$(printf '%s' "$showj" | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+print(d['brief'], '|', 'result' in d and len(d['result'])>0)
+" 2>&1)
+  assert_contains "show carries the brief" "$fields" "json shape check"
+  assert_contains "show carries the result" "$fields" "True"
+
+  # A brief containing quotes, newlines and backslashes must not break the JSON.
+  hid=$("$PODIUM" run tester 'tricky "quoted" and \backslash
+second line' --wait 2>/dev/null)
+  hostile=$("$PODIUM" show "$hid" | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+print('parsed', 'quoted' in d['brief'], '\n' in d['brief'])
+" 2>&1)
+  assert_eq "JSON survives quotes, newlines and backslashes" "$hostile" "parsed True True"
+fi
+
+assert_contains "brief returns the brief verbatim" "$("$PODIUM" brief "$jid")" "json shape check"
+assert_contains "live job reports a duration" "$("$PODIUM" status --json "$jid")" '"duration_secs":'
+
+echo
+echo "== doctor =="
+doc=$("$PODIUM" doctor)
+assert_contains "doctor reports ready" "$doc" "ready."
+assert_contains "doctor checks the executor" "$doc" "executor function defined"
+assert_contains "doctor counts the roster" "$doc" "roster: 1 bot(s)"
+missing_conf=$(PODIUM_CONF=/nonexistent/podium.conf "$PODIUM" doctor 2>&1 || true)
+assert_contains "doctor fails loud on a missing config" "$missing_conf" "FAIL"
+
+
+echo
+echo "== acceptance checks: the runner verifies, not the bot =="
+vid=$("$PODIUM" run tester "job with a passing check" --check "true" --wait 2>/dev/null)
+assert_contains "passing check settles as done" "$("$PODIUM" status "$vid")" "status=done"
+assert_contains "passing check records verified" "$("$PODIUM" status "$vid")" "verdict=verified"
+
+rid=$("$PODIUM" run tester "job with a failing check" --check "exit 7" --wait 2>/dev/null)
+assert_contains "failing check REJECTS the job" "$("$PODIUM" status "$rid")" "status=rejected"
+assert_contains "failing check records the verdict" "$("$PODIUM" status "$rid")" "verdict=failed_check"
+
+uid=$("$PODIUM" run tester "job with no check at all" --wait 2>/dev/null)
+assert_contains "no check means unverified, not done-and-trusted" "$("$PODIUM" status "$uid")" "verdict=unverified"
+
+# The bot's own exit code must not be able to launder a failed check.
+assert_contains "a rejected job still records exit_code 0" "$("$PODIUM" status "$rid")" "exit_code=0"
+
+# A check that never ran is distinguishable from one that passed.
+nid=$("$PODIUM" run tester "FAKE_FAIL with a check" --check "true" --wait 2>/dev/null)
+assert_contains "check does not run when the bot failed" "$("$PODIUM" status "$nid")" "verdict=not_run"
+assert_contains "failed bot still reports failed" "$("$PODIUM" status "$nid")" "status=failed"
+
+echo
+echo "== the check runs in the job's cwd, and is recorded verbatim =="
+probe=$(mktemp -d)
+printf 'sentinel\n' > "$probe/marker.txt"
+cid=$("$PODIUM" run tester "cwd check" --cwd "$probe" --check "grep -q sentinel marker.txt" --wait 2>/dev/null)
+assert_contains "check executes in the job cwd" "$("$PODIUM" status "$cid")" "verdict=verified"
+
+if command -v python3 >/dev/null 2>&1; then
+  recorded=$("$PODIUM" show "$cid" | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+print(d['check'], '|', d['check_exit'], '|', d['verified'])
+" 2>&1)
+  assert_contains "the check command is stored verbatim" "$recorded" "grep -q sentinel marker.txt"
+  assert_contains "the check exit code is stored" "$recorded" "| 0 |"
+  assert_contains "verified is a boolean in show" "$recorded" "True"
+
+  failout=$("$PODIUM" show "$rid" | python3 -c "
+import json,sys
+d=json.load(sys.stdin)
+print('exit', d['check_exit'], 'verified', d['verified'])
+" 2>&1)
+  assert_eq "a failed check records its exit code" "$failout" "exit 7 verified False"
+fi
+rm -rf "$probe"
+
+echo
+echo "== a vacuous check is visible, not laundered =="
+gid=$("$PODIUM" run tester "goodhart" --check "test 1 -eq 1" --wait 2>/dev/null)
+assert_contains "even a trivial check is shown in the ledger" "$("$PODIUM" ledger --limit 100)" "test 1 -eq 1"
+
+echo
+echo "== require-check policy =="
+refused=$(PODIUM_REQUIRE_CHECK=1 "$PODIUM" run tester "no check supplied" 2>&1 || true)
+assert_contains "policy refuses an uncheckable job" "$refused" "no acceptance check"
+allowed=$(PODIUM_REQUIRE_CHECK=1 "$PODIUM" run tester "checked" --check "true" --wait 2>/dev/null)
+assert_ne "policy allows a checked job" "$allowed" ""
+
+echo
+echo "== throttling is not a hang =="
+tlid=$("$PODIUM" run tester "FAKE_RATELIMIT slow" --timeout 3 2>/dev/null)
+wait_settled "$tlid" 40 || bad "throttled job settles" "still running"
+assert_contains "a throttled executor is classified, not called a timeout" "$("$PODIUM" status "$tlid")" "status=rate_limited"
+plain=$("$PODIUM" run tester "FAKE_SLEEP=20 quiet stall" --timeout 3 2>/dev/null)
+wait_settled "$plain" 40 || bad "silent stall settles" "still running"
+assert_contains "a silent stall is still a timeout" "$("$PODIUM" status "$plain")" "status=timeout"
+
+echo
+echo "== the ledger answers 'what was actually verified?' =="
+led=$("$PODIUM" ledger --limit 100)
+assert_contains "ledger lists a verified job" "$led" "verified"
+unv=$("$PODIUM" ledger --unverified --limit 100)
+assert_contains "unverified filter includes an unchecked job" "$unv" "$uid"
+case "$unv" in
+  *"$vid"*) bad "unverified filter excludes verified jobs" "$vid leaked into --unverified" ;;
+  *) ok "unverified filter excludes verified jobs" ;;
+esac
+assert_contains "unverified filter includes a rejected job" "$unv" "$rid"
+botled=$("$PODIUM" ledger --bot nobody --limit 100)
+assert_contains "ledger --bot filters" "$botled" "(nothing matched)"
+
+if command -v python3 >/dev/null 2>&1; then
+  lj=$("$PODIUM" ledger --json --limit 100)
+  ok_json=$(printf '%s' "$lj" | python3 -c "
+import json,sys
+rows=json.load(sys.stdin)
+v=[r for r in rows if r.get('verified') is True]
+u=[r for r in rows if r.get('verified') is False]
+print('rows',len(rows)>0,'verified',len(v)>0,'unverified',len(u)>0)
+" 2>&1)
+  assert_eq "ledger --json is valid and carries verified flags" "$ok_json" "rows True verified True unverified True"
+fi
+
+echo
+echo "== manual re-verification =="
+reran=$("$PODIUM" verify "$cid" 2>&1 || true)
+assert_contains "verify re-runs the recorded check" "$reran" "grep -q sentinel marker.txt"
+noverify=$("$PODIUM" verify "$uid" 2>&1 || true)
+assert_contains "verify refuses a job with no check" "$noverify" "no acceptance check"
+
 summary

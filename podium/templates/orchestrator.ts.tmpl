@@ -62,9 +62,10 @@ export default function (pi: ExtensionAPI) {
 		label: "Delegate",
 		description:
 			"Hand a briefed task to one bot. Returns a job id immediately; the job keeps " +
-			"running if this session ends. Every brief must state the goal, the files or " +
-			"scope to touch, the constraints, and how the result will be checked. Do not " +
-			"delegate a task you cannot describe an acceptance check for.",
+			"running if this session ends. The check parameter is a real shell command that " +
+			"the RUNNER executes after the bot finishes - not a description, and not " +
+			"something the bot can satisfy by claiming success. A job whose check fails is " +
+			"rejected. A job with no check is recorded as unverified forever.",
 		parameters: Type.Object({
 			bot: Type.String({ description: "Bot name from the roster" }),
 			brief: Type.String({
@@ -72,6 +73,16 @@ export default function (pi: ExtensionAPI) {
 					"The full brief: goal, scope, constraints, acceptance check. Self-contained - " +
 					"the bot has not seen this conversation.",
 			}),
+			check: Type.Optional(
+				Type.String({
+					description:
+						"Shell command proving the work landed, run by the runner in cwd after the " +
+						"bot finishes. Exit 0 means verified. Make it specific to this task - " +
+						"'npm test -- parser', 'grep -q retryFetch src/http.ts'. A check that " +
+						"passes whether or not the work happened ('true', 'ls') is worse than none, " +
+						"because it is recorded as verification.",
+				}),
+			),
 			cwd: Type.Optional(Type.String({ description: "Working directory for the job" })),
 			model: Type.Optional(Type.String({ description: "Override the bot's default model" })),
 			timeout: Type.Optional(Type.Number({ description: "Hard timeout in seconds" })),
@@ -81,6 +92,7 @@ export default function (pi: ExtensionAPI) {
 		}),
 		async execute(_id, params, signal) {
 			const args = ["run", params.bot, params.brief];
+			if (params.check) args.push("--check", params.check);
 			if (params.cwd) args.push("--cwd", params.cwd);
 			if (params.model) args.push("--model", params.model);
 			if (params.timeout) args.push("--timeout", String(params.timeout));
@@ -93,10 +105,10 @@ export default function (pi: ExtensionAPI) {
 				const result = await podium(["result", jobId], signal);
 				return text(`${status}\n\n--- result ---\n${result}`);
 			}
-			return text(
-				`${status}\n\nLaunched. Collect it later with the collect tool and job id ${jobId}. ` +
-					`Verify the result yourself before reporting it as done.`,
-			);
+			const note = params.check
+				? `The runner will run \`${params.check}\` when it finishes; collect will tell you the verdict.`
+				: "NO ACCEPTANCE CHECK was given, so this job can never be verified. Say so when you report it.";
+			return text(`${status}\n\nLaunched as ${jobId}. ${note}`);
 		},
 	});
 
@@ -141,14 +153,41 @@ export default function (pi: ExtensionAPI) {
 				return text(`${status}\n\nNot settled yet. Check again shortly.`);
 			}
 			const result = await podium(["result", params.job], signal);
+			const verdict = /verdict=(\w+)/.exec(status)?.[1] ?? "unknown";
+			const banner =
+				verdict === "verified"
+					? "VERIFIED - the runner ran the acceptance check and it passed."
+					: verdict === "failed_check"
+						? "REJECTED - the acceptance check FAILED. Do not report this as done."
+						: "UNVERIFIED - no acceptance check passed. The bot's report is not evidence.";
 			const cap = params.maxInline ?? 8000;
-			if (result.length <= cap) return text(`${status}\n\n--- result ---\n${result}`);
+			if (result.length <= cap) return text(`${banner}\n${status}\n\n--- result ---\n${result}`);
 
 			const spill = path.join(PODIUM_HOME, "jobs", params.job, "out.txt");
 			return text(
-				`${status}\n\nResult is ${result.length} characters. Full output: ${spill}\n\n` +
+				`${banner}\n${status}\n\nResult is ${result.length} characters. Full output: ${spill}\n\n` +
 					`--- first ${cap} characters ---\n${result.slice(0, cap)}`,
 			);
+		},
+	});
+
+	// ---- receipts ----------------------------------------------------------
+	pi.registerTool({
+		name: "receipts",
+		label: "Receipts",
+		description:
+			"The audit ledger: what ran, what acceptance check it was given, and what the " +
+			"runner's verdict was. Use it to answer 'what have we not actually verified?'",
+		parameters: Type.Object({
+			unverifiedOnly: Type.Optional(Type.Boolean({ description: "Only jobs that were never verified" })),
+			bot: Type.Optional(Type.String({ description: "Filter to one bot" })),
+			limit: Type.Optional(Type.Number({ description: "How many rows (default 20)" })),
+		}),
+		async execute(_id, params, signal) {
+			const args = ["ledger", "--limit", String(params.limit ?? 20)];
+			if (params.unverifiedOnly) args.push("--unverified");
+			if (params.bot) args.push("--bot", params.bot);
+			return text(await podium(args, signal));
 		},
 	});
 
@@ -181,6 +220,15 @@ export default function (pi: ExtensionAPI) {
 		handler: async (_args, ctx) => {
 			const out = await podium(["bots"]);
 			ctx.ui.notify(out || "Roster is empty.", "info");
+		},
+	});
+
+	pi.registerCommand("receipts", {
+		description: "Show what was verified and what was not",
+		handler: async (args, ctx) => {
+			const extra = args.trim() === "unverified" ? ["--unverified"] : [];
+			const out = await podium(["ledger", "--limit", "30", ...extra]);
+			ctx.ui.notify(out || "Nothing has settled yet.", "info");
 		},
 	});
 
