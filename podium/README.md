@@ -26,8 +26,17 @@ better than this for most people:
   desktop for Pi with worktrees, diffs and an integrated terminal. If you want a
   coding IDE around Pi, this is it, and Podium's tools show up inside it because
   they are ordinary Pi tools.
+- **[CopilotKit/OpenBot](https://github.com/CopilotKit/openbot)** - governance
+  first. Every action is checked against a CEL policy *before* it runs, with an
+  audit row written first and a container plus browser profile per bot. If your
+  problem is "what is this agent allowed to touch", that is the answer, and it is
+  a different problem from this one.
 
-Podium is for one thing those do not do: **it will not let an agent tell you the
+Three different problems get called trust. OpenBot answers *may the agent do
+this?* Agent Receipts and Nobulex answer *can the record be edited afterwards?*
+Podium answers the third: **did the work actually land?**
+
+It is for one thing those do not do: **it will not let an agent tell you the
 work is done.** A job is verified only when a shell command the runner ran exited
 zero. Everything else is recorded as unverified, permanently, and is one query
 away. If that distinction does not matter to you, use one of the above.
@@ -59,12 +68,16 @@ readable in a sitting, with no database, no daemon and no server.
 
 v0, honestly labelled:
 
-- **Runner: complete and tested.** 68 assertions, including a live check that a
-  detached worker's parent pid becomes 1 after its launching shell exits, and
-  that a failed acceptance check rejects a job whose executor exited 0.
+- **Runner: complete and tested.** 79 assertions, including a live check that a
+  detached worker's parent pid becomes 1 after its launching shell exits, that a
+  failed acceptance check rejects a job whose executor exited 0, and that editing
+  or deleting a receipt is detected.
 - **Desktop console: works, unsigned.** Boots, renders, and is smoke-tested
   headless with screenshots on every view. Not notarized, so macOS will need a
   right-click → Open the first time.
+- **The Pi extension loads.** Verified against real pi 0.84.2: pi rejects a
+  broken extension loudly, and this one loads silently with all eight
+  registrations executing.
 - **Never run against a live model.** Everything is proved with a fake executor.
   The first real run is yours.
 
@@ -126,6 +139,22 @@ finished successfully and proved nothing.
 check by hand. Set `PODIUM_REQUIRE_CHECK=1` to refuse any job launched without
 one.
 
+Receipts are hash-chained, so the ledger is tamper-evident:
+
+```
+$ podium audit
+79 receipt(s), chain intact.
+head: 6a08b11f99f439be4b3ac36d58f481de858cbb4795b0a2ab3c80f8451e027c2d
+```
+
+Each receipt carries the SHA-256 of the one before it, and the newest hash is
+kept separately because nothing chains to the last line yet. Editing a verdict,
+deleting a receipt, or truncating the file are all detected and located. This is
+hashing, not signing - it catches a bad edit or a torn write, not an adversary
+with write access to the whole directory. If you need the stronger property,
+[Agent Receipts](https://github.com/agent-receipts/obsigna) and
+[Nobulex](https://github.com/nobulexdev/nobulex) do Ed25519 properly.
+
 ## The desktop console
 
 ```sh
@@ -142,9 +171,9 @@ The conversation is the front door; the receipts are why it exists.
 ## Tests
 
 ```sh
-./test/run.sh                 # runner:  68 assertions
-cd desktop && npm test        # bridges: 47 assertions
-cd desktop && npm run smoke   # the UI:  12 assertions + screenshots
+./test/run.sh                 # runner:  79 assertions
+cd desktop && npm test        # bridges: 51 assertions
+cd desktop && npm run smoke   # the UI:  13 assertions + screenshots
 ```
 
 None of them calls a real model or touches your roster. The smoke test seeds a

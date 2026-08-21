@@ -31,6 +31,7 @@ contextBridge.exposeInMainWorld("podium", {
   cancel: (id) => call("podium:cancel", id),
   ledger: (opts) => call("podium:ledger", opts),
   stats: () => call("podium:stats"),
+  audit: () => call("podium:audit"),
   run: (spec) => call("podium:run", spec),
   reveal: (id) => call("podium:reveal", id),
   pickCwd: () => call("podium:pickCwd"),

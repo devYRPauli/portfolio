@@ -59,6 +59,56 @@ is_settled() {
   esac
 }
 
+# Portable SHA-256. Linux ships sha256sum, macOS ships shasum.
+sha256_of() {
+  if command -v sha256sum >/dev/null 2>&1; then
+    printf '%s' "$1" | sha256sum | cut -d' ' -f1
+  elif command -v shasum >/dev/null 2>&1; then
+    printf '%s' "$1" | shasum -a 256 | cut -d' ' -f1
+  else
+    printf 'nohash'
+  fi
+}
+
+GENESIS_HASH="0000000000000000000000000000000000000000000000000000000000000000"
+
+# Append one receipt, chained to the one before it.
+#
+# Concurrent jobs settle at the same moment routinely, and two workers reading
+# the same tail would each chain to it and break the chain. mkdir is atomic on
+# every POSIX filesystem, so it is the lock.
+append_receipt() {
+  local line_body=$1
+  local lock="${PODIUM_LOG}.lock"
+  local waited=0
+  while ! mkdir "$lock" 2>/dev/null; do
+    sleep 0.2
+    waited=$((waited+1))
+    if [ "$waited" -gt 100 ]; then
+      # 20s is far longer than an append takes; assume the holder died.
+      rmdir "$lock" 2>/dev/null || true
+    fi
+  done
+  # shellcheck disable=SC2064
+  trap "rmdir '$lock' 2>/dev/null" EXIT
+
+  local prev="$GENESIS_HASH"
+  if [ -s "$PODIUM_LOG" ]; then
+    prev=$(sha256_of "$(tail -n 1 "$PODIUM_LOG")")
+  fi
+  local full="${line_body%\}},\"prev\":\"$prev\"}"
+  printf '%s\n' "$full" >> "$PODIUM_LOG"
+
+  # The chain alone cannot protect the newest receipt, because nothing links to
+  # it yet - editing the last line would go unnoticed. The head hash is kept in
+  # its own file so that tampering means editing two files consistently rather
+  # than one.
+  sha256_of "$full" > "${PODIUM_LOG}.head"
+
+  rmdir "$lock" 2>/dev/null
+  trap - EXIT
+}
+
 json_escape() {
   # Escape a string for embedding in JSON. Handles backslash, quote, control chars.
   local s=${1//\\/\\\\}
@@ -181,7 +231,8 @@ cmd_worker() {
   echo "$status" > "$jd/status"
 
   mkdir -p "$(dirname "$PODIUM_LOG")"
-  printf '{"ts":"%s","id":"%s","bot":"%s","model":"%s","status":"%s","exit_code":%s,"duration_secs":%s,"timed_out":%s,"verdict":"%s","verified":%s,"check":"%s","check_exit":%s,"cwd":"%s"}\n' \
+  local receipt
+  receipt=$(printf '{"ts":"%s","id":"%s","bot":"%s","model":"%s","status":"%s","exit_code":%s,"duration_secs":%s,"timed_out":%s,"verdict":"%s","verified":%s,"check":"%s","check_exit":%s,"cwd":"%s"}' \
     "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
     "$(json_escape "$JOB_ID")" \
     "$(json_escape "$JOB_BOT")" \
@@ -192,8 +243,8 @@ cmd_worker() {
     "$( [ "$verdict" = "verified" ] && echo true || echo false )" \
     "$(json_escape "${JOB_CHECK:-}")" \
     "$check_exit" \
-    "$(json_escape "$JOB_CWD")" \
-    >> "$PODIUM_LOG"
+    "$(json_escape "$JOB_CWD")")
+  append_receipt "$receipt"
 }
 
 # --- run --------------------------------------------------------------------
@@ -358,6 +409,7 @@ cmd_ledger() {
   local only_unverified=0 filter_bot="" limit=50 as_json=0
   while [ $# -gt 0 ]; do
     case "$1" in
+      --audit)      cmd_audit; return $? ;;
       --unverified) only_unverified=1; shift ;;
       --bot)        filter_bot=$2; shift 2 ;;
       --limit)      limit=$2; shift 2 ;;
@@ -396,6 +448,52 @@ cmd_ledger() {
       else if (shown == 0) print "(nothing matched)"
     }
   ' "$PODIUM_LOG"
+}
+
+# Walk the receipt chain. A ledger that cannot be edited without detection is
+# the difference between an audit trail and a log file.
+cmd_audit() {
+  [ -f "$PODIUM_LOG" ] || { echo "no ledger at $PODIUM_LOG"; return 0; }
+
+  local n=0 broken=0 prev_hash="$GENESIS_HASH" line claimed
+  while IFS= read -r line; do
+    [ -n "$line" ] || continue
+    n=$((n+1))
+    claimed=$(printf '%s' "$line" | sed -n 's/.*"prev":"\([0-9a-f]*\)".*/\1/p')
+    if [ -z "$claimed" ]; then
+      printf 'line %s: no chain field (written before chaining was added)\n' "$n"
+    elif [ "$claimed" != "$prev_hash" ]; then
+      printf 'line %s: CHAIN BROKEN\n' "$n"
+      printf '  expected prev %s\n' "$prev_hash"
+      printf '  found        %s\n' "$claimed"
+      broken=1
+      break
+    fi
+    prev_hash=$(sha256_of "$line")
+  done < "$PODIUM_LOG"
+
+  if [ "$broken" -eq 1 ]; then
+    printf '\n%s receipt(s) checked. The ledger has been edited or truncated.\n' "$n"
+    return 1
+  fi
+
+  # The newest receipt has no successor to protect it, so it is checked against
+  # the separately stored head.
+  if [ -f "${PODIUM_LOG}.head" ]; then
+    local recorded; recorded=$(cat "${PODIUM_LOG}.head")
+    if [ "$recorded" != "$prev_hash" ]; then
+      printf 'HEAD MISMATCH on the newest receipt (line %s)\n' "$n"
+      printf '  recorded  %s\n' "$recorded"
+      printf '  computed  %s\n' "$prev_hash"
+      printf '\n%s receipt(s) checked. The last receipt has been edited.\n' "$n"
+      return 1
+    fi
+  else
+    printf 'note: no head file; the newest receipt is unprotected\n'
+  fi
+
+  printf '%s receipt(s), chain intact.\n' "$n"
+  printf 'head: %s\n' "$prev_hash"
 }
 
 # Re-run a job's acceptance check by hand, without re-running the job.
@@ -534,6 +632,7 @@ podium - durable job runner for a roster of agent bots
   podium doctor                Preflight every requirement and report
   podium ledger [--unverified] [--bot B] [--limit N] [--json]
                                The receipts: what ran, and what was verified
+  podium audit                 Walk the receipt chain and report any tampering
   podium verify <id>           Re-run a job's acceptance check by hand
   podium bots                  Show the roster
   podium cancel <id>
@@ -542,7 +641,9 @@ podium - durable job runner for a roster of agent bots
 State lives in $PODIUM_HOME (default ~/.podium). Every settled job appends one
 line to log.jsonl recording its acceptance check and verdict, so "was this
 actually verified?" is a query, not a matter of trust. Set
-PODIUM_REQUIRE_CHECK=1 to refuse any job launched without a check.
+PODIUM_REQUIRE_CHECK=1 to refuse any job launched without a check. Each receipt
+carries the hash of the one before it, so `podium audit` detects an edited or
+truncated ledger.
 USAGE
 }
 
@@ -553,6 +654,7 @@ case "${1:-help}" in
   brief)     shift; cmd_brief "$@" ;;
   doctor)    shift; cmd_doctor "$@" ;;
   ledger)    shift; cmd_ledger "$@" ;;
+  audit)     shift; cmd_audit "$@" ;;
   verify)    shift; cmd_verify "$@" ;;
   result)    shift; cmd_result "$@" ;;
   list)      shift; cmd_list "$@" ;;

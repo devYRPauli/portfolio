@@ -187,6 +187,23 @@ class Podium {
     };
   }
 
+  /**
+   * Walk the receipt chain. Returns {intact, receipts, head, detail}.
+   * A broken chain is a finding, not an error, so this never throws on tamper.
+   */
+  async audit() {
+    let raw;
+    try {
+      raw = await this._run(["audit"]);
+    } catch (err) {
+      raw = err.message || "";
+    }
+    const intact = /chain intact/.test(raw);
+    const receipts = Number((/(\d+) receipt/.exec(raw) || [])[1] ?? 0);
+    const head = (/head: ([0-9a-f]+)/.exec(raw) || [])[1] || "";
+    return { intact, receipts, head, detail: raw.trim() };
+  }
+
   /** Where a job's growing output lives, so the UI can tail it. */
   outputPath(id) {
     return path.join(this.home, "jobs", id, "out.txt");

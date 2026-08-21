@@ -264,4 +264,55 @@ assert_contains "verify re-runs the recorded check" "$reran" "grep -q sentinel m
 noverify=$("$PODIUM" verify "$uid" 2>&1 || true)
 assert_contains "verify refuses a job with no check" "$noverify" "no acceptance check"
 
+
+echo
+echo "== tamper-evident receipts =="
+assert_contains "audit reports an intact chain" "$("$PODIUM" audit)" "chain intact"
+assert_contains "audit reports the head hash" "$("$PODIUM" audit)" "head:"
+assert_contains "every receipt carries a prev link" "$(tail -1 "$PODIUM_HOME/log.jsonl")" '"prev":"'
+[ -f "$PODIUM_HOME/log.jsonl.head" ] && ok "the head hash is stored separately" || bad "the head hash is stored separately"
+
+cp "$PODIUM_HOME/log.jsonl" "$PODIUM_HOME/log.clean"
+
+# 1. Editing the newest receipt - the case a plain chain cannot catch.
+sed -i.bak 's/"verified":false/"verified":true/' "$PODIUM_HOME/log.jsonl" 2>/dev/null || \
+  sed -i '' 's/"verified":false/"verified":true/' "$PODIUM_HOME/log.jsonl"
+out=$("$PODIUM" audit 2>&1); rc=$?
+assert_ne "editing a receipt is detected" "$rc" "0"
+cp "$PODIUM_HOME/log.clean" "$PODIUM_HOME/log.jsonl"
+
+# 2. Deleting a receipt.
+if command -v python3 >/dev/null 2>&1; then
+  python3 -c "
+lines=open('$PODIUM_HOME/log.jsonl').read().split('\n')
+lines=[l for l in lines if l]
+del lines[1]
+open('$PODIUM_HOME/log.jsonl','w').write('\n'.join(lines)+'\n')
+"
+  out=$("$PODIUM" audit 2>&1); rc=$?
+  assert_ne "deleting a receipt is detected" "$rc" "0"
+  assert_contains "the audit names the broken link" "$out" "CHAIN BROKEN"
+  cp "$PODIUM_HOME/log.clean" "$PODIUM_HOME/log.jsonl"
+fi
+
+# 3. Restoring the file restores the chain - no false positives.
+out=$("$PODIUM" audit 2>&1)
+assert_contains "an untouched ledger still verifies" "$out" "chain intact"
+
+echo
+echo "== concurrent settles do not break the chain =="
+before=$(wc -l < "$PODIUM_HOME/log.jsonl" | tr -d ' ')
+for i in 1 2 3 4 5 6; do "$PODIUM" run tester "concurrent $i" --check "true" >/dev/null 2>&1 & done
+wait
+# Give the detached workers time to settle and append.
+for _ in $(seq 1 40); do
+  now=$(wc -l < "$PODIUM_HOME/log.jsonl" | tr -d ' ')
+  [ "$((now - before))" -ge 6 ] && break
+  sleep 1
+done
+after=$(wc -l < "$PODIUM_HOME/log.jsonl" | tr -d ' ')
+assert_eq "all six concurrent receipts landed" "$((after - before))" "6"
+assert_contains "the chain survives concurrent appends" "$("$PODIUM" audit)" "chain intact"
+[ -d "$PODIUM_HOME/log.jsonl.lock" ] && bad "the append lock is released" "lock dir left behind" || ok "the append lock is released"
+
 summary

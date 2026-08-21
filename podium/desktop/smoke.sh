@@ -60,6 +60,7 @@ want '"throttled"'                 "throttling is shown distinctly from a timeou
 want '"noneGiven":2'               "jobs with no check are marked as such"
 want '"unverifiedFilter":{"rows":3}' "the unverified filter matches the ledger"
 want '"acceptance check"'          "the job sheet leads with the acceptance check"
+want 'chain intact'                "the console reports the receipt chain intact"
 
 echo
 cli_unverified=$("$P" ledger --unverified --limit 100 | grep -c .)

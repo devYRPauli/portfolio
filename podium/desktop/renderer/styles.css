@@ -231,6 +231,16 @@ button:focus-visible, textarea:focus-visible { outline: 2px solid var(--brass); 
 .stat.good .v { color: var(--good); }
 .stat.warn .v { color: var(--warn); }
 
+.chainbar {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 11px; margin-bottom: 14px;
+  border: 1px solid var(--rule); border-radius: var(--r);
+  background: var(--panel-2);
+}
+.chainbar.bad { border-color: var(--bad); background: var(--bad-dim); }
+.chaintext { font-family: var(--mono); font-size: 11px; color: var(--ink-soft); }
+.chainbar.bad .chaintext { color: var(--bad); }
+
 .filters { display: flex; gap: 6px; margin-bottom: 12px; }
 .filters button {
   background: var(--panel-2); border: 1px solid var(--rule);

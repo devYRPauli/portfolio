@@ -135,6 +135,60 @@ A prompt is an aspiration a model may ignore, and any competitor can paste the
 same paragraph tomorrow. It has to be a few hundred lines of auditable shell that
 runs the check itself and writes the verdict down. That is what v0 does.
 
+## 4c. The governance and receipts wing
+
+A second survey, prompted by CopilotKit's OpenBot, turned up a whole category the
+first pass missed. These are not Grok Bot clones. They are the answer to a
+different question - *can you trust what the agent did?* - and they are closer to
+Podium than any of the chat apps.
+
+| Project | What it does |
+|---|---|
+| **CopilotKit/OpenBot** | "AI coworkers you can hand real work to, and actually trust with the access." Every action is decided **before** execution against a CEL policy, and an audit row is written before the call is made. Container, `/workspace` volume and browser profile per bot; optional gVisor. Agents conform to the AG-UI protocol, so LangGraph, Mastra, CrewAI and Pydantic AI agents all plug in. **Fails closed - a missing policy permits nothing.** |
+| **Agent Receipts** (`agent-receipts/obsigna`) | An open protocol for cryptographically signed, tamper-evident records of agent actions. Defines the receipt format, signing scheme, chain structure and a taxonomy of action types. SDKs in Go, TypeScript and Python, plus an MCP proxy. |
+| **Nobulex** | Every action produces a receipt: Ed25519-signed **before and after** execution, hash-chained for tamper evidence. A third party can verify the history without trusting the agent *or* the operator. Agents earn "Trust Capital" that gates what they may do. |
+| **MartinLoop** | Governs autonomous coding agents - turns open-ended runs into budgeted, verified software work with signed outcome receipts. |
+| **agent-fleet-o** | Self-hosted orchestration with a visual DAG builder, 450+ MCP tools, human-in-the-loop approvals and a full audit trail. |
+
+### The distinction that matters
+
+Three different problems get called "trust", and conflating them is how you end
+up building the wrong thing:
+
+- **Authorization** - *may the agent do this?* Decided before the action.
+  OpenBot's CEL policy, Nobulex's Trust Capital, agent-fleet-o's approvals.
+- **Verification** - *did the work actually land?* Decided after the action, by
+  running something that fails if it did not. **This is the gap.** OpenBot will
+  faithfully record that an agent was permitted to edit a file and did; it will
+  not tell you the change works.
+- **Tamper-evidence** - *can the record be edited afterwards?* Agent Receipts and
+  Nobulex, via signing and hash chains.
+
+Podium sits squarely on the second, and the survey says nobody else does. But it
+was weak on the third, and that was worth fixing.
+
+### What this changed
+
+Podium's ledger was a plain appended JSONL file. Calling that an "audit trail"
+was generous - any text editor could rewrite a `failed_check` into a `verified`
+and nothing would notice. For a tool whose entire pitch is "do not take the
+agent's word for it", that was the wrong place to be relaxed.
+
+So receipts are now **hash-chained**: each one carries the SHA-256 of the
+receipt before it, and the newest hash is kept in a separate `log.jsonl.head`
+file because nothing chains to the last line yet. `podium audit` walks the chain
+and names the first broken link. Editing a receipt, deleting one, or truncating
+the file are all detected. Concurrent appends take an atomic `mkdir` lock, since
+parallel jobs settling at the same instant would otherwise each chain to the same
+tail and split the chain.
+
+What was deliberately **not** copied: Ed25519 signing. Nobulex signs because a
+third party must verify without trusting the operator. Podium runs on your
+machine, for you - the threat is a bad edit or a corrupted write, not an
+adversary. Hashing catches those with no key management and no dependencies.
+The README says exactly this rather than implying stronger guarantees than the
+mechanism provides.
+
 ## 5. Subscription billing: what actually works
 
 This is the requirement that constrains the design, so it is worth being exact.
@@ -208,6 +262,11 @@ Grok Bot and Grok 4 Heavy:
 - [ai-x.chat - Grok 4 Heavy architecture](https://ai-x.chat/models/grok-4-heavy/)
 
 Open-source alternatives:
+- [CopilotKit/OpenBot](https://github.com/CopilotKit/openbot)
+- [Agent Receipts / obsigna](https://github.com/agent-receipts/obsigna)
+- [Nobulex](https://github.com/nobulexdev/nobulex)
+- [agent-fleet-o](https://github.com/escapeboy/agent-fleet-o)
+- [awesome-ai-agent-governance](https://github.com/systempromptio/awesome-ai-agent-governance)
 - [OpenMausBot](https://github.com/milind-soni/OpenMausBot)
 - [Rakazo](https://github.com/elie222/rakazo)
 - [pi-gui](https://github.com/minghinmatthewlam/pi-gui)

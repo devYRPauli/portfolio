@@ -192,6 +192,50 @@ test("PODIUM_HOME is forced into the child environment", async () => {
   assert.strictEqual(env.PODIUM_HOME, home, "the app never reads a different roster than it shows");
 });
 
+test("audit() parses an intact chain", async () => {
+  const p = fakePodium(tmpHome(), {
+    audit: "4 receipt(s), chain intact.\nhead: abc123def456\n",
+  });
+  const res = await p.audit();
+  assert.strictEqual(res.intact, true);
+  assert.strictEqual(res.receipts, 4);
+  assert.strictEqual(res.head, "abc123def456");
+});
+
+test("audit() reports tampering as a finding, not an exception", async () => {
+  // The binary exits non-zero on a broken chain. That must surface as
+  // intact:false, never as a thrown error the UI swallows into a blank panel.
+  const p = new Podium({
+    home: tmpHome(),
+    bin: "/fake",
+    exec: (b, a, o, cb) =>
+      cb(new Error("exit 1"), "", "line 3: CHAIN BROKEN\n\n3 receipt(s) checked. The ledger has been edited or truncated."),
+  });
+  const res = await p.audit();
+  assert.strictEqual(res.intact, false);
+  assert.strictEqual(res.receipts, 3);
+  assert.match(res.detail, /CHAIN BROKEN/);
+});
+
+test("audit() handles a head mismatch on the newest receipt", async () => {
+  const p = new Podium({
+    home: tmpHome(),
+    bin: "/fake",
+    exec: (b, a, o, cb) =>
+      cb(new Error("exit 1"), "", "HEAD MISMATCH on the newest receipt (line 4)\n\n4 receipt(s) checked. The last receipt has been edited."),
+  });
+  const res = await p.audit();
+  assert.strictEqual(res.intact, false);
+  assert.match(res.detail, /HEAD MISMATCH/);
+});
+
+test("audit() on an empty ledger is intact-but-empty, not a crash", async () => {
+  const p = fakePodium(tmpHome(), { audit: "no ledger at /tmp/x/log.jsonl\n" });
+  const res = await p.audit();
+  assert.strictEqual(res.intact, false, "no ledger is not a verified chain");
+  assert.strictEqual(res.receipts, 0);
+});
+
 test("outputPath points at the job's growing output", () => {
   const p = new Podium({ home: "/h", bin: "/fake" });
   assert.strictEqual(p.outputPath("abc"), path.join("/h", "jobs", "abc", "out.txt"));

@@ -106,6 +106,7 @@ function createWindow() {
             "JSON.stringify({visible: document.getElementById('view-receipts').classList.contains('is-on')," +
             "rows: document.querySelectorAll('#view-receipts tbody tr').length," +
             "stats: [...document.querySelectorAll('#view-receipts .stat')].map(s=>s.textContent)," +
+            "chain: (document.querySelector('#view-receipts .chainbar')||{}).textContent||''," +
             "noneGiven: document.querySelectorAll('#view-receipts .check.none').length})"));
           await shot("receipts");
 
@@ -182,6 +183,7 @@ const handlers = {
   "podium:cancel": async (_e, id) => podium.cancel(id),
   "podium:ledger": async (_e, opts) => podium.ledger(opts || {}),
   "podium:stats": async () => podium.stats(),
+  "podium:audit": async () => podium.audit(),
   "podium:run": async (_e, { bot, brief, check, cwd }) =>
     podium.run(bot, brief, { cwd: cwd || settings.cwd, check }),
   "podium:reveal": async (_e, id) => {

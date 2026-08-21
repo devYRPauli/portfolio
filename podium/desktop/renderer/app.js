@@ -206,9 +206,11 @@ async function renderReceipts() {
 
   let rows = [];
   let stats = { total: 0, succeeded: 0, failed: 0, seconds: 0 };
+  let chain = { intact: true, receipts: 0, head: "", detail: "" };
   try {
     rows = await api.ledger({ limit: 500 });
     stats = await api.stats();
+    chain = await api.audit();
   } catch (err) {
     wrap.appendChild(el("div", "empty", String(err.message || err)));
     pane.appendChild(wrap);
@@ -230,6 +232,16 @@ async function renderReceipts() {
   stats_.appendChild(stat("failed", stats.failed, stats.failed ? "warn" : ""));
   stats_.appendChild(stat("compute", relTime(stats.seconds)));
   wrap.appendChild(stats_);
+
+  // Chain integrity. The ledger's whole value is that it cannot be quietly
+  // edited, so its state belongs above the table, not buried.
+  const chainRow = el("div", chain.intact ? "chainbar ok" : "chainbar bad");
+  chainRow.appendChild(el("span", "badge " + (chain.intact ? "verified" : "failed"),
+    chain.intact ? "chain intact" : "tampered"));
+  chainRow.appendChild(el("span", "chaintext", chain.intact
+    ? `${chain.receipts} receipts, hash-chained. Head ${chain.head.slice(0, 12)}…`
+    : chain.detail.split("\n")[0] || "The ledger has been edited or truncated."));
+  wrap.appendChild(chainRow);
 
   const filters = el("div", "filters");
   for (const [key, label] of [["all", "All"], ["unverified", "Unverified only"]]) {

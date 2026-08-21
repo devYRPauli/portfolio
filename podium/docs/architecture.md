@@ -55,6 +55,21 @@ Three verdicts, deliberately not collapsible:
 `unverified` is not a soft pass. A job that finished cleanly with no check is
 recorded as unverified forever and surfaces under `podium ledger --unverified`.
 
+**4b-ii. The ledger is hash-chained, not signed.** A plain appended file is a
+log, not an audit trail: any editor can rewrite `failed_check` into `verified`.
+Each receipt now carries the SHA-256 of the one before it, and the newest hash
+lives in a separate `log.jsonl.head` because nothing chains to the last line yet.
+`podium audit` walks the chain and names the first break. Appends take an atomic
+`mkdir` lock - parallel jobs settling in the same instant would otherwise chain
+to the same tail and fork the chain.
+
+Ed25519 signing, which Nobulex and the Agent Receipts protocol use, was
+considered and rejected. Signing exists so a third party can verify without
+trusting the operator. Podium runs on your machine for you: the threat is a bad
+edit or a torn write, not an adversary with your filesystem. Hashing catches
+those with no keys and no dependencies, and the README claims exactly that and
+nothing more.
+
 **4c. A check the model wrote can still be worthless.** Enforcement stops a bot
 lying about the outcome; it cannot stop an orchestrator writing `--check true`.
 The mitigation is visibility, not cleverness: every check is stored verbatim in
