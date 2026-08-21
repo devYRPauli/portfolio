@@ -27,6 +27,10 @@ podium_executor() {
 # Any executor works. Map the five arguments onto its flags: read the brief
 # from "$4", read the system prompt from "$5", write the result to "$3".
 
+# The executor binary, so `podium doctor` can confirm it is installed and
+# tell you plainly when it is not.
+PODIUM_EXECUTOR_CLI={{EXECUTOR_CLI}}
+
 PODIUM_BOTS_DIR="{{PODIUM_HOME}}/bots"
 PODIUM_JOBS_DIR="{{PODIUM_HOME}}/jobs"
 PODIUM_LOG="{{PODIUM_HOME}}/log.jsonl"

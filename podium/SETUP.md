@@ -63,6 +63,7 @@ Slots to fill:
 - `{{PODIUM_HOME}}` - absolute path to the state directory
 - `{{DEFAULT_MODEL}}` - from the interview, or empty
 - `{{TIMEOUT}}` - from the interview
+- `{{EXECUTOR_CLI}}` - the executor binary name, e.g. `pi` or `codex`
 - `{{MAX_PARALLEL}}` - from the interview
 
 Also write `PODIUM_REQUIRE_CHECK=<0|1>` into `podium.conf` from answer 7.

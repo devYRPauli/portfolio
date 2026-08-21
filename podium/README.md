@@ -9,6 +9,21 @@ back with an answer. Every job carries an acceptance check that **the runner
 executes**, so "done" is a verdict rather than a claim. Jobs are detached and
 survive the session that launched them. Every settled job leaves a receipt.
 
+## See it work first
+
+No model, no auth, no config. Thirty seconds:
+
+```sh
+./demo.sh              # run five jobs and print the receipts
+./demo.sh --console    # the same, then open the desktop console on it
+```
+
+It uses a stand-in executor, so nothing calls a real model and your `~/.podium`
+is untouched. It delegates five jobs — two that pass their acceptance check, one
+given no check at all, one whose check fails, and one that gets rate limited —
+then shows you which of them actually proved anything, and finally edits the
+ledger in front of you so you can watch `podium audit` catch it.
+
 ## Should you use this?
 
 Be honest with yourself first. There is a crowded field here and some of it is

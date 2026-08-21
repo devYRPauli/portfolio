@@ -275,8 +275,9 @@ assert_contains "every receipt carries a prev link" "$(tail -1 "$PODIUM_HOME/log
 cp "$PODIUM_HOME/log.jsonl" "$PODIUM_HOME/log.clean"
 
 # 1. Editing the newest receipt - the case a plain chain cannot catch.
-sed -i.bak 's/"verified":false/"verified":true/' "$PODIUM_HOME/log.jsonl" 2>/dev/null || \
-  sed -i '' 's/"verified":false/"verified":true/' "$PODIUM_HOME/log.jsonl"
+# GNU and BSD sed disagree about -i, so edit through a temp file instead.
+sed 's/"verified":false/"verified":true/' "$PODIUM_HOME/log.jsonl" > "$PODIUM_HOME/log.tmp"
+mv "$PODIUM_HOME/log.tmp" "$PODIUM_HOME/log.jsonl"
 out=$("$PODIUM" audit 2>&1); rc=$?
 assert_ne "editing a receipt is detected" "$rc" "0"
 cp "$PODIUM_HOME/log.clean" "$PODIUM_HOME/log.jsonl"

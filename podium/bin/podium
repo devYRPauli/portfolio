@@ -13,7 +13,7 @@ PODIUM_VERSION="0.1.0"
 # already-exported name overwrites the exported value too - so capturing later
 # would read back the default, not what the caller set.
 _PODIUM_ENV_OVERRIDES=""
-for _v in PODIUM_TIMEOUT PODIUM_REQUIRE_CHECK PODIUM_RATELIMIT_RE \
+for _v in PODIUM_TIMEOUT PODIUM_REQUIRE_CHECK PODIUM_RATELIMIT_RE PODIUM_EXECUTOR_CLI \
           PODIUM_DEFAULT_MODEL PODIUM_BOTS_DIR PODIUM_JOBS_DIR PODIUM_LOG; do
   if env | grep -q "^${_v}="; then
     _PODIUM_ENV_OVERRIDES="${_PODIUM_ENV_OVERRIDES} ${_v}=$(printf '%q' "$(eval "printf '%s' \"\$$_v\"")")"
@@ -31,6 +31,8 @@ PODIUM_LOG="$PODIUM_HOME/log.jsonl"
 PODIUM_DEFAULT_MODEL=""
 # When 1, a job with no acceptance check is refused rather than silently trusted.
 PODIUM_REQUIRE_CHECK=0
+# The executor binary, named so `podium doctor` can confirm it is installed.
+PODIUM_EXECUTOR_CLI=""
 # Output matching this (case-insensitive, extended regex) means the executor was
 # throttled, not hung. Recorded distinctly so starvation never reads as a hang.
 PODIUM_RATELIMIT_RE="rate.?limit|429|too many requests|quota exceeded|usage limit|overloaded"
@@ -534,6 +536,20 @@ cmd_doctor() {
   check "executor function defined"            "declare -f podium_executor > /dev/null"
   check "nohup available"                      "command -v nohup"
   check "ps available"                         "command -v ps"
+  check "sha256 available (tamper-evidence)"   "command -v sha256sum || command -v shasum"
+
+  # The executor is the one thing podium cannot supply. The config names it
+  # explicitly rather than podium guessing it out of the function body, because
+  # a guess that silently fails is worse than no check.
+  if [ -n "${PODIUM_EXECUTOR_CLI:-}" ]; then
+    if command -v "$PODIUM_EXECUTOR_CLI" >/dev/null 2>&1; then
+      printf 'ok    executor "%s" found at %s\n' "$PODIUM_EXECUTOR_CLI" "$(command -v "$PODIUM_EXECUTOR_CLI")"
+    else
+      printf 'FAIL  executor "%s" is not on PATH\n' "$PODIUM_EXECUTOR_CLI"; fail=1
+    fi
+  else
+    printf 'note  PODIUM_EXECUTOR_CLI is unset, so the executor was not checked\n'
+  fi
 
   local n; n=$(ls -1 "$PODIUM_BOTS_DIR" 2>/dev/null | wc -l | tr -d ' ')
   printf '\nroster: %s bot(s)\n' "$n"
