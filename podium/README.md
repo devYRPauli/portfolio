@@ -142,18 +142,16 @@ The conversation is the front door; the receipts are why it exists.
 ## Tests
 
 ```sh
-./test/run.sh                 # runner: 68 assertions, fake executor
-cd desktop && npm test        # bridges and view model: 47 assertions
+./test/run.sh                 # runner:  68 assertions
+cd desktop && npm test        # bridges: 47 assertions
+cd desktop && npm run smoke   # the UI:  12 assertions + screenshots
 ```
 
-Neither calls a real model or touches your roster. The desktop smoke test drives
-every view in a headless Electron and writes screenshots:
-
-```sh
-cd desktop
-PODIUM_HOME=/path/to/home PODIUM_SMOKE=/tmp/shot \
-  xvfb-run -a ./node_modules/.bin/electron . --no-sandbox
-```
+None of them calls a real model or touches your roster. The smoke test seeds a
+throwaway home with one job of every verdict, boots the console in a headless
+Electron, drives every view, captures a screenshot of each, and asserts that the
+console's unverified count matches `podium ledger --unverified` exactly. It needs
+`xvfb-run` on Linux.
 
 ## Boundaries
 

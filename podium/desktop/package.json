@@ -8,7 +8,7 @@
   "scripts": {
     "start": "electron .",
     "test": "node --test \"test/*.test.js\"",
-    "dist": "electron-builder --mac --dir"
+    "smoke": "./smoke.sh"
   },
   "devDependencies": {
     "electron": "^40.0.0"
