@@ -17,47 +17,52 @@ const { entries } = Astro.props;
     <li>
       <a href={e.href}>
         <strong transition:name={e.transitionName}>{e.title}</strong>
-        <span class="meta">
-          {e.meta.map((m, i) => (
-            <>
-              {i > 0 && <span class="sep" aria-hidden="true">/</span>}
-              <span>{m}</span>
-            </>
-          ))}
-        </span>
-        <span class="summary">{e.summary}</span>
-        {e.verdict && (
-          <span class="verdict">
-            <span>{e.verdict.tried}</span>
-            <span class="arrow" aria-hidden="true">-&gt;</span>
-            <span class="out">{e.verdict.result}</span>
-          </span>
-        )}
       </a>
+      <span class="meta">
+        {e.meta.map((m, i) => (
+          <>
+            {i > 0 && <span class="sep" aria-hidden="true">/</span>}
+            <span>{m}</span>
+          </>
+        ))}
+      </span>
+      <span class="summary">{e.summary}</span>
+      {e.verdict && (
+        <span class="verdict">
+          <span>{e.verdict.tried}</span>
+          <span class="arrow" aria-hidden="true">-&gt;</span>
+          <span class="out">{e.verdict.result}</span>
+        </span>
+      )}
     </li>
   ))}
 </ul>
 
 <style>
   ul { list-style: none; padding: 0; display: grid; gap: var(--space-2); }
-  li { min-width: 0; }
-  a {
+  li {
+    position: relative;
     display: grid;
     gap: var(--space-1);
+    min-width: 0;
     padding: var(--space-4);
     margin-inline: calc(-1 * var(--space-4));
     border-radius: 10px;
+  }
+  a {
+    justify-self: start;
     text-decoration: none;
     color: var(--ink);
   }
-  a:hover { background: var(--bg-raised); }
+  a::after { content: ""; position: absolute; inset: 0; }
+  li:hover { background: var(--bg-raised); }
   strong {
     font-weight: 600;
     font-size: var(--t-body);
     line-height: 1.35;
     letter-spacing: -0.01em;
   }
-  a:hover strong { color: var(--accent); }
+  li:hover strong { color: var(--accent); }
   .meta { display: flex; flex-wrap: wrap; gap: 0 var(--space-2); }
   .sep { color: var(--line); }
   .summary { font-size: var(--t-read); color: var(--ink-soft); line-height: 1.6; }
