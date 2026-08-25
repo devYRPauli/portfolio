@@ -79,6 +79,10 @@ const socialImage = new URL(ogImage, Astro.site);
         document.documentElement.dataset.theme = theme;
       };
       applyTheme();
+      if (!window.themeListenerRegistered) {
+        matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+        window.themeListenerRegistered = true;
+      }
       document.addEventListener('astro:after-swap', applyTheme);
     </script>
   </head>

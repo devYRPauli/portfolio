@@ -92,7 +92,9 @@ const isCurrent = (href: string) => path === href || path.startsWith(href);
     button?.addEventListener('click', () => {
       const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
       document.documentElement.dataset.theme = next;
-      localStorage.setItem('theme', next);
+      const systemTheme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      if (next === systemTheme) localStorage.removeItem('theme');
+      else localStorage.setItem('theme', next);
       syncButton();
     });
   });
