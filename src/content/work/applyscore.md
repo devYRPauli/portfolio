@@ -12,6 +12,9 @@ stack:
 links:
   - { label: Chrome Web Store, href: https://chromewebstore.google.com/detail/applyscore/ibecekikdjelajpnjnmapejhahgcplim }
 order: 9
+verdict:
+  tried: "Postings hide in Shadow DOM"
+  result: "8 extractors, 1 fallback"
 ---
 
 A published Chrome extension that scores how well a resume matches any job posting on the web, with every claim linked to the evidence behind it.
@@ -24,7 +27,7 @@ Scraping job postings is also harder than it looks. Every board renders differen
 
 ## Approach
 
-- **Read the posting anywhere.** Dedicated extractors handle LinkedIn, Greenhouse, Lever, Ashby, Workday, Indeed, and Glassdoor, with a generic fallback for everything else. The content script pierces Shadow DOM, and a validator confirms the page really is a job posting before scoring runs.
+- **Read the posting anywhere.** Dedicated extractors handle LinkedIn, Greenhouse, Lever, Ashby, Workday, Amazon, Indeed, and Glassdoor, with a generic fallback for everything else. The content script pierces Shadow DOM, and a validator confirms the page really is a job posting before scoring runs.
 - **Score against evidence, not vibes.** The analysis returns a confidence-weighted 0-100 fit score, the top requirements matched to the exact resume bullets that prove them, and a prioritized list of what is missing.
 - **Bring your own key.** Three providers are supported: OpenAI, Anthropic, and Google. The resume is cached locally, and the key stays in the user's own storage, so the data and the model choice both stay with them.
 - **Manifest V3 throughout.** A service worker handles the API calls, the popup holds settings and results, and host permissions are limited to the three provider endpoints, with wider access requested only when a board needs it.
