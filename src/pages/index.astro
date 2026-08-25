@@ -15,7 +15,10 @@ const selectedProjects = projects
 const allPosts = (await getCollection('writing'))
   .filter((p) => !p.data.draft)
   .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-const posts = allPosts.slice(0, 3);
+const featuredProjectIds = new Set(selectedProjects.map((project) => project.id));
+const posts = allPosts
+  .filter((post) => !post.data.project || !featuredProjectIds.has(post.data.project.id))
+  .slice(0, 3);
 
 const workEntries = selectedProjects.map((p) => ({
   href: `/work/${p.id}/`,

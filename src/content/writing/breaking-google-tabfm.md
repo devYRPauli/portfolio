@@ -1,6 +1,7 @@
 ---
 title: I Tried to Break Google's New Tabular Foundation Model. Then I Fixed It.
 description: An independent, reproducible evaluation of TabFM - what held up, what did not, and the bug fix that got merged into Google's repo
+project: tabfm-evaluation
 verdict:
   tried: "Won on 10 datasets"
   result: "demoted 2 of my own wins to ties"

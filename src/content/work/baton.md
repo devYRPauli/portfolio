@@ -14,7 +14,6 @@ stack:
   - GitHub Actions
 links:
   - { label: GitHub, href: https://github.com/devYRPauli/baton }
-  - { label: Writeup, href: /writing/baton-the-tool-that-built-itself/ }
 order: 3
 featuredOrder: 3
 ---

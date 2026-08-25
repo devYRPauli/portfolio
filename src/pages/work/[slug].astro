@@ -10,6 +10,8 @@ export async function getStaticPaths() {
 const { project } = Astro.props;
 const { Content } = await render(project);
 const { role, year, stack, links } = project.data;
+const writeup = (await getCollection('writing', ({ data }) => !data.draft))
+  .find((post) => post.data.project?.id === project.id);
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -39,6 +41,7 @@ const jsonLd = {
   {links && (
     <p class="links">
       {links.map((l) => <a href={l.href}>{l.label}</a>)}
+      {writeup && <a href={`/writing/${writeup.id}/`}>Writeup</a>}
     </p>
   )}
   <Content />

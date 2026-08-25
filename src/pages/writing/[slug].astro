@@ -1,5 +1,5 @@
 ---
-import { getCollection, render } from 'astro:content';
+import { getCollection, getEntry, render } from 'astro:content';
 import PostLayout from '../../layouts/PostLayout.astro';
 import { wordCount, readMinutes } from '../../lib/reading';
 
@@ -10,6 +10,7 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 const { Content } = await render(post);
+const project = post.data.project ? await getEntry(post.data.project) : undefined;
 
 const words = wordCount(post.body);
 
@@ -38,5 +39,6 @@ const jsonLd = {
   backHref="/writing/"
   backLabel="Writing"
 >
+  {project && <a slot="meta" href={`/work/${project.id}/`}>Project: {project.data.title}</a>}
   <Content />
 </PostLayout>

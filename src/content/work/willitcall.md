@@ -15,7 +15,6 @@ stack:
 links:
   - { label: GitHub, href: https://github.com/devYRPauli/willitcall }
   - { label: Live matrix, href: https://devyrpauli.github.io/willitcall/ }
-  - { label: Writeup, href: /writing/same-weights-opposite-results/ }
 order: 2
 featuredOrder: 2
 ---

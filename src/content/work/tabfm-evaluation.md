@@ -14,7 +14,6 @@ stack:
   - Multi-GPU testing
 links:
   - { label: GitHub, href: https://github.com/devYRPauli/tabfm-evaluation }
-  - { label: Writeup, href: /writing/breaking-google-tabfm/ }
   - { label: Merged fix, href: https://github.com/google-research/tabfm/pull/42 }
 order: 5
 ---

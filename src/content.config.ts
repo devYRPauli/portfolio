@@ -1,4 +1,4 @@
-import { defineCollection } from 'astro:content';
+import { defineCollection, reference } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 
@@ -7,6 +7,7 @@ const writing = defineCollection({
   schema: z.object({
     title: z.string(),
     description: z.string(),
+    project: reference('work').optional(),
     verdict: z.object({ tried: z.string(), result: z.string() }).optional(),
     pubDate: z.coerce.date(),
     updatedDate: z.coerce.date().optional(),

@@ -52,6 +52,7 @@ const {
       <p class="byline meta">
         {date && <time datetime={date.toISOString()}>{isoDate(date)}</time>}
         {metaParts.map((m) => <span>{m}</span>)}
+        <slot name="meta" />
         {updated && <span class="updated">updated {isoDate(updated)}</span>}
       </p>
     </header>

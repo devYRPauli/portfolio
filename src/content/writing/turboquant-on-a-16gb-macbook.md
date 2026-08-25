@@ -1,6 +1,7 @@
 ---
 title: "From 0% to 100%: Debugging a KV Cache Compression Algorithm on a 16GB MacBook"
 description: TurboQuant on an M1 Pro - five bugs across two codebases, one coupled math fix, and 100% needle retrieval at 16K with 3.5x less KV memory
+project: turboquant-evaluation
 verdict:
   tried: "Called it a bug fix"
   result: "variance reduction, corrected"
