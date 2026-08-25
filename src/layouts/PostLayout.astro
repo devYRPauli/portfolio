@@ -1,5 +1,6 @@
 ---
 import BaseLayout from './BaseLayout.astro';
+import { isoDate } from '../lib/reading';
 
 interface Props {
   title: string;
@@ -30,7 +31,6 @@ const {
   backLabel = 'Home',
 } = Astro.props;
 
-const fmt = (d: Date) => d.toISOString().slice(0, 10);
 ---
 <BaseLayout
   title={title}
@@ -50,9 +50,9 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       <p class="eyebrow">{backLabel}</p>
       <h1 transition:name={transitionName}>{title}</h1>
       <p class="byline meta">
-        {date && <time datetime={date.toISOString()}>{fmt(date)}</time>}
+        {date && <time datetime={date.toISOString()}>{isoDate(date)}</time>}
         {metaParts.map((m) => <span>{m}</span>)}
-        {updated && <span class="updated">updated {fmt(updated)}</span>}
+        {updated && <span class="updated">updated {isoDate(updated)}</span>}
       </p>
     </header>
     <div class="prose">

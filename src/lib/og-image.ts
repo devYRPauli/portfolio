@@ -9,10 +9,10 @@ interface OgCard {
   meta: string;
 }
 
-const PAPER = '#f9f7ef';
-const INK = '#261d16';
-const SOFT = '#4a4038';
-const AMBER = '#b46d10';
+const PAPER = '#ffffff';
+const INK = '#212429';
+const SOFT = '#565961';
+const AMBER = '#8f5211';
 const require = createRequire(import.meta.url);
 
 const el = (type: string, style: Record<string, unknown>, children?: unknown) => ({

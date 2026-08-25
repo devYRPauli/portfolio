@@ -18,7 +18,7 @@ const jsonLd = {
   description: project.data.summary,
   url: new URL(`/work/${project.id}/`, Astro.site).href,
   image: new URL(`/og/work/${project.id}.png`, Astro.site).href,
-  dateCreated: year,
+  dateCreated: year.slice(0, 4),
   keywords: stack,
   creator: { '@type': 'Person', name: 'Yash Raj Pandey', url: 'https://yashrajpandey.com' },
 };

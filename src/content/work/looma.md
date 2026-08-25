@@ -16,7 +16,6 @@ links:
   - { label: GitHub, href: https://github.com/devYRPauli/looma }
   - { label: PyPI, href: https://pypi.org/project/looma/ }
 order: 4
-featuredOrder: 4
 ---
 
 A command-line tool that turns Claude Code, Codex, and Cursor history into resumable project context, with zero third-party dependencies.

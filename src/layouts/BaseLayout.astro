@@ -72,7 +72,6 @@ const socialImage = new URL(ogImage, Astro.site);
     <ClientRouter />
     {jsonLd && <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
     <script is:inline>
-      document.documentElement.classList.add('js');
       const applyTheme = () => {
         const stored = localStorage.getItem('theme');
         const theme =
