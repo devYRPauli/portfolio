@@ -31,6 +31,7 @@ Writing lives in `src/content/writing/`. Each Markdown file requires:
 - `pubDate`
 - Optional `updatedDate`, `tags`, and `draft`
 - Optional `verdict`, described below
+- Optional `project`, described below
 
 Work lives in `src/content/work/`. Each Markdown file requires:
 
@@ -58,6 +59,20 @@ verdict:
 The field is optional on purpose. An entry with no honest outcome renders bare, which is better than a forced line. Negative results belong here on the same terms as wins.
 
 Keep both parts short. A verdict over about 56 characters wraps onto a second row.
+
+### Linking a post to its project
+
+Four posts are the long-form writeup of a project that also has a short case study. The post declares that relationship once, with a reference to the work entry:
+
+```yaml
+project: willitcall
+```
+
+Everything else derives from it. The case study renders a "Writeup" link back to the post. The post renders a "Project" link to the case study. The home page skips a post whose project is already featured, so one subject never takes two of the six home entries.
+
+Do not hand-write a "Writeup" entry in a work file's `links:`. That was the old approach, it only pointed one way, and nothing in the code knew a pair was a pair.
+
+The section indexes are unaffected. `/work/` lists every project and `/writing/` lists every post, whether or not they are paired.
 
 ## Generated pages and feeds
 
