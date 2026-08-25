@@ -5,6 +5,7 @@ export interface Entry {
   /** Measured facts. Rendered in the mono voice, figures flagged. */
   meta: string[];
   summary: string;
+  verdict?: { tried: string; result: string };
   transitionName?: string;
 }
 
@@ -25,6 +26,13 @@ const { entries } = Astro.props;
           ))}
         </span>
         <span class="summary">{e.summary}</span>
+        {e.verdict && (
+          <span class="verdict">
+            <span>{e.verdict.tried}</span>
+            <span class="arrow" aria-hidden="true">-&gt;</span>
+            <span class="out">{e.verdict.result}</span>
+          </span>
+        )}
       </a>
     </li>
   ))}

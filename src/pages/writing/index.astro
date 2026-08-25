@@ -14,6 +14,7 @@ const entries = posts.map((p) => ({
   title: p.data.title,
   meta: postMeta(p.data.pubDate, p.body),
   summary: p.data.description,
+  verdict: p.data.verdict,
   transitionName: `post-${p.id}`,
 }));
 ---

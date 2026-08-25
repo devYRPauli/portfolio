@@ -1,6 +1,9 @@
 ---
 title: "The Work You Don't Do: Losing Two Optimization Competitions the Same Way"
 description: I named the question I failed to ask, then entered another competition and failed to ask it again. What actually wins these races, and why I keep missing it.
+verdict:
+  tried: "2 competitions entered"
+  result: "2 lost the same way"
 pubDate: 2026-08-14
 tags:
   - performance

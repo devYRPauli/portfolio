@@ -1,6 +1,9 @@
 ---
 title: Baton
 summary: A kit that installs a reliable code-delegation workflow into Claude Code
+verdict:
+  tried: "Built the delegation kit"
+  result: "used it to build itself"
 role: Solo - Open source
 kind: Developer tool
 year: "2026"

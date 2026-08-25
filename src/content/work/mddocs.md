@@ -1,6 +1,9 @@
 ---
 title: mddocs
 summary: Git-native collaborative Markdown, with an agent API
+verdict:
+  tried: "An agent suggests"
+  result: "a person accepts or rejects, in git"
 role: Solo - Open source
 kind: Collaboration tool
 year: "2026"

@@ -1,6 +1,9 @@
 ---
 title: Looma
 summary: Local-first project memory for coding agents
+verdict:
+  tried: "Recall@3 0.62"
+  result: "1.00, on 0 third-party dependencies"
 role: Solo - Open source
 kind: AI infrastructure
 year: "2026"

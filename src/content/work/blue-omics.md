@@ -1,6 +1,9 @@
 ---
 title: Blue Omics
 summary: Genomics research platform for the UF blueberry breeding program
+verdict:
+  tried: "Joined at 81 source files"
+  result: "687, and the lead seat"
 role: Lead developer - UF IFAS
 kind: Research platform
 year: "2025-2026"

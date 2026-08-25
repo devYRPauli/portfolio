@@ -1,6 +1,9 @@
 ---
 title: TurboQuant Evaluation
 summary: Reproduced and debugged KV-cache compression on a 16 GB M1 Pro
+verdict:
+  tried: "0% needle retrieval"
+  result: "100% at 16K, 3.5x less KV memory"
 role: Independent research - Open source
 kind: Systems evaluation
 year: "2026"

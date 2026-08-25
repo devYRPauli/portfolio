@@ -30,6 +30,7 @@ Writing lives in `src/content/writing/`. Each Markdown file requires:
 - `description`
 - `pubDate`
 - Optional `updatedDate`, `tags`, and `draft`
+- Optional `verdict`, described below
 
 Work lives in `src/content/work/`. Each Markdown file requires:
 
@@ -38,8 +39,25 @@ Work lives in `src/content/work/`. Each Markdown file requires:
 - `order`, which controls the full work index
 - Optional `links`
 - Optional `featuredOrder`, which selects and orders up to three homepage projects
+- Optional `verdict`, described below
 
 Collection schemas are defined in `src/content.config.ts`. Invalid or incomplete frontmatter fails the Astro check and production build.
+
+### Verdict lines
+
+An entry can end with a verdict: what was tried, then what came of it.
+
+```yaml
+verdict:
+  tried: "8 submitted"
+  result: "0 promoted"
+```
+
+`EntryList` puts an arrow between the two parts and gives the result the `--flag` colour. The line then appears under that entry on the home page and on the section index.
+
+The field is optional on purpose. An entry with no honest outcome renders bare, which is better than a forced line. Negative results belong here on the same terms as wins.
+
+Keep both parts short. A verdict over about 56 characters wraps onto a second row.
 
 ## Generated pages and feeds
 

@@ -1,6 +1,9 @@
 ---
 title: "Eight Submissions, Zero Promotions: A Week Inside mlx.fast on the Wrong Hardware"
 description: Competing in an open ML-optimization competition on hardware that could not run the ranked benchmark, and why measurement bandwidth decided everything.
+verdict:
+  tried: "8 submitted"
+  result: "0 promoted"
 pubDate: 2026-08-05
 updatedDate: 2026-08-14
 tags:

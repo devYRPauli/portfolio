@@ -7,6 +7,7 @@ const writing = defineCollection({
   schema: z.object({
     title: z.string(),
     description: z.string(),
+    verdict: z.object({ tried: z.string(), result: z.string() }).optional(),
     pubDate: z.coerce.date(),
     updatedDate: z.coerce.date().optional(),
     tags: z.array(z.string()).default([]),
@@ -19,6 +20,7 @@ const work = defineCollection({
   schema: z.object({
     title: z.string(),
     summary: z.string(),
+    verdict: z.object({ tried: z.string(), result: z.string() }).optional(),
     role: z.string(),
     kind: z.string(),
     year: z.string(),

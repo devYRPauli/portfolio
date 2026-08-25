@@ -1,6 +1,9 @@
 ---
 title: TabFM Evaluation
 summary: Independent evaluation that surfaced and fixed a multi-GPU crash in Google's tabular foundation model
+verdict:
+  tried: "Crashed on multi-GPU"
+  result: "fix merged by Google Research"
 role: Independent research - Open source
 kind: Model evaluation
 year: "2026"

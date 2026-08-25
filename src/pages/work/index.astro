@@ -11,6 +11,7 @@ const toEntry = (p: (typeof projects)[number]) => ({
   title: p.data.title,
   meta: [p.data.kind, p.data.year],
   summary: p.data.summary,
+  verdict: p.data.verdict,
   transitionName: `work-${p.id}`,
 });
 

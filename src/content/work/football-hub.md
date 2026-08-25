@@ -1,6 +1,9 @@
 ---
 title: Football Hub
 summary: Live standings, fixtures, and scorers across 7 competitions
+verdict:
+  tried: "A rate-limited free tier"
+  result: "7 competitions stay live"
 role: Solo - Open source
 kind: Web application
 year: "2025"

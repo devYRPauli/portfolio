@@ -1,6 +1,9 @@
 ---
 title: "Baton: I Built a Tool for Delegating Code to an AI, Then Used It to Build Itself"
 description: A standalone kit that installs a reliable orchestrator-delegates-to-executor workflow into Claude Code - and the dogfooding loop that wrote it
+verdict:
+  tried: "8 tasks delegated"
+  result: "2 failed, both my spec's fault"
 pubDate: 2026-07-13
 tags:
   - ai-agents

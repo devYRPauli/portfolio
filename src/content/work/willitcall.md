@@ -1,6 +1,9 @@
 ---
 title: willitcall
 summary: The caniuse of local-model tool calling
+verdict:
+  tried: "Nobody had published the matrix"
+  result: "32 rows, 3 servers"
 role: Solo - Live
 kind: Conformance suite + public matrix
 year: "2026"

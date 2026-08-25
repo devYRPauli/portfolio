@@ -1,6 +1,9 @@
 ---
 title: World Cup 2026 Picks
 summary: Self-hostable prediction pool with live leaderboards
+verdict:
+  tried: "Skipped picks count as wrong"
+  result: "no hiding in safe games"
 role: Solo - Live
 kind: Live product
 year: "2026"
