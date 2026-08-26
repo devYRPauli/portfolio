@@ -14,8 +14,7 @@ stack:
   - GitHub Actions
 links:
   - { label: GitHub, href: https://github.com/devYRPauli/baton }
-order: 3
-featuredOrder: 3
+order: 6.5
 ---
 
 A standalone kit that installs an orchestrator-delegates-to-executor workflow into Claude Code. A coding agent hands implementation work to an executor CLI, and the jobs survive the session that launched them.
