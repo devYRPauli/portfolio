@@ -1,11 +1,11 @@
 ---
 title: World Cup 2026 Picks
-summary: Self-hostable prediction pool with live leaderboards
+summary: Self-hostable prediction pool for small groups
 verdict:
   tried: "Skipped picks count as wrong"
   result: "no hiding in safe games"
-role: Solo - Live
-kind: Live product
+role: Solo - Shipped
+kind: Product
 year: "2026"
 stack:
   - Next.js (App Router)
@@ -14,11 +14,10 @@ stack:
   - Vercel + Cron
 links:
   - { label: GitHub, href: https://github.com/devYRPauli/world-cup-2026-picks }
-  - { label: Live, href: https://world-cup-2026-picks.vercel.app }
 order: 8
 ---
 
-A prediction pool for small groups, built for the 2026 World Cup and running live through the tournament. Pick match outcomes, choose group qualifiers, and compete on a leaderboard that updates as real results land.
+A prediction pool for small groups, built for the 2026 World Cup and run through the tournament. Members picked match outcomes and group qualifiers, and the leaderboard updated as real results landed. The pool has finished; the code and the final standings stay in the repo.
 
 ## Problem
 

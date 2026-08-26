@@ -19,6 +19,8 @@ order: 6.5
 
 A standalone kit that installs an orchestrator-delegates-to-executor workflow into Claude Code. A coding agent hands implementation work to an executor CLI, and the jobs survive the session that launched them.
 
+Baton is superseded by [Podium](/work/podium/), which adds a roster of bots and an acceptance check the runner executes. Baton still works. New work goes to Podium.
+
 ## Problem
 
 Letting a planning model delegate code to a separate executor is good practice. The orchestrator briefs and verifies, the executor writes. The background path was the flaky part. Jobs launched, the launching session ended, and the work went with it. A background flag got stripped; a session-end hook killed jobs in flight.
