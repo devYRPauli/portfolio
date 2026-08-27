@@ -1,9 +1,9 @@
 {
-  "updated": "2026-08-26",
-  "merged": 65,
-  "projects": 28,
+  "updated": "2026-08-27",
+  "merged": 69,
+  "projects": 30,
   "byRepo": {
-    "infiniflow/ragflow": 14,
+    "infiniflow/ragflow": 16,
     "steipete/CodexBar": 8,
     "mem0ai/mem0": 4,
     "BerriAI/litellm": 3,
@@ -18,6 +18,8 @@
     "steipete/tokentally": 2,
     "agno-agi/agno": 1,
     "google-research/tabfm": 1,
+    "neuml/txtai": 1,
+    "py-pdf/pypdf": 1,
     "steipete/BlackBar": 1,
     "steipete/inngest": 1,
     "steipete/macos-automator-mcp": 1,

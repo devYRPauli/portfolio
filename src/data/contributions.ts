@@ -95,7 +95,20 @@ const described: Omit<Project, 'count'>[] = [
     what: 'A TurboQuant prototype. The fix came out of my KV cache compression study.',
     highlights: ['fix(qjl): use orthogonal projection and sqrt(d) scale factor'],
   },
-];
+  {
+    repo: 'neuml/txtai',
+    what: 'An embeddings database for semantic search and LLM workflows.',
+    highlights: [
+      'Index zero and False values in the tabular pipeline instead of dropping them',
+    ],
+  },
+  {
+    repo: 'py-pdf/pypdf',
+    what: 'The pure-Python PDF library a large share of ingestion pipelines sit on.',
+    highlights: [
+      'Detect a duplicate dictionary key whose first value is falsy',
+    ],
+  },];
 
 /** Projects most people will recognize by name, with live counts attached. */
 export const notable: Project[] = described
