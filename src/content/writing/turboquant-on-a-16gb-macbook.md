@@ -100,9 +100,9 @@ I swapped in an orthogonal matrix (via QR decomposition) and changed the scale t
 
 **Then I went back and actually re-derived the math, and I was wrong about the framing.**
 
-The paper's pairing of a Gaussian matrix with the `1/d` scale is not a bug. It is self-consistent and unbiased. Gaussian rows have norm approximately `sqrt(d)`, so the projection output is about `sqrt(d)` larger than it would be with unit-norm rows, and the `1/d` scale absorbs exactly that factor. The `sqrt(d)` "error" I thought I had found only exists relative to the orthogonal matrix I introduced in the same change. In other words, the projection change and the scale change are one coupled substitution, not two independent fixes. You cannot do one without the other, and the stock code was never carrying a scale bug.
+The paper's pairing of a Gaussian matrix with the `1/d` scale is self-consistent and unbiased. Gaussian rows have norm approximately `sqrt(d)`, so the projection output is about `sqrt(d)` larger than it would be with unit-norm rows, and the `1/d` scale absorbs exactly that factor. The `sqrt(d)` "error" I thought I had found only exists relative to the orthogonal matrix I introduced in the same change. In other words, the projection change and the scale change are one coupled substitution, not two independent fixes. You cannot do one without the other, and the stock code was never carrying a scale bug.
 
-So what actually fixed it? Not a corrected formula. A variance reduction. The paper-faithful estimator is unbiased but so noisy at head dimension 128 that attention collapses. The orthogonal variant has the same expectation but far lower variance, and that is what makes generation stable.
+So what actually fixed it was a variance reduction, not a corrected formula. The paper-faithful estimator is unbiased but so noisy at head dimension 128 that attention collapses. The orthogonal variant has the same expectation but far lower variance, and that is what makes generation stable.
 
 This distinction matters. The wrong version is "the original authors made a mistake," which is false and a bad look. The right version is that the paper is correct in expectation, but its variance bound is loose enough that a naive implementation degenerates in practice. My change reduces that variance and fixes it. That version is true, and far more interesting.
 

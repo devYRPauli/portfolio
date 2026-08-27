@@ -34,7 +34,7 @@ Short case study: **[TabFM Evaluation](/work/tabfm-evaluation/)**
 
 I read the TabFM launch post the day it went up. The pitch is genuinely interesting: tabular data is the one domain where deep learning has repeatedly lost to gradient-boosted trees, and here was a foundation-model approach claiming to close that gap with *zero* training on your data. It learns in-context, the way a large language model does, except the "context" is your training rows.
 
-My first instinct with a claim like that is not to believe it and not to dismiss it, but to reproduce it. Benchmarks in papers and blog posts are run by people who want their method to look good. That is not dishonesty; it is just how incentives work. An independent reproduction is the only way to know which parts hold up when someone with no stake in the outcome runs them.
+My first instinct with a claim like that is not to believe it and not to dismiss it, but to reproduce it. Benchmarks in papers and blog posts are run by people who want their method to look good. That reflects incentives rather than dishonesty. An independent reproduction is the only way to know which parts hold up when someone with no stake in the outcome runs them.
 
 So I set three rules for myself before writing a line of code:
 
@@ -72,7 +72,7 @@ I ran this across three machines, each with one job:
 
 The MacBook is "orchestration only" for a reason I learned the hard way. Early on I ran the full model on the 16 GB laptop. The 32-member ensemble needs a ~17 GB working set. macOS tried to cover the gap with swap, wrote about 39 GB of it, and the machine restarted itself.
 
-That incident produced the most useful piece of infrastructure in the whole project: a `safe_run.sh` watchdog that preflights free memory and disk, then kills any job before its resident set, system swap, or free disk crosses a limit. A killed job is an acceptable outcome; a machine restart is not. Every heavy run after that went through it. The lesson generalizes: **when you are probing the limits of a model's resource use, build the kill-switch before you need it.**
+That incident produced the most useful piece of infrastructure in the whole project: a `safe_run.sh` watchdog that preflights free memory and disk, then kills any job before its resident set, system swap, or free disk crosses a limit. I would rather lose a job than restart the machine. Every heavy run after that went through it. The lesson generalizes: **when you are probing the limits of a model's resource use, build the kill-switch before you need it.**
 
 ---
 
@@ -82,7 +82,7 @@ Before the headline benchmark, three checks:
 
 **Phase 1 - conformance and determinism.** The scikit-learn contract holds, and predictions are **bit-exact deterministic** under a fixed seed, on both the Studio CPU and the 4090 GPU. CPU and GPU agree numerically. Good - a model whose outputs drift run-to-run is not one you can benchmark honestly.
 
-**Phase 2 - known-answer sanity.** Before trusting it on real data, I checked it can learn things I already know the answer to. It nails XOR (accuracy 1.00), accuracy climbs from 0.69 to 0.98 as I feed it more context rows, and it recovers a monotone function at R2 0.997. It genuinely learns from context; it is not pattern-matching noise.
+**Phase 2 - known-answer sanity.** Before trusting it on real data, I checked it can learn things I already know the answer to. It nails XOR (accuracy 1.00), accuracy climbs from 0.69 to 0.98 as I feed it more context rows, and it recovers a monotone function at R2 0.997. It genuinely learns from context rather than matching noise.
 
 **A caught harness bug.** My first sanity layer looked broken until I found the bug was *mine*: the synthetic-data generator was drawing a fresh labeling function for train versus test. Fixing my own harness before blaming the model is a recurring theme. Most of my "the model is wrong" moments turned out to be "my measurement is wrong" moments.
 
@@ -197,7 +197,7 @@ So I ran the sweep again on the same 4090, this time on the **PyTorch backend at
 | 20000 | ~17 GB (near ceiling) | 5.0 GB | 384.1 s -> 87.8 s |
 | 40000 | OOM (>24 GB) | 7.0 GB | - -> 245.4 s |
 
-Two caveats I want to be explicit about, because the numbers look almost too good. First, the memory columns are **not the same metric**: the JAX figure is `nvidia-smi` (masked by XLA preallocation), while the PyTorch figure is `torch.cuda.max_memory_allocated` (the device-authoritative live working set). So "17 GB vs 3 GB" is not a clean like-for-like allocation delta - the honest framing is "flat ~17 GB and OOM around 20-30k" versus "3-7 GB and comfortably fits 40k." Second, this compares two *code states* (my older JAX pin against today's chunked PyTorch main), not JAX-vs-PyTorch as languages.
+Two caveats I want to be explicit about, because the numbers look almost too good. First, the memory columns are **not the same metric**: the JAX figure is `nvidia-smi` (masked by XLA preallocation), while the PyTorch figure is `torch.cuda.max_memory_allocated` (the device-authoritative live working set). So "17 GB vs 3 GB" mixes two different metrics. The honest framing is "flat ~17 GB and OOM around 20-30k" versus "3-7 GB and comfortably fits 40k." Second, this compares two *code states* (my older JAX pin against today's chunked PyTorch main), not JAX-vs-PyTorch as languages.
 
 With those caveats stated, the practical result is real and it is large: on a single 24 GB card the updated PyTorch backend **fits roughly twice the context and runs 2-4x faster at scale.** My original "distrust flat numbers" finding still stands for the JAX backend - but the maintainers' chunking work is exactly the fix that flattens the memory wall for good. That is the best possible outcome for a reproduction to surface: not just a verdict on the old state, but a measured confirmation that the new state is better.
 

@@ -52,11 +52,11 @@ I want to report these plainly because they were all avoidable.
 
 **Submission 1** re-quantized a weight window. The rules document said, in a section I had not read carefully enough, that the quantization envelope was frozen - even if the output stays correct. The reviewer rejected it and quoted my own code comment back to me as evidence. One grep would have prevented it.
 
-**Submission 2** changed GEMM tile geometry. Before submitting, I ran an adversarial review, and the reviewer warned that my bit-exactness argument did not cover the split-K path on the M5's kernel family. I recorded the objection as a caveat and submitted anyway. The behavior gate failed exactly there: expected 5991, actual 31807. A flagged unverified correctness precondition is not a caveat. It is a blocker. This rule is now written down where I cannot miss it.
+**Submission 2** changed GEMM tile geometry. Before submitting, I ran an adversarial review, and the reviewer warned that my bit-exactness argument did not cover the split-K path on the M5's kernel family. I recorded the objection as a caveat and submitted anyway. The behavior gate failed exactly there: expected 5991, actual 31807. A flagged unverified correctness precondition is a blocker. This rule is now written down where I cannot miss it.
 
-**Submission 3** was correctly narrowed and passed every gate. The ranked machine priced it at -2.05 percent. A clean, honest negative.
+**Submission 3** was correctly narrowed and passed every gate. The ranked machine priced it at -2.05 percent. It was a clean, honest negative.
 
-After that, my process got strict: read the policy first, classify every change by whether my hardware can actually verify it, run two independent adversarial reviews before submitting, and treat any unresolved objection as a stop. My next five submissions all passed the static review and the behavior gate. None of the failures that followed were process failures. They were something else.
+After that, my process got strict: read the policy first, classify every change by whether my hardware can actually verify it, run two independent adversarial reviews before submitting, and treat any unresolved objection as a stop. My next five submissions all passed the static review and the behavior gate. None of the failures that followed were process failures.
 
 ---
 
@@ -82,7 +82,7 @@ This is the table I wish I had on day one. Every row is an officially priced res
 
 The pattern that emerged from the field's collective pricing: instruction-count cuts and byte cuts transfer between silicon generations. Dispatch-count cuts and anything whose benefit depends on scheduling context do not. The M5's memory system behaves differently enough that a fusion which wins on every other machine can lose by 19 percent there.
 
-There was a second, subtler version of the problem. The frontier moved 4-8 times a day, and each promotion changed the tree your change lands in. I watched one four-line scheduling change get promoted, then priced at -1.14 percent two promotions later, then effectively promoted again in a different tree context. My own held patches flipped sign across trees three times. A pricing is not a property of a change. It is a property of a change in a tree, and the tree does not sit still.
+There was a second, subtler version of the problem. The frontier moved 4-8 times a day, and each promotion changed the tree your change lands in. I watched one four-line scheduling change get promoted, then priced at -1.14 percent two promotions later, then effectively promoted again in a different tree context. My own held patches flipped sign across trees three times. A pricing belongs to a change in a tree, not to the change alone, and the tree does not sit still.
 
 ---
 

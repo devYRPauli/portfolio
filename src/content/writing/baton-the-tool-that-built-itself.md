@@ -101,7 +101,7 @@ That is the standard I try to hold on every project: do not take the tool's word
 
 ## Two bugs, and they were mine
 
-The most interesting failure in the build was not a bug in the generated code. It was a bug in my plan.
+The most interesting failure in the build came from my plan, not from the generated code.
 
 Two tasks failed their tests on the first pass. When I dug in, the executor had implemented my plan faithfully, character for character. The plan was wrong.
 
@@ -125,7 +125,7 @@ After that, "delegate this to the executor" just works, with a brief, a durable 
 
 - **macOS and Linux only.** The runner leans on `nohup`, `ps`, and process reparenting. Windows is not supported and I did not pretend otherwise.
 - **Verified with a fake executor, not yet battle-tested by a stranger.** I proved the mechanics end to end (survival, render, install, acceptance) with a stand-in executor and cross-platform CI. A first real-world install by someone who is not me, against a live executor, is the next validation I want.
-- **The one-command plugin version is deliberately deferred.** The agent-driven install works today. A packaged plugin is a "when it earns it" upgrade, not something I built speculatively.
+- **The one-command plugin version is deliberately deferred.** The agent-driven install works today. A packaged plugin can come later, once the agent-driven install stops being enough.
 - **It never manages your secrets, by design.** That is a feature, but it means auth is on you.
 
 ---

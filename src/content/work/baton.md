@@ -39,4 +39,4 @@ Undisciplined delegation is the other failure mode. No brief, no acceptance test
 
 Standalone means fewer built-in features to lean on, but no dependency on a component with known reliability bugs. macOS and Linux only, because the durability guarantee rests on nohup, ps, and reparenting. Windows is out rather than faked.
 
-It never manages credentials, which costs some setup convenience and means the kit never touches a secret. The one-command plugin version is deferred on purpose. The agent-driven install works today, and a packaged plugin is a "when it earns it" upgrade.
+It never manages credentials, which costs some setup convenience and means the kit never touches a secret. The one-command plugin version is deferred on purpose. The agent-driven install works today, and a packaged plugin can come later.

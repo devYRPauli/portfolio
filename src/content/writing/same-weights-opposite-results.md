@@ -31,8 +31,8 @@ Three findings survived replication, and one of my own headline claims did not:
    deltas.** llama.cpp compiles your tool definitions into a grammar and
    constrains decoding with it - a call naming a function you never supplied
    cannot be sampled. Ollama and mlx-lm generate unconstrained text and parse a
-   tool call out of it afterwards. Same weights, opposite results, and it is a
-   property of the stack, not the model.
+   tool call out of it afterwards. Same weights, opposite results, decided by
+   the stack rather than the model.
 2. **Quantization level does not order tool-calling ability** on this corpus.
    The folklore that lower quants degrade tool calling did not show up: across
    Q8_0, Q4_K_M, and Q3_K_M, seed-varied replication puts the arms within noise
@@ -101,7 +101,8 @@ call, wrote it up, and filed it upstream.
 
 A maintainer pushed back, and they were right to. When I recovered the actual
 discarded bytes (using a rebuild with a then-open logging PR), the model had
-emitted the tool's *description* string in the `name` field. Not a valid call.
+emitted the tool's *description* string in the `name` field. That was not a
+valid call.
 Ollama's parser had correctly rejected garbage; my claim was built on an
 inference from the token count, not on the tokens themselves. I retitled the
 issue, retracted the claim in the thread with credit to the person who
@@ -122,9 +123,8 @@ failures are swallowed).
 
 That is the mechanism behind the whole matrix. It favors llama.cpp
 systematically, in every row, for every model. A llama.cpp-versus-Ollama delta
-is not evidence that Ollama is defective or that a model is worse than
-another - it is the difference between constrained and unconstrained decoding
-showing up in a table.
+measures constrained decoding against unconstrained decoding, not the quality
+of either server or model.
 The comparison that isolates the model is same-server, never cross-server. The
 site now discloses this above the matrix, because without it, every reader
 would misread the reds the same way I did.
@@ -196,8 +196,8 @@ and fail. The matrix now distinguishes, mechanically, per response:
   Ten runs, zero variance. The 7 passes are precisely the negative traps,
   where emitting no parsed call is correct - a model doing everything right
   and scoring near zero. Without this class, those cells read as "granite
-  cannot call tools", which is false. It is neither a model failure nor a
-  server defect: it is an ecosystem format mismatch, a third fault domain.
+  cannot call tools", which is false. It is a third fault domain: an
+  ecosystem format mismatch.
 
 Each class is assigned conservatively - crediting a model with a call it never
 made is worse than leaving a cell unexplained - and the full precedence rules

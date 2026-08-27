@@ -24,7 +24,7 @@ A command-line tool that turns Claude Code, Codex, and Cursor history into resum
 
 Coding-agent transcripts pile up fast. The moment you switch projects the context is gone, and getting it back means scrolling old sessions to remember what you were doing, what you decided, and what is still open.
 
-Keyword search does not solve this. The useful unit is not a matching line, it is the piece of work that line belonged to.
+Keyword search does not solve this. The useful unit is the piece of work a matching line belonged to.
 
 ## Approach
 
@@ -46,3 +46,5 @@ Keyword search does not solve this. The useful unit is not a matching line, it i
 I chose a transparent heuristic core over an LLM-by-default pipeline. It is auditable and it runs with no keys, which matters for a tool that reads your entire working history. The cost is accuracy: 0.86 F1 against 0.95 when a local model is available.
 
 Every reconstruction carries a confidence score and shows its alternatives rather than guessing. That makes the output longer and less tidy than a single confident answer, which I think is the right way round for a memory tool.
+
+It also only knows what the transcripts recorded. Looma reads history that already exists, so work done away from the agent stays invisible to it.
