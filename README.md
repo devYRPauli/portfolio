@@ -1,8 +1,11 @@
 # yashrajpandey.com
 
-Personal site of Yash Raj Pandey, an AI systems engineer and AI Agents Architect at UF IFAS. The site is intentionally text-first: selected work, technical writing, and concise context about the systems behind them.
+Source for my personal site. It is a text-first portfolio for selected work,
+technical writing, and short case studies.
 
-Built with Astro as a static site with no client framework. Work and writing live in Markdown content collections, while shared layouts handle metadata, structured data, navigation, and generated social cards.
+The site uses Astro with no client framework. Work and writing live in Markdown
+content collections. Shared layouts handle metadata, structured data,
+navigation, and generated social cards.
 
 ## Local development
 
