@@ -1,9 +1,9 @@
 {
-  "updated": "2026-09-14",
-  "merged": 92,
+  "updated": "2026-09-21",
+  "merged": 93,
   "projects": 33,
   "byRepo": {
-    "infiniflow/ragflow": 20,
+    "infiniflow/ragflow": 21,
     "steipete/CodexBar": 10,
     "steipete/birdclaw": 5,
     "mem0ai/mem0": 4,
