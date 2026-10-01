@@ -2,7 +2,7 @@ name: Sync contribution counts
 
 # The counts on /contributions/ drift as pull requests merge elsewhere.
 # This refreshes them weekly and commits only when a number actually changed,
-# which then triggers the normal deploy. Descriptions are never touched.
+# and then starts the deploy. Descriptions are never touched.
 
 on:
   schedule:
@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   sync:
@@ -28,6 +29,8 @@ jobs:
         run: npm run sync:contributions
 
       - name: Commit if changed
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           if git diff --quiet -- src/data/contributions.generated.json; then
             echo "No count changes. Nothing to commit."
@@ -40,3 +43,5 @@ jobs:
           git add src/data/contributions.generated.json
           git commit -m "Update contribution counts to ${MERGED} merged across ${PROJECTS} projects"
           git push
+          # A push made with GITHUB_TOKEN starts no other workflow, so start the deploy here.
+          gh workflow run deploy.yml
