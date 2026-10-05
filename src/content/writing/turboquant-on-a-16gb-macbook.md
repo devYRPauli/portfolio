@@ -81,7 +81,7 @@ With the math validated, I ran the full pipeline through actual generation. Base
 
 The MSE-only variant produced coherent text at tiny prompts but completely failed to retrieve the needle at any real context length: at 16K it hallucinated fake IDs like "UF-B999999999999". The moment I enabled the QJL correction stage, generation collapsed into literal word-loop degeneration ("gen gen gen gen...") even at 36 tokens.
 
-One detail stood out: both of the independent open-source implementations I was working from (a Python prototype and an MLX package) had quietly abandoned the QJL stage in favor of MSE-only. Two separate engineers had independently concluded that the paper's second stage made things worse. That is a strong signal that something real was wrong, and it is where the investigation got interesting.
+Both of the independent open-source implementations I was working from (a Python prototype and an MLX package) had quietly abandoned the QJL stage in favor of MSE-only. Two separate engineers had independently concluded that the paper's second stage made things worse. That is a strong signal that something real was wrong, and it is where the investigation got interesting.
 
 ---
 
@@ -129,7 +129,7 @@ That damping factor of 0.7, incidentally, turns out to be almost exactly the MMS
 
 ## Keys are not values
 
-Fixing the QJL math was necessary but not sufficient. A symmetric 4-bit allocation still failed. With 4-bit keys (3-bit MSE plus 1-bit QJL), an early probe could not find the needle even in an 800-token prompt. The clue came from a clean diagnostic in the llama.cpp path:
+Fixing the QJL math was not enough on its own. A symmetric 4-bit allocation still failed. With 4-bit keys (3-bit MSE plus 1-bit QJL), an early probe could not find the needle even in an 800-token prompt. The clue came from a clean diagnostic in the llama.cpp path:
 
 1. Quantize keys, keep values full precision: degenerate, repetitive output.
 2. Keep keys full precision, quantize values: coherent, correct output.
@@ -144,9 +144,9 @@ My round 1 post-mortem notes record the effect on reconstruction. With the fixes
 
 ## Round 2: the llama.cpp bug hunt
 
-The MLX path proved the algorithm works. But MLX dequantization runs as slow, unfused array operations, so I moved to two llama.cpp forks for a real C++/Metal implementation. This is where the classic systems bugs lived.
+The MLX path showed that 5-bit keys unlocked needle retrieval. But MLX dequantization runs as slow, unfused array operations, so I moved to two llama.cpp forks for a real C++/Metal implementation. This is where the classic systems bugs lived.
 
-**Bug 1: GGML context sizing crash.** One fork crashed instantly on startup with `GGML_ASSERT(obj_new) failed`, even with the GPU fully disabled. The first hypothesis was hardware: the logs mentioned the Metal Tensor API being unavailable on the M1 Pro's GPU family, which looked like a smoking gun. It was a red herring. The real cause was a metadata pre-allocation formula that counted one K and one V tensor per layer but did not account for the two shared rotation-matrix tensors the TurboQuant cache allocates. The fix was to reserve two extra tensor slots. A one-expression change. It was a software bug, not a hardware limitation, and disproving the hardware theory was half the work. (This same bug was later fixed independently upstream, which was a nice confirmation.)
+**Bug 1: GGML context sizing crash.** One fork crashed instantly on startup with `GGML_ASSERT(obj_new) failed`, even with the GPU fully disabled. The first hypothesis was hardware: the logs mentioned the Metal Tensor API being unavailable on the M1 Pro's GPU family, which looked like a smoking gun. It was a red herring. The real cause was a metadata pre-allocation formula that counted one K and one V tensor per layer but did not account for the two shared rotation-matrix tensors the TurboQuant cache allocates. The fix was to reserve two extra tensor slots, a one-expression change. It was a software bug, not a hardware limitation, and disproving the hardware theory was half the work. (This same bug was later fixed independently upstream, which was a nice confirmation.)
 
 **Bug 2: missing Metal kernels.** The other fork ran on CPU but crashed on Metal offload because the tq3_0 quantization type was missing from the Metal backend's operation allowlist and had no Flash Attention kernel instantiations. This meant writing tq3_0 quantize and dequantize helpers in the Metal shader, adding the SET_ROWS and FLASH_ATTN_EXT kernel instantiations, and registering the type in the device allowlist.
 
@@ -221,11 +221,11 @@ There is also a broader community discussion tracking TurboQuant work in llama.c
 
 1. **Validate the component before the system.** Confirming the rotation Gaussianized the KV distribution (kurtosis 51 to 0) up front meant that when generation failed, I knew the codec was fine and the bug was elsewhere. That saved a lot of flailing.
 
-2. **A paper being correct in expectation does not mean a naive implementation works.** TurboQuant's QJL is unbiased exactly as written. It still degenerates in practice because the variance bound is loose at real head dimensions. The gap between "unbiased" and "usable" was the entire project.
+2. **A paper being correct in expectation does not mean a naive implementation works.** TurboQuant's QJL is unbiased exactly as written. It still degenerates in practice because the variance bound is loose at real head dimensions.
 
 3. **Debug the diagnosis, not just the symptom.** The GGML crash looked like a hardware incompatibility. It was a counting error in a size formula. The Metal log line was real but irrelevant. Chasing the wrong signal there would have cost days.
 
-4. **Keys and values are not interchangeable.** Asymmetric bit allocation was not in the paper, and retrieval needed it. It only worked together with the orthogonal QJL change. The same bits with the paper's Gaussian QJL still scored 0%.
+4. **Keys and values are not interchangeable.** Asymmetric bit allocation was not in the paper, and retrieval needed it. The same bits with the paper's Gaussian QJL still scored 0%, with degenerate text. A later control spent the fifth key bit on MSE instead of QJL, and it did just as well.
 
 5. **Re-read the source and be willing to overturn your own conclusion.** My first writeup called the fix two bugs. It was one coupled substitution, and the stock code was faithful to the paper. Catching that required going back to the math and running an ablation, and it is the difference between an accurate technical story and a wrong one that happens to sound impressive.
 
@@ -240,6 +240,8 @@ The stock MLX implementation scored 0%. The finished configuration scores 100% a
 The first version of this post said TurboQuant cut KV cache memory by 3.5x to 4x, and that every number was reproducible from the repo. I had not measured the memory. The 3.6x figure is a calculation, and measured peak memory was 7% higher with TurboQuant. The repo also does not hold the modified optiq package yet. I changed the TL;DR, the results section, and the closing paragraph to match.
 
 Later the same day I finished the repo work behind those corrections. I rebuilt the lost optiq changes in `benchmarks/tq_patched.py` and reran the needle test. The 16K result reproduced, but 4K and 8K dropped to 0.5. I also measured the cache. It was only 1.29x smaller than FP16, and the higher peak comes from float32 output. The Ollama tok/s figure covers decode only, while the MLX figures include the prefill. I updated the affected sections again to match.
+
+Later still, I ran a control with no QJL stage at all (`logs/needle-control-k5v4-mse.json`). Keys used 5-bit MSE quantization, and values kept the same 4-bit MSE as the hybrid. Under the same case-insensitive scoring, it found both facts at 16K and matched or beat the October hybrid rebuild at every length. Exact-case scoring favors the hybrid, because the control wrote names like "VcMYb4". Each length is one greedy run, so I count this as a tie. With 4-bit MSE keys and the same values, the score was 0% at every length. So the fifth key bit is what restored retrieval. Spending that bit on QJL did no better than adding it to the MSE quantizer. I had credited QJL for the retrieval gain, and this control does not support that. The orthogonal projection only kept the QJL bit from breaking generation.
 
 ---
 
