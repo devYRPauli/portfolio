@@ -1,55 +1,43 @@
 # yashrajpandey.com
 
-Source for my personal site. It is a text-first portfolio for selected work,
-technical writing, and short case studies.
+The source for my personal site. It holds my projects and my writing, and it lists my open source work.
 
-The site uses Astro with no client framework. Work and writing live in Markdown
-content collections. Shared layouts handle metadata, structured data,
-navigation, and generated social cards.
+The site is static. It uses Astro with no client framework. Projects and posts are Markdown files in content collections.
 
-## Local development
+## Run it locally
 
 ```sh
 npm ci
 npm run dev
 ```
 
-The local site runs at `http://localhost:4321/` by default.
+The dev server runs at `http://localhost:4321/`. Astro runs it as a background daemon, so `npm run dev` returns at once. Use `npx astro dev status`, `npx astro dev logs`, and `npx astro dev stop` to manage it.
 
 ```sh
-npm run check                 # Validate Astro, TypeScript, and content schemas
-npm run build                 # Validate, build to dist/, and check internal links
-npm run preview               # Serve the production build locally
+npm run check                 # Check Astro, TypeScript, and the content schemas
+npm run build                 # Check, build to dist/, and check internal links
+npm run preview               # Serve the production build
 npm run sync:contributions    # Refresh merged pull request counts from the GitHub API
 ```
 
-Astro runs the dev server as a background daemon, so `npm run dev` returns immediately. Use `npx astro dev status`, `npx astro dev logs`, and `npx astro dev stop` to manage it.
+The build must finish with 0 errors, 0 warnings, and 0 hints.
 
 ## Content
 
-Writing lives in `src/content/writing/`. Each Markdown file requires:
+The schemas are in `src/content.config.ts`. Bad or missing frontmatter fails the check and the build.
 
-- `title`
-- `description`
-- `pubDate`
-- Optional `updatedDate`, `tags`, and `draft`
-- Optional `verdict`, described below
-- Optional `project`, described below
+Posts are in `src/content/writing/`. Each post needs `title`, `description`, and `pubDate`. The optional fields are `updatedDate`, `tags`, `draft`, `verdict`, `project`, and `featuredOrder`. A post with `featuredOrder` shows in the Writing section of the home page, in that order.
 
-Work lives in `src/content/work/`. Each Markdown file requires:
+Projects are in `src/content/work/`. Each project needs `title`, `summary`, `role`, `kind`, `year`, `stack`, `mode`, and `order`. The optional fields are `links`, `verdict`, `supersededBy`, and `featured`.
 
-- `title`, `summary`, `role`, `kind`, and `year`
-- `stack`
-- `order`, which controls the full work index
-- Optional `links`
-- Optional `featuredOrder`, which selects and orders up to three homepage projects
-- Optional `verdict`, described below
-
-Collection schemas are defined in `src/content.config.ts`. Invalid or incomplete frontmatter fails the Astro check and production build.
+- `mode` is `build`, `evaluate`, or `football`. It sets the group on the home page and on `/work/`.
+- `order` sorts the projects in a group. The home page and `/work/` use the same order.
+- `featured: true` puts the project on the home page.
+- `supersededBy` names the project that replaced this one. A superseded project sorts last in its group.
 
 ### Verdict lines
 
-An entry can end with a verdict: what was tried, then what came of it.
+A post or a project can end with a verdict: what I tried, then what came of it.
 
 ```yaml
 verdict:
@@ -57,44 +45,40 @@ verdict:
   result: "0 promoted"
 ```
 
-`EntryList` puts an arrow between the two parts and gives the result the `--flag` colour. The line then appears under that entry on the home page and on the section index.
+The result shows after an arrow, in the flag color. The field is optional. An entry with no honest outcome has no verdict. Negative results go here on the same terms as wins. Keep the line to about 56 characters.
 
-The field is optional on purpose. An entry with no honest outcome renders bare, which is better than a forced line. Negative results belong here on the same terms as wins.
+### A post about a project
 
-Keep both parts short. A verdict over about 56 characters wraps onto a second row.
-
-### Linking a post to its project
-
-Four posts are the long-form writeup of a project that also has a short case study. The post declares that relationship once, with a reference to the work entry:
+When a post is the long writeup of a project, the post says so once:
 
 ```yaml
 project: willitcall
 ```
 
-Everything else derives from it. The case study renders a "Writeup" link back to the post. The post renders a "Project" link to the case study. The home page skips a post whose project is already featured, so one subject never takes two of the six home entries.
+The code reads the pair from this field only. The project then has no page of its own. Every link to the project goes to the post, and `/work/willitcall/` redirects to the post. The post shows the project's role, kind, stack, and links beside the text. The home page does not list the post when the project is already featured.
 
-Do not hand-write a "Writeup" entry in a work file's `links:`. That was the old approach, it only pointed one way, and nothing in the code knew a pair was a pair.
+Do not write a link between a post and its project by hand.
 
-The section indexes are unaffected. `/work/` lists every project and `/writing/` lists every post, whether or not they are paired.
+## Pages and feeds
 
-## Generated pages and feeds
-
-- `/work/` and `/writing/` provide the complete indexes.
-- `/about/` covers background, role history, and contact.
-- `/contributions/` lists merged pull requests to projects I do not own.
-- `/rss.xml` publishes writing as an RSS feed.
-- `/sitemap-index.xml` is generated during the production build.
-- `/llms.txt` provides a plain-text site summary.
-- `/og/default.png`, `/og/page/[slug].png`, `/og/work/[slug].png`, and `/og/writing/[slug].png` generate social cards at build time.
+- `/work/` and `/writing/` list every project and every post.
+- `/about/` has my background, my roles, and my contact links.
+- `/contributions/` lists my merged pull requests to projects that I do not own.
+- `/rss.xml` is the RSS feed for the posts.
+- `/sitemap-index.xml` comes from the build. It leaves out the redirect pages.
+- `/llms.txt` is a plain text summary of the site.
+- `/og/` holds the social cards. The build makes them with Satori.
 
 ## Contribution counts
 
-The figures on `/contributions/` come from `src/data/contributions.generated.json`, written by `scripts/sync-contributions.mjs` and refreshed by a weekly GitHub Action. That file is generated and should not be edited by hand.
+The counts come from `src/data/contributions.generated.json`. `scripts/sync-contributions.mjs` writes this file, and a GitHub Action runs the script every week. Do not edit the file by hand.
 
-Project descriptions in `src/data/contributions.ts` are hand-written, and the sync never touches them. Every surface that states a count derives it from `totals`, so a refreshed number updates the page, the home record row, `llms.txt`, and the social card together.
+The project descriptions in `src/data/contributions.ts` are hand-written. The sync does not change them. Every page that shows a count reads it from `totals`, so a new count updates all of them.
 
-Static files that must retain stable public URLs, including the resume, favicons, manifest, robots file, and custom domain file, live in `public/`. Transformable page images live in `src/assets/` and use Astro's image pipeline.
+## Files
 
-## Deployment
+`public/` holds the files that need a fixed URL: the resume, the icons, the manifest, `robots.txt`, and `CNAME`. Images that Astro processes are in `src/assets/`.
 
-Push to `main`. GitHub Actions runs the production build and deploys the result to GitHub Pages. The custom domain is configured through `public/CNAME`.
+## Deploy
+
+Push to `main`. A GitHub Action builds the site and deploys it to GitHub Pages. `public/CNAME` sets the custom domain.
