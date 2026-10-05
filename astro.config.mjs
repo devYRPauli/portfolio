@@ -2,6 +2,7 @@ import { defineConfig, fontProviders } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import { satteri } from '@astrojs/markdown-satteri';
 import GithubSlugger from 'github-slugger';
+import { readFileSync } from 'node:fs';
 
 // Runs before Astro's heading-ids plugin, which keeps any id already set.
 const headingAnchors = () => {
@@ -25,9 +26,16 @@ const headingAnchors = () => {
   };
 };
 
+// A /work/ page whose project has a writeup is a redirect stub. Stubs are noindex,
+// so they stay out of the sitemap. Runs after the build has written dist/.
+const isRedirect = (page) =>
+  readFileSync(new URL(`./dist${new URL(page).pathname}index.html`, import.meta.url), 'utf8').includes(
+    'http-equiv="refresh"',
+  );
+
 export default defineConfig({
   site: 'https://yashrajpandey.com',
-  integrations: [sitemap()],
+  integrations: [sitemap({ filter: (page) => !isRedirect(page) })],
   prefetch: {
     prefetchAll: true,
     defaultStrategy: 'viewport',
@@ -39,26 +47,26 @@ export default defineConfig({
     shikiConfig: {
       themes: { light: 'github-light', dark: 'github-dark' },
     },
-    processor: satteri({ hastPlugins: [headingAnchors] }),
+    // Straight quotes in, straight quotes out: the rest of the site is ASCII.
+    processor: satteri({ hastPlugins: [headingAnchors], features: { smartPunctuation: false } }),
   },
   fonts: [
     {
-      provider: fontProviders.fontsource(),
-      name: 'Space Grotesk',
+      // Cal Sans v2 (OFL), vendored from github.com/calcom/sans as a Latin subset
+      // of the Google Fonts build, with the unused YTAS and SHRP axes pinned at
+      // their defaults (9 KB less). One variable file covers display and text
+      // through its opsz axis.
+      provider: fontProviders.local(),
+      name: 'Cal Sans',
       cssVariable: '--font-sans',
-      weights: ['300 700'],
-      // Astro only generates a metric-matched fallback when a generic family is
-      // named. Without these the serif and mono both fell back to sans-serif
-      // metrics and the page shifted on swap.
+      // Astro only generates a metric-matched fallback when a generic family is named.
       fallbacks: ['sans-serif'],
-    },
-    {
-      provider: fontProviders.fontsource(),
-      name: 'Instrument Serif',
-      cssVariable: '--font-serif',
-      weights: ['400'],
-      styles: ['normal', 'italic'],
-      fallbacks: ['serif'],
+      options: {
+        variants: [
+          { src: ['./src/assets/fonts/cal-sans/CalSans-latin.woff2'], weight: '400 700', style: 'normal' },
+          { src: ['./src/assets/fonts/cal-sans/CalSans-Italic-latin.woff2'], weight: '400 700', style: 'italic' },
+        ],
+      },
     },
     {
       provider: fontProviders.fontsource(),

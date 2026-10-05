@@ -2,44 +2,37 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
+import ModeSection from '../../components/ModeSection.astro';
 import EntryList from '../../components/EntryList.astro';
+import { modes, type Mode } from '../../lib/modes';
+import { workEntry, byOrder, getWriteups } from '../../lib/entries';
 
-const projects = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
+const work = await getCollection('work');
+const writeups = await getWriteups();
 
-const toEntry = (p: (typeof projects)[number]) => ({
-  href: `/work/${p.id}/`,
-  title: p.data.title,
-  meta: [p.data.kind, p.data.year],
-  summary: p.data.summary,
-  verdict: p.data.verdict,
-  transitionName: `work-${p.id}`,
-});
-
-const selected = projects.slice(0, 6).map(toEntry);
-const more = projects.slice(6).map(toEntry);
+const inMode = (mode: Mode, withLinks = false) =>
+  work
+    .filter((p) => p.data.mode === mode)
+    .sort(byOrder)
+    .map((p) => workEntry(p, work, writeups, withLinks));
 ---
 <BaseLayout
   title="Work - Yash Raj Pandey"
-  description="Selected AI systems, model evaluations, developer tools, and products built by Yash Raj Pandey."
+  description="These are the projects I have built and tested, from a genomics platform at UF to a tool-calling matrix for local model servers. Two are about football."
   ogImage="/og/page/work.png"
   ogImageAlt="Work by Yash Raj Pandey"
 >
   <PageHeader
-    eyebrow={`${projects.length} projects`}
     title="Work"
-    lede="Systems, tools, and independent evaluations I have built and shipped. Each page covers the problem, the decisions, the result, and the parts that did not go smoothly."
+    lede="This is what I have built and tested, at UF and on my own time. Each page covers the trade-offs, including the parts that did not go smoothly."
   />
-  <EntryList entries={selected} />
-
-  {more.length > 0 && (
-    <section class="more">
-      <h2 class="eyebrow">More</h2>
-      <EntryList entries={more} />
-    </section>
-  )}
+  <ModeSection id="build" title={modes.build.label} lede={modes.build.lede}>
+    <EntryList entries={inMode('build')} layout="spec" />
+  </ModeSection>
+  <ModeSection id="evaluate" title={modes.evaluate.label} lede={modes.evaluate.lede}>
+    <EntryList entries={inMode('evaluate')} layout="result" />
+  </ModeSection>
+  <ModeSection id="football" title={modes.football.label} lede={modes.football.lede} band>
+    <EntryList entries={inMode('football', true)} layout="pair" />
+  </ModeSection>
 </BaseLayout>
-
-<style>
-  .more { margin-top: var(--space-8); }
-  .more h2 { margin-bottom: var(--space-4); }
-</style>

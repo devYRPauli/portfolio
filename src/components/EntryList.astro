@@ -1,69 +1,112 @@
 ---
-export interface Entry {
-  href: string;
-  title: string;
-  /** Measured facts. Rendered in the mono voice, figures flagged. */
-  meta: string[];
-  summary: string;
-  verdict?: { tried: string; result: string };
-  transitionName?: string;
+import Verdict from './Verdict.astro';
+import { isoDate } from '../lib/reading';
+import type { Entry } from '../lib/entries';
+
+/**
+ * Each kind of work gets a shape of its own, so groups are told apart by
+ * layout rather than by color.
+ *   spec    title and kind on the left, summary and verdict on the right
+ *   result  the verdict first and large, two up
+ *   dated   a date column, then the entry
+ *   pair    two up, with outside links
+ */
+interface Props {
+  entries: Entry[];
+  layout: 'spec' | 'result' | 'dated' | 'pair';
+  headingLevel?: 2 | 3;
 }
 
-interface Props { entries: Entry[] }
-const { entries } = Astro.props;
+const { entries, layout, headingLevel = 3 } = Astro.props;
+const Heading = headingLevel === 2 ? 'h2' : 'h3';
 ---
-<ul>
+<ul class={layout}>
   {entries.map((e) => (
     <li>
-      <a href={e.href}>
-        <strong transition:name={e.transitionName}>{e.title}</strong>
-      </a>
-      <span class="meta">
-        {e.meta.map((m, i) => (
-          <>
-            {i > 0 && <span class="sep" aria-hidden="true">/</span>}
-            <span>{m}</span>
-          </>
-        ))}
-      </span>
-      <span class="summary">{e.summary}</span>
-      {e.verdict && (
-        <span class="verdict">
-          <span>{e.verdict.tried}</span>
-          <span class="arrow" aria-hidden="true">-&gt;</span>
-          <span class="out">{e.verdict.result}</span>
-        </span>
-      )}
+      {layout === 'dated' && e.date && <time datetime={e.date.toISOString()}>{isoDate(e.date)}</time>}
+      <div class="name">
+        <Heading class="title">
+          <a href={e.href}><span transition:name={e.transitionName}>{e.title}</span></a>
+        </Heading>
+        {e.kind && <p class="kind">{e.kind}</p>}
+        {e.supersededBy && (
+          <p class="kind raised">Superseded by <a href={e.supersededBy.href}>{e.supersededBy.title}</a></p>
+        )}
+      </div>
+      <div class="about">
+        <p class="summary">{e.summary}</p>
+        {e.verdict && <Verdict verdict={e.verdict} />}
+        {e.links && (
+          <p class="links raised">{e.links.map((l) => <a href={l.href}>{l.label}</a>)}</p>
+        )}
+      </div>
     </li>
   ))}
 </ul>
 
 <style>
-  ul { list-style: none; padding: 0; display: grid; gap: var(--space-2); }
-  li {
-    position: relative;
-    display: grid;
-    gap: var(--space-1);
-    min-width: 0;
-    padding: var(--space-4);
-    margin-inline: calc(-1 * var(--space-4));
-    border-radius: 10px;
-  }
-  a {
-    justify-self: start;
-    text-decoration: none;
+  ul { list-style: none; }
+  li { position: relative; }
+
+  .title { font-size: var(--t-md); font-weight: 650; line-height: 1.25; font-variation-settings: normal; }
+  .title a {
     color: var(--ink);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--accent) 55%, transparent);
   }
-  a::after { content: ""; position: absolute; inset: 0; }
-  li:hover { background: var(--bg-raised); }
-  strong {
-    font-weight: 600;
-    font-size: var(--t-body);
-    line-height: 1.35;
-    letter-spacing: -0.01em;
+  /* The title link covers the whole row; links inside the row sit above it. */
+  .title a::after { content: ''; position: absolute; inset: 0; }
+  .raised { position: relative; z-index: 1; }
+  li:hover .title a,
+  .title a:focus-visible { color: var(--accent); text-decoration-color: var(--accent); }
+
+  .kind { margin-top: 0.2rem; }
+  .summary { margin-top: 0.15rem; }
+  .about :global(.verdict) { margin-top: 0.4rem; }
+  .links { display: flex; flex-wrap: wrap; gap: 0.25rem 1.25rem; margin-top: 0.6rem; font-size: var(--t-ui); }
+
+  /* spec rows */
+  .spec li { display: grid; gap: 0.3rem 2rem; padding-block: 1.25rem; border-top: 1px solid var(--line); }
+  .spec li:first-child { padding-top: 0.2rem; border-top: 0; }
+  @media (min-width: 40rem) {
+    .spec li { grid-template-columns: 12.5rem minmax(0, 1fr); }
+    .spec .summary { margin-top: 0.2rem; }
   }
-  li:hover strong { color: var(--accent); }
-  .meta { display: flex; flex-wrap: wrap; gap: 0 var(--space-2); }
-  .sep { color: var(--line); }
-  .summary { font-size: var(--t-read); color: var(--ink-soft); line-height: 1.6; }
+
+  /* result first */
+  .result { display: grid; gap: 2.5rem; }
+  .result li { display: flex; flex-direction: column; }
+  .result .about { display: contents; }
+  .result :global(.verdict) {
+    order: -1;
+    margin: 0 0 1rem;
+    font-size: var(--t-lg);
+    line-height: 1.3;
+    text-wrap: balance;
+  }
+  .result :global(.verdict .out) { display: block; }
+  .result .summary { margin-top: 0.5rem; }
+  @media (min-width: 40rem) {
+    .result { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* dated rows */
+  .dated li { display: grid; gap: 0.3rem 1.5rem; padding-block: 1.35rem; border-top: 1px solid var(--line); }
+  .dated li:first-child { padding-top: 0.2rem; border-top: 0; }
+  .dated time { font-size: var(--t-sm); color: var(--ink-soft); }
+  .dated .title { font-size: var(--t-md); max-width: 36rem; }
+  .dated :is(.name, .about) { grid-column: -2; }
+  .dated .about { max-width: 38rem; }
+  .dated .summary { margin-top: 0.4rem; }
+  @media (min-width: 40rem) {
+    .dated li { grid-template-columns: 6.25rem minmax(0, 1fr); }
+    .dated time { grid-row: 1 / span 2; padding-top: 0.2rem; }
+  }
+
+  /* pair */
+  .pair { display: grid; gap: 2rem 2.5rem; }
+  .pair .summary { margin-top: 0.5rem; }
+  @media (min-width: 40rem) {
+    .pair { grid-template-columns: 1fr 1fr; }
+  }
 </style>

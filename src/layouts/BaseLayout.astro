@@ -64,10 +64,8 @@ const socialImage = new URL(ogImage, Astro.site);
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={socialImage} />
     <meta name="twitter:image:alt" content={ogImageAlt} />
-    <Font cssVariable="--font-sans" preload />
-    {/* The serif sets the h1 on every page, so it is render-blocking in
-        practice. Without preload the heading reflows when it lands. */}
-    <Font cssVariable="--font-serif" preload />
+    {/* The italic loads on first use; nearly every page above the fold is upright. */}
+    <Font cssVariable="--font-sans" preload={[{ style: 'normal' }]} />
     <Font cssVariable="--font-mono" />
     <ClientRouter />
     {jsonLd && <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
@@ -89,7 +87,7 @@ const socialImage = new URL(ogImage, Astro.site);
   <body>
     <a class="skip-link" href="#main-content">Skip to content</a>
     <SiteHeader />
-    <main id="main-content" class="container">
+    <main id="main-content">
       <slot />
     </main>
     <SiteFooter />

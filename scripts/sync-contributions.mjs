@@ -49,16 +49,30 @@ async function allMergedPrs() {
     items.push(...batch);
     if (items.length >= total_count || batch.length === 0) break;
   }
-  return items.map((i) => i.repository_url.split('/').slice(-2).join('/'));
+  return items.map((i) => ({
+    repo: i.repository_url.split('/').slice(-2).join('/'),
+    month: i.pull_request.merged_at.slice(0, 7),
+  }));
 }
 
-const repos = await allMergedPrs();
+const prs = await allMergedPrs();
 
 /** Someone else's repository, and not a student-era merge. */
-const external = repos.filter((r) => !r.startsWith(`${USER}/`) && !EXCLUDED.test(r));
+const external = prs.filter(({ repo }) => !repo.startsWith(`${USER}/`) && !EXCLUDED.test(repo));
 
 const byRepo = {};
-for (const r of external) byRepo[r] = (byRepo[r] || 0) + 1;
+for (const { repo } of external) byRepo[repo] = (byRepo[repo] || 0) + 1;
+
+/** Every month from the first merge to now, so a quiet month shows as 0. */
+const byMonth = {};
+const months = external.map((p) => p.month).sort();
+const now = new Date().toISOString().slice(0, 7);
+for (let m = months[0]; m <= now; ) {
+  byMonth[m] = 0;
+  const [y, mo] = m.split('-').map(Number);
+  m = mo === 12 ? `${y + 1}-01` : `${y}-${String(mo + 1).padStart(2, '0')}`;
+}
+for (const m of months) byMonth[m]++;
 
 const ecosystemByRepo = {};
 for (const [repo, n] of Object.entries(byRepo)) {
@@ -72,6 +86,7 @@ const next = {
   merged: external.length,
   projects: Object.keys(byRepo).length,
   byRepo: Object.fromEntries(Object.entries(byRepo).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))),
+  byMonth,
   ecosystem: {
     owner: ECOSYSTEM_OWNER,
     count: ecosystemCount,

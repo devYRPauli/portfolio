@@ -11,7 +11,8 @@ export async function GET(context) {
   );
   return rss({
     title: 'Yash Raj Pandey - Writing',
-    description: 'Essays and playbooks on local-first AI, RAG, LLM evals, and systems engineering.',
+    description:
+      'I write about reproducing new model research and about two competitions I lost. When a claim turns out wrong, I correct the post and mark the change.',
     site: context.site,
     items: posts.map((post) => ({
       title: post.data.title,

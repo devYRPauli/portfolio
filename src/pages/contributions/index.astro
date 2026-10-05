@@ -1,125 +1,117 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
-import { totals, searchUrl, notable, ecosystem } from '../../data/contributions';
+import ModeSection from '../../components/ModeSection.astro';
+import MonthlyMerges from '../../components/MonthlyMerges.astro';
+import { totals, searchUrl, notable, others, ecosystem } from '../../data/contributions';
 
 const repoUrl = (repo: string) => `https://github.com/${repo}`;
 const prUrl = (repo: string) =>
   `https://github.com/${repo}/pulls?q=is%3Apr+author%3AdevYRPauli+is%3Amerged`;
+const tooling = [...ecosystem.top, ...ecosystem.rest.map((repo) => ({ repo, count: 1 }))];
 ---
 <BaseLayout
-  title="Open Source - Yash Raj Pandey"
-  description="Merged pull requests across llama.cpp, Apple MLX, Google Research's TabFM, RAGFlow, mem0, and litellm. Mostly correctness fixes, each one verifiable."
+  title="Open source - Yash Raj Pandey"
+  description="These are my merged pull requests to llama.cpp, Apple MLX, Google's TabFM, RAGFlow, LiteLLM and others. Almost all of them are bug fixes."
   ogImage="/og/page/contributions.png"
   ogImageAlt="Open source contributions by Yash Raj Pandey"
 >
   <PageHeader
-    eyebrow={`${totals.merged} merged`}
-    title="Open Source"
-    lede="Almost all of them are correctness fixes: a parser that drops data, a bill computed at 1/1000 of the real price, a kernel that returns the wrong answer when its input aliases. I find most of them while using the tool for something else."
-  />
-  <section>
-    <p class="verify meta">
-      <a href={searchUrl}>See every merged pull request on GitHub</a>. Counts exclude my own
-      repositories and student-era merges. Last checked {totals.updated}.
+    title="Open source"
+    lede="Almost all of these are bug fixes. Most fix code that gave a wrong answer without an error. A RAGFlow parser dropped table cells, and LiteLLM billed Perplexity searches at 1/1000 of the price. The fixes span RAG document parsers, LLM gateways, local inference runtimes, SQL and JavaScript linters, and macOS menu-bar apps."
+  >
+    <p class="count">
+      Since May 2026, <span class="fig">{totals.merged}</span> of my pull requests have been merged across{' '}
+      <span class="fig">{totals.projects}</span> open source projects.
     </p>
+    <p class="verify">
+      <a href={searchUrl}>See every merged pull request on GitHub</a>. Counts exclude my own repositories and
+      student-era merges. Last checked <time datetime={totals.updated}>{totals.updated}</time>.
+    </p>
+  </PageHeader>
 
-    <h2 class="eyebrow">Notable projects</h2>
+  <ModeSection id="by-month" title="By month">
+    <MonthlyMerges />
+  </ModeSection>
+
+  <ModeSection id="notable" title="Notable projects">
     <ul class="projects">
       {notable.map((p) => (
         <li>
-          <div class="row">
-            <a class="repo" href={repoUrl(p.repo)}>{p.repo}</a>
-            <a class="count" href={prUrl(p.repo)}>{p.count} merged</a>
+          <div>
+            <h3><a href={repoUrl(p.repo)}>{p.repo.split('/')[0]}/<wbr />{p.repo.split('/')[1]}</a></h3>
+            <a class="merged" href={prUrl(p.repo)}>{p.count} merged<span class="sr-only"> pull requests in {p.repo}</span></a>
           </div>
-          <p class="what">{p.what}</p>
-          <ul class="highlights">
-            {p.highlights.map((h) => <li>{h}</li>)}
-          </ul>
+          <div>
+            <p class="what">{p.what}</p>
+            <ul class="highlights">
+              {p.highlights.map((h) => <li>{h}</li>)}
+            </ul>
+          </div>
         </li>
       ))}
     </ul>
+  </ModeSection>
 
-    <h2 class="eyebrow eco-heading">Developer tooling</h2>
-    <p class="what eco-intro">
-      {ecosystem.count} merged across {ecosystem.repos} repositories in one maintainer's
-      ecosystem (<a href={`https://github.com/${ecosystem.owner}`}>{ecosystem.owner}</a>).
-      {' '}{ecosystem.what}
-    </p>
-    <ul class="eco">
-      {ecosystem.top.map((r) => (
+  {others.length > 0 && (
+    <ModeSection id="others" title="Also merged">
+      <ul class="tooling">
+        {others.map((r) => (
+          <li>
+            <a href={prUrl(r.repo)}>{r.repo}</a>
+            <span class="n">{r.count}</span>
+          </li>
+        ))}
+      </ul>
+    </ModeSection>
+  )}
+
+  <ModeSection
+    id="tooling"
+    title="Developer tooling"
+    lede={`${ecosystem.count} merged across ${ecosystem.repos} repositories in one maintainer's ecosystem. ${ecosystem.what}`}
+    more={{ href: `https://github.com/${ecosystem.owner}`, label: `${ecosystem.owner} on GitHub` }}
+    band
+  >
+    <ul class="tooling">
+      {tooling.map((r) => (
         <li>
           <a href={prUrl(`${ecosystem.owner}/${r.repo}`)}>{r.repo}</a>
           <span class="n">{r.count}</span>
         </li>
       ))}
-      {ecosystem.rest.map((r) => (
-        <li>
-          <a href={prUrl(`${ecosystem.owner}/${r}`)}>{r}</a>
-          <span class="n">1</span>
-        </li>
-      ))}
     </ul>
-  </section>
+  </ModeSection>
 </BaseLayout>
 
 <style>
-  .verify { margin-bottom: var(--space-7); }
-  h2 { margin-bottom: var(--space-4); }
-  .eco-heading { margin-top: var(--space-8); }
+  .count { margin-top: 1.25rem; font-size: var(--t-md); max-width: 40rem; }
+  .verify { margin-top: 0.6rem; font-size: var(--t-ui); color: var(--ink-soft); max-width: 40rem; }
 
-  .projects { list-style: none; padding: 0; display: grid; gap: var(--space-6); }
-  .row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: var(--space-4);
+  .projects { list-style: none; }
+  .projects > li { display: grid; gap: 0.3rem 2rem; padding-block: 1.25rem; border-top: 1px solid var(--line); }
+  .projects > li:first-child { padding-top: 0.2rem; border-top: 0; }
+  h3 { font-size: var(--t-base); font-weight: 650; line-height: 1.3; }
+  h3 a { color: var(--ink); text-decoration-color: color-mix(in srgb, var(--accent) 55%, transparent); }
+  h3 a:hover { color: var(--accent); }
+  .merged { display: inline-block; margin-top: 0.2rem; font-size: var(--t-sm); font-variant-numeric: tabular-nums; }
+  .what { font-size: var(--t-ui); color: var(--ink-soft); line-height: 1.5; }
+  .highlights { margin-top: 0.6rem; padding-left: 1.1rem; font-size: var(--t-sm); line-height: 1.5; color: var(--ink-soft); }
+  .highlights li + li { margin-top: 0.25rem; }
+  .highlights li::marker { color: var(--ink-soft); }
+  @media (min-width: 40rem) {
+    .projects > li { grid-template-columns: 12.5rem minmax(0, 1fr); }
   }
-  .repo {
-    font-family: var(--font-mono);
-    font-size: var(--t-read);
-    font-weight: 500;
-    color: var(--ink);
-    text-decoration: none;
-    overflow-wrap: anywhere;
-  }
-  .repo:hover { color: var(--accent); }
-  .count {
-    font-family: var(--font-mono);
-    color: var(--flag);
-    font-size: var(--t-meta);
-    white-space: nowrap;
-    text-decoration: none;
-    font-variant-numeric: tabular-nums;
-  }
-  .count:hover { color: var(--accent); }
-  .what { color: var(--ink-soft); font-size: var(--t-read); margin-top: var(--space-2); }
-  .highlights {
-    margin-top: var(--space-3);
-    padding-left: 1.1rem;
-    font-family: var(--font-mono);
-    font-size: var(--t-meta);
-    line-height: 1.6;
-    color: var(--ink-soft);
-  }
-  .highlights li + li { margin-top: var(--space-1); }
 
-  .eco-intro { margin-bottom: var(--space-4); }
-  .eco {
+  .tooling {
     list-style: none;
-    padding: 0;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
-    gap: var(--space-1) var(--space-4);
-    font-family: var(--font-mono);
-    font-size: var(--t-meta);
+    gap: 0.35rem 2rem;
+    font-size: var(--t-ui);
   }
-  .eco li { display: flex; justify-content: space-between; gap: var(--space-2); }
-  .eco a { color: var(--ink); text-decoration: none; overflow-wrap: anywhere; }
-  .eco a:hover { color: var(--accent); }
-  .eco .n { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
-
-  @media (max-width: 520px) {
-    .row { flex-direction: column; align-items: flex-start; gap: var(--space-1); }
-  }
+  .tooling li { display: flex; justify-content: space-between; gap: 0.5rem; padding-block: 0.3rem; border-bottom: 1px solid var(--line); }
+  .tooling a { color: var(--ink); overflow-wrap: anywhere; }
+  .tooling a:hover { color: var(--accent); }
+  .n { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
 </style>

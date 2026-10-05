@@ -15,7 +15,9 @@ stack:
 links:
   - { label: GitHub, href: https://github.com/devYRPauli/football-hub }
   - { label: Live, href: https://football-hub-six.vercel.app }
+mode: football
 order: 10
+featuredOrder: 8
 ---
 
 A live football dashboard for seven competitions: the Premier League, La Liga, Bundesliga, Serie A, Ligue 1, the Champions League, and the Primeira Liga. Standings, fixtures, top scorers, and detail views for teams and matches. The React frontend deploys on Vercel, the Express proxy on Render.

@@ -1,14 +1,16 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import PageHeader from '../components/PageHeader.astro';
 ---
 <BaseLayout title="Not found - Yash Raj Pandey" description="This page does not exist." noIndex>
-  <section>
-    <h1>404</h1>
-    <p>This page does not exist. <a href="/">Head home</a>.</p>
-  </section>
+  <PageHeader
+    title="Not found"
+    lede="This page does not exist. If one of my links sent you here, that is my bug, and I would like to hear about it."
+  >
+    <p class="links"><a href="/">Head home</a><a href="mailto:yashpn62@gmail.com">Email me</a></p>
+  </PageHeader>
 </BaseLayout>
 
 <style>
-  section { margin-top: 4rem; }
-  p { margin-top: 0.75rem; color: var(--ink-soft); }
+  .links { display: flex; gap: 1.5rem; margin-top: 1.5rem; padding-bottom: 4rem; }
 </style>

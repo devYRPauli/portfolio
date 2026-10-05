@@ -1,6 +1,8 @@
 ---
+import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import PageHeader from '../../components/PageHeader.astro';
+import ModeSection from '../../components/ModeSection.astro';
+import memoji from '../../assets/memoji.png';
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -25,73 +27,110 @@ const roles = [
   { period: '2025-03 - 2025-10', title: 'Software Engineer', org: 'UF IFAS' },
   { period: '2022-01 - 2022-06', title: 'Software Engineer Intern', org: 'Hackdev Technology' },
 ];
+
+/** Read off each machine with sysctl, lscpu, and nvidia-smi on 2026-10-05. */
+const machines = [
+  { name: 'MacBook Pro', hardware: 'Apple M1 Pro, 16 GB', use: 'My laptop. The TurboQuant study ran here.' },
+  { name: 'Mac Studio', hardware: 'Apple M4 Max, 64 GB', use: 'MLX work, including the mlx.fast entries and willitcall runs.' },
+  {
+    name: 'Workstation',
+    hardware: 'AMD Threadripper PRO 5955WX, 128 GB, 2x RTX 4090',
+    use: 'CUDA runs. Its two GPUs are how I hit the TabFM multi-GPU crash.',
+  },
+  { name: 'Blue Omics server', hardware: 'Intel Xeon w5-2455X, 64 GB, RTX A400', use: 'Runs Blue Omics inside the university network.' },
+];
 ---
 <BaseLayout
   title="About - Yash Raj Pandey"
-  description="AI Agents Architect at UF IFAS. Three roles in thirteen months, a genomics platform serving five labs, and production AI where a wrong answer matters."
+  description="I'm an AI systems engineer at UF IFAS in Gainesville, Florida. I lead the AI agents work there, and I took over the Blue Omics genomics platform in 2025."
   ogImage="/og/page/about.png"
   ogImageAlt="About Yash Raj Pandey"
   jsonLd={jsonLd}
 >
-  <PageHeader
-    title="About"
-    lede="I build systems that have to be correct, and I measure them before I claim anything about them."
-  />
+  <header class="wrap head">
+    <div class="lockup">
+      <Image class="memoji" src={memoji} alt="Yash's memoji" width={88} densities={[1, 2]} format="webp" quality={85} loading="eager" />
+      <h1>About</h1>
+    </div>
+    <p class="position">I'm an AI systems engineer at UF IFAS, and outside work I reproduce new model research on my own hardware.</p>
+  </header>
 
-  <section class="prose-block">
-    <p>I joined UF IFAS in March 2025 as a software engineer. I am now the AI Agents Architect, leading a function I proposed. That is three roles in thirteen months.</p>
+  <div class="wrap">
+    <div class="grid">
+      <div class="bio prose">
+        <p>I joined UF IFAS in March 2025 as a software engineer and became the lead software engineer that October. Since April 2026 my title has been AI Agents Architect. I lead the AI agents work, a function I proposed.</p>
+        <p>In June 2025 I joined Blue Omics, the genomics platform for the UF blueberry breeding program, when it was 81 source files. When its lead developer left that August, I took over and hired two interns. I rebuilt the backend and frontend, and it is 687 source files now. It runs inside the university network and is the system of record for 30+ researchers across five labs.</p>
+        <p>The AI agents work runs on university-operated GPUs, so sensitive research data stays on institutional infrastructure. Generation runs on the shared gateway, and retrieval and reranking stay on lab hardware because I benchmarked both and local won. Retrieval covers 10,000+ technical documents, and a 24-case regression suite gates every model and pipeline change.</p>
+        <p>Most of the writing here covers evaluations I ran on my own hardware or two optimization competitions I lost. I publish the results whether or not they hold up. I retracted a public bug report after a maintainer pushed back, and I corrected a writeup after re-reading the paper.</p>
+        <p>I studied computer science at Jaypee University of Engineering and Technology. I came to Florida as an exchange student and stayed for a master's at UF. I live in Gainesville and follow seven football competitions, which explains the two football projects.</p>
+      </div>
 
-    <p>I started on Blue Omics, the genomics platform for the UF blueberry breeding program. I joined it at 81 source files. It replaced years of spreadsheet-driven workflows and became the system of record for 30+ researchers across 5 labs. When the previous lead left I took over, rebuilt the backend and frontend, and grew the team from one to three.</p>
+      <aside class="rail" aria-label="Roles and contact">
+        <section aria-labelledby="roles-h">
+          <h2 id="roles-h">Roles</h2>
+          <ul class="roles">
+            {roles.map((r) => (
+              <li>
+                <span class="period">{r.period}</span>
+                <b>{r.title}</b>, {r.org}
+              </li>
+            ))}
+          </ul>
+        </section>
+        <section aria-labelledby="open-h">
+          <h2 id="open-h">Open to</h2>
+          <p>I work at UF IFAS, and I'm open to conversations about AI infrastructure.</p>
+        </section>
+        <section aria-labelledby="contact-h">
+          <h2 id="contact-h">Contact</h2>
+          <p>
+            Email me at <a href="mailto:yashpn62@gmail.com">yashpn62@gmail.com</a>. You can also find me on{' '}
+            <a href="https://github.com/devYRPauli" rel="me">GitHub</a> and{' '}
+            <a href="https://www.linkedin.com/in/yashrajpandeyy/" rel="me">LinkedIn</a>, or read my{' '}
+            <a href="/Resume_YashRaj.pdf">resume</a>.
+          </p>
+        </section>
+      </aside>
+    </div>
+  </div>
 
-    <p>The current work runs on university-operated GPUs, so sensitive research data stays on institutional infrastructure. Generation runs on the shared gateway. Retrieval and reranking stay on lab hardware, because I benchmarked both and local won. Retrieval covers 10,000+ technical documents, and a 24-case regression suite gates every model and pipeline change.</p>
-
-    <p>Outside the job I reproduce new model research on my own hardware. That is where most of the writing and the merged pull requests come from. I publish the results either way, including the times my own claim was the thing that broke.</p>
-
-    <p>I studied computer science at Jaypee University of Engineering and Technology, came to Florida as an exchange student, and stayed for a master's at UF. I live in Gainesville.</p>
-  </section>
-
-  <section class="roles" aria-labelledby="roles-h">
-    <h2 id="roles-h" class="eyebrow">Roles</h2>
-    <ul>
-      {roles.map((r) => (
-        <li>
-          <span class="period meta">{r.period}</span>
-          <span class="role">
-            <strong>{r.title}</strong>
-            <span class="org">{r.org}</span>
-          </span>
-        </li>
-      ))}
-    </ul>
-  </section>
-
-  <section class="contact" aria-labelledby="contact-h">
-    <h2 id="contact-h" class="eyebrow">Contact</h2>
-    <p>
-      Email me at <a href="mailto:yashpn62@gmail.com">yashpn62@gmail.com</a>. You can also find me
-      on <a href="https://www.linkedin.com/in/yashrajpandeyy/">LinkedIn</a>, or read my
-      <a href="/Resume_YashRaj.pdf">resume</a>.
-    </p>
-  </section>
+  <ModeSection id="machines" title="Machines" lede="I work on four machines and reach the other three from my laptop over SSH.">
+    <div class="prose">
+      <table>
+        <thead>
+          <tr><th scope="col">Machine</th><th scope="col">Hardware</th><th scope="col">What it runs</th></tr>
+        </thead>
+        <tbody>
+          {machines.map((m) => (
+            <tr><th scope="row">{m.name}</th><td>{m.hardware}</td><td>{m.use}</td></tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </ModeSection>
 </BaseLayout>
 
 <style>
-  .prose-block { max-width: 34rem; }
-  .prose-block p + p { margin-top: var(--space-4); }
+  .head { padding-block: 2.5rem 2.25rem; }
+  .lockup { display: flex; align-items: flex-end; gap: 1rem; }
+  .lockup :global(.memoji) { width: 88px; height: auto; flex: none; }
+  h1 { font-size: var(--t-display); line-height: 0.95; padding-bottom: 0.3rem; }
+  .position { margin-top: 1.75rem; font-size: var(--t-lead); line-height: 1.38; max-width: 38rem; }
 
-  section + section { margin-top: var(--space-8); }
-  h2 { margin-bottom: var(--space-4); }
+  .grid { display: grid; gap: 2.75rem; padding-block: 2.25rem 4rem; border-top: 1px solid var(--line); }
+  .rail section + section { margin-top: 2.25rem; }
+  .rail h2 { font-size: var(--t-md); }
+  .rail p { margin-top: 0.6rem; font-size: var(--t-ui); line-height: 1.55; }
+  .roles { list-style: none; margin-top: 0.75rem; }
+  .roles li { padding-block: 0.65rem; border-top: 1px solid var(--line); font-size: var(--t-ui); }
+  .roles li:first-child { padding-top: 0.2rem; border-top: 0; }
+  .period { display: block; font-size: var(--t-sm); color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .roles b { font-weight: 650; }
 
-  .roles ul { list-style: none; padding: 0; display: grid; gap: var(--space-3); }
-  .roles li { display: grid; grid-template-columns: 11rem 1fr; gap: var(--space-4); align-items: baseline; }
-  .period { white-space: nowrap; }
-  .role { display: flex; flex-wrap: wrap; gap: 0 var(--space-2); align-items: baseline; }
-  .role strong { font-weight: 600; }
-  .org { font-family: var(--font-mono); font-size: var(--t-meta); color: var(--ink-soft); }
-
-  .contact { max-width: 34rem; }
-
-  @media (max-width: 560px) {
-    .roles li { grid-template-columns: 1fr; gap: var(--space-1); }
+  @media (min-width: 60rem) {
+    .head { padding-block: 3.5rem 2.75rem; }
+    .grid { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: 2rem; padding-top: 3rem; }
+    .bio { grid-column: 1 / span 7; }
+    .rail { grid-column: 9 / -1; }
   }
 </style>

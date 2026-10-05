@@ -14,6 +14,7 @@ stack:
   - JSONL ledger
 links:
   - { label: GitHub, href: https://github.com/devYRPauli/podium }
+mode: build
 order: 3
 featuredOrder: 3
 ---

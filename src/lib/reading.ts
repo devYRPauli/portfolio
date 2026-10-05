@@ -1,5 +1,5 @@
 /**
- * One definition of "how long is this", so list rows and article bylines agree.
+ * One definition of "how long is this", so list rows and article rails agree.
  *
  * Counting raw `entry.body` overstates length, because Markdown syntax, table
  * pipes, code blocks, and link URLs all split on whitespace and count as words.
@@ -10,7 +10,7 @@
 const WORDS_PER_MINUTE = 220;
 
 /** Reduce Markdown to the words a person actually reads. */
-export function toProse(body: string | undefined): string {
+function toProse(body: string | undefined): string {
   return (body ?? '')
     // Defensive: `entry.body` excludes frontmatter, but raw file reads do not.
     .replace(/^---\r?\n[\s\S]*?\r?\n---/, ' ')
@@ -32,16 +32,16 @@ export function toProse(body: string | undefined): string {
     .trim();
 }
 
-export const wordCount = (body: string | undefined) =>
+const wordCount = (body: string | undefined) =>
   toProse(body).split(' ').filter(Boolean).length;
 
-export const readMinutes = (words: number) => Math.max(1, Math.round(words / WORDS_PER_MINUTE));
+const readMinutes = (words: number) => Math.max(1, Math.round(words / WORDS_PER_MINUTE));
 
 /** UTC by definition, so a pubDate never shifts a day across time zones. */
 export const isoDate = (d: Date) => d.toISOString().slice(0, 10);
 
-/** The measured facts shown under a post title, in list and article alike. */
-export function postMeta(date: Date, body: string | undefined): string[] {
+/** Length as a reader sees it, in list rows and article rails alike. */
+export function postLength(body: string | undefined): string {
   const words = wordCount(body);
-  return [isoDate(date), `${words.toLocaleString('en-US')} words`, `${readMinutes(words)} min`];
+  return `${words.toLocaleString('en-US')} words, ${readMinutes(words)} min`;
 }

@@ -1,5 +1,4 @@
 import { readFile } from 'node:fs/promises';
-import { createRequire } from 'node:module';
 import satori, { type SatoriOptions } from 'satori';
 import { Resvg } from '@resvg/resvg-js';
 
@@ -9,35 +8,40 @@ interface OgCard {
   meta: string;
 }
 
-const PAPER = '#ffffff';
-const INK = '#212429';
-const SOFT = '#565961';
-const AMBER = '#8f5211';
-const require = createRequire(import.meta.url);
+// The light theme from global.css.
+const BG = '#f4f5f2';
+const INK = '#1a1e22';
+const SOFT = '#48505a';
+const LINE = '#d3d8d1';
 
-const el = (type: string, style: Record<string, unknown>, children?: unknown) => ({
+const el = (type: string, style: Record<string, unknown>, children?: unknown, props: Record<string, unknown> = {}) => ({
   type,
-  props: { style, children },
+  props: { style, children, ...props },
 });
 
-const font = (pkg: string, file: string) =>
-  readFile(require.resolve(`@fontsource/${pkg}/files/${file}`));
+// Satori cannot read a variable font, so these are static instances of Cal Sans:
+// the display cut for titles and the text cut for everything else. They carry no
+// GPOS: with it, Satori opened random gaps of about twice a space between words.
+const fontFile = (name: string) => readFile(`src/assets/fonts/cal-sans/og/${name}`);
 
-let fonts: Promise<SatoriOptions['fonts']> | undefined;
-const loadFonts = () =>
-  (fonts ??= Promise.all([
-    font('space-grotesk', 'space-grotesk-latin-500-normal.woff'),
-    font('space-grotesk', 'space-grotesk-latin-600-normal.woff'),
-    font('instrument-serif', 'instrument-serif-latin-400-italic.woff'),
-    font('jetbrains-mono', 'jetbrains-mono-latin-400-normal.woff'),
-  ]).then(([sans500, sans600, serifItalic, mono]) => [
-    { name: 'Space Grotesk', data: sans500, weight: 500 as const, style: 'normal' as const },
-    { name: 'Space Grotesk', data: sans600, weight: 600 as const, style: 'normal' as const },
-    { name: 'Instrument Serif', data: serifItalic, weight: 400 as const, style: 'italic' as const },
-    { name: 'JetBrains Mono', data: mono, weight: 400 as const, style: 'normal' as const },
-  ]));
+let assets: Promise<{ fonts: SatoriOptions['fonts']; memoji: string }> | undefined;
+const loadAssets = () =>
+  (assets ??= Promise.all([
+    fontFile('CalSans-Display.ttf'),
+    fontFile('CalSans-Text.ttf'),
+    fontFile('CalSans-TextSemiBold.ttf'),
+    readFile('src/assets/memoji.png'),
+  ]).then(([display, text, textSemiBold, memoji]) => ({
+    fonts: [
+      { name: 'Cal Sans Display', data: display, weight: 700 as const, style: 'normal' as const },
+      { name: 'Cal Sans', data: text, weight: 400 as const, style: 'normal' as const },
+      { name: 'Cal Sans', data: textSemiBold, weight: 600 as const, style: 'normal' as const },
+    ],
+    memoji: `data:image/png;base64,${memoji.toString('base64')}`,
+  })));
 
 export async function renderOgCard({ kicker, title, meta }: OgCard) {
+  const { fonts, memoji } = await loadAssets();
   const card = el(
     'div',
     {
@@ -46,60 +50,40 @@ export async function renderOgCard({ kicker, title, meta }: OgCard) {
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
-      padding: '64px 80px 56px',
-      background: PAPER,
+      padding: '60px 80px 56px',
+      background: BG,
       color: INK,
-      fontFamily: 'Space Grotesk',
+      fontFamily: 'Cal Sans',
     },
     [
       el('div', { display: 'flex', justifyContent: 'space-between', alignItems: 'center' }, [
-        el(
-          'div',
-          {
-            width: 56,
-            height: 56,
-            borderRadius: 13,
-            background: AMBER,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          },
-          el('div', { color: PAPER, fontSize: 34, fontWeight: 600, lineHeight: 1 }, 'Y'),
-        ),
-        el(
-          'div',
-          { fontFamily: 'Instrument Serif', fontStyle: 'italic', fontSize: 34, color: AMBER },
-          kicker,
-        ),
+        el('div', { display: 'flex', alignItems: 'center' }, [
+          el('img', { width: 72, height: 74 }, undefined, { src: memoji, width: 72, height: 74 }),
+          el('div', { marginLeft: 20, fontFamily: 'Cal Sans Display', fontSize: 32 }, 'Yash Raj Pandey'),
+        ]),
+        el('div', { fontSize: 30, fontWeight: 600, color: SOFT }, kicker),
       ]),
       el('div', { display: 'flex', flexDirection: 'column' }, [
         el(
           'div',
           {
-            fontSize: title.length > 42 ? 58 : 68,
-            fontWeight: 600,
-            letterSpacing: '-0.02em',
-            lineHeight: 1.12,
-            maxWidth: 980,
+            fontFamily: 'Cal Sans Display',
+            fontSize: title.length > 42 ? 62 : 74,
+            lineHeight: 1.06,
+            maxWidth: 1000,
           },
           title,
         ),
-        el('div', { marginTop: 26, fontFamily: 'JetBrains Mono', fontSize: 24, color: SOFT }, meta),
+        el('div', { marginTop: 24, fontSize: 30, color: SOFT }, meta),
       ]),
-      el('div', { display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }, [
-        el('div', { display: 'flex', flexDirection: 'column' }, [
-          el('div', { width: 88, height: 3, background: AMBER, marginBottom: 18 }),
-          el('div', { fontSize: 28, fontWeight: 500 }, 'Yash Raj Pandey'),
-        ]),
-        el('div', { fontFamily: 'JetBrains Mono', fontSize: 22, color: SOFT }, 'yashrajpandey.com'),
-      ]),
+      el(
+        'div',
+        { display: 'flex', paddingTop: 22, borderTop: `2px solid ${LINE}`, fontSize: 24, color: SOFT },
+        'yashrajpandey.com',
+      ),
     ],
   );
 
-  const svg = await satori(card as unknown as Parameters<typeof satori>[0], {
-    width: 1200,
-    height: 630,
-    fonts: await loadFonts(),
-  });
+  const svg = await satori(card as unknown as Parameters<typeof satori>[0], { width: 1200, height: 630, fonts });
   return new Uint8Array(new Resvg(svg).render().asPng());
 }

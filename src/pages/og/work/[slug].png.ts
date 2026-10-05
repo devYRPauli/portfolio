@@ -1,9 +1,12 @@
 import type { APIRoute } from 'astro';
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { renderOgCard } from '../../../lib/og-image';
+import { getWriteups } from '../../../lib/entries';
 
 export async function getStaticPaths() {
-  const projects = await getCollection('work');
+  // A project with a writeup has no page of its own, so it shares the post's card.
+  const writeups = await getWriteups();
+  const projects = (await getCollection('work')).filter((p) => !writeups.has(p.id));
   return projects.map((project) => ({ params: { slug: project.id }, props: { project } }));
 }
 
@@ -13,11 +16,11 @@ interface Props {
 
 export const GET: APIRoute<Props> = async ({ props }) => {
   const { project } = props;
-  const { role, year } = project.data;
+  const { kind, year } = project.data;
   const png = await renderOgCard({
     kicker: 'Work',
     title: project.data.title,
-    meta: `${role} | ${year}`,
+    meta: `${kind}, ${year}`,
   });
   return new Response(png, { headers: { 'Content-Type': 'image/png' } });
 };

@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <style>
-    path { fill: #261d16; }
+    path { fill: #1a1e22; }
     @media (prefers-color-scheme: dark) {
-      path { fill: #f9f7ef; }
+      path { fill: #e8eae5; }
     }
   </style>
   <g transform="translate(52.3 486) scale(0.657 -0.657)">

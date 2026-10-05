@@ -10,24 +10,24 @@ import { totals } from '../../../data/contributions';
 const pages = {
   about: {
     kicker: 'About',
-    title: 'Yash Raj Pandey',
-    meta: 'AI Agents Architect at UF IFAS',
+    title: 'AI systems engineer at UF IFAS in Gainesville, Florida',
+    meta: 'I lead the AI agents work there and took over Blue Omics in 2025',
   },
   work: {
     kicker: 'Work',
-    title: 'Systems, tools, and independent evaluations',
-    meta: 'Production platforms | developer tools | model evaluation',
+    title: 'Things I build and things I evaluate',
+    meta: 'From a genomics platform at UF to a tool-calling matrix for local models',
   },
   writing: {
     kicker: 'Writing',
-    title: 'Reproductions, post-mortems, and debugging stories',
-    meta: 'Every claim carries the measurement behind it',
+    title: 'Reproductions of new model research, and two competitions I lost',
+    meta: 'When a claim turns out wrong, I correct the post and mark the change',
   },
   contributions: {
-    kicker: 'Open Source',
+    kicker: 'Open source',
     // Derived, so the card cannot drift when the weekly sync moves the count.
-    title: `Merged pull requests across ${totals.projects} projects`,
-    meta: 'llama.cpp | Apple MLX | TabFM | RAGFlow | mem0 | litellm',
+    title: `${totals.merged} merged pull requests across ${totals.projects} projects`,
+    meta: 'llama.cpp, Apple MLX, Google TabFM, RAGFlow, LiteLLM and others',
   },
 };
 

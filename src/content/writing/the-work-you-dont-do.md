@@ -4,6 +4,7 @@ description: I named the question I failed to ask, then entered another competit
 verdict:
   tried: "2 competitions entered"
   result: "2 lost the same way"
+featuredOrder: 2
 pubDate: 2026-08-14
 tags:
   - performance

@@ -2,48 +2,33 @@
 import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ModeSection from '../components/ModeSection.astro';
 import EntryList from '../components/EntryList.astro';
+import MonthlyMerges from '../components/MonthlyMerges.astro';
 import memoji from '../assets/memoji.png';
-import { totals } from '../data/contributions';
-import { postMeta } from '../lib/reading';
+import { totals, namedFixes } from '../data/contributions';
+import { modes, type Mode } from '../lib/modes';
+import { workEntry, postEntry, getWriteups } from '../lib/entries';
 
-const projects = (await getCollection('work')).sort((a, b) => a.data.order - b.data.order);
-const selectedProjects = projects
-  .filter((project) => project.data.featuredOrder !== undefined)
-  .sort((a, b) => (a.data.featuredOrder ?? Infinity) - (b.data.featuredOrder ?? Infinity))
-  .slice(0, 3);
-const allPosts = (await getCollection('writing'))
-  .filter((p) => !p.data.draft)
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-const featuredProjectIds = new Set(selectedProjects.map((project) => project.id));
-const posts = allPosts
-  .filter((post) => !post.data.project || !featuredProjectIds.has(post.data.project.id))
-  .slice(0, 3);
+const work = await getCollection('work');
+const writeups = await getWriteups();
+const byFeatured = (a: { data: { featuredOrder?: number } }, b: { data: { featuredOrder?: number } }) =>
+  (a.data.featuredOrder ?? 0) - (b.data.featuredOrder ?? 0);
 
-const workEntries = selectedProjects.map((p) => ({
-  href: `/work/${p.id}/`,
-  title: p.data.title,
-  meta: [p.data.kind, p.data.year],
-  summary: p.data.summary,
-  verdict: p.data.verdict,
-  transitionName: `work-${p.id}`,
-}));
+/** Featured work in one mode, in the order its frontmatter asks for. */
+const featured = (mode: Mode, withLinks = false) =>
+  work
+    .filter((p) => p.data.mode === mode && p.data.featuredOrder !== undefined)
+    .sort(byFeatured)
+    .map((p) => workEntry(p, work, writeups, withLinks));
 
-const postEntries = posts.map((p) => ({
-  href: `/writing/${p.id}/`,
-  title: p.data.title,
-  meta: postMeta(p.data.pubDate, p.body),
-  summary: p.data.description,
-  verdict: p.data.verdict,
-  transitionName: `post-${p.id}`,
-}));
-
-const record = [
-  { figure: `${totals.merged}`, label: 'pull requests merged', href: '/contributions/' },
-  { figure: `${totals.projects}`, label: 'projects contributed to', href: '/contributions/' },
-  { figure: `${projects.length}`, label: 'case studies', href: '/work/' },
-  { figure: `${allPosts.length}`, label: 'posts', href: '/writing/' },
-];
+// A featured project already links to its writeup, so the post is not listed twice.
+const onHome = new Set(work.filter((p) => p.data.featuredOrder !== undefined).map((p) => p.id));
+const posts = (await getCollection('writing'))
+  .filter((p) => !p.data.draft && p.data.featuredOrder !== undefined)
+  .filter((p) => !(p.data.project && onHome.has(p.data.project.id)))
+  .sort(byFeatured)
+  .map((p) => postEntry(p));
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -72,143 +57,134 @@ const jsonLd = {
 };
 ---
 <BaseLayout
-  title="Yash Raj Pandey - AI Agents Architect"
-  description="AI systems engineer at UF IFAS. I work on the layer where AI systems quietly go wrong: LLM infrastructure, agent platforms, and evaluation systems."
+  title="Yash Raj Pandey - AI systems engineer"
+  description="I'm Yash Raj Pandey, an AI systems engineer at UF IFAS. I build agent and retrieval systems, and my fixes have been merged into llama.cpp and Google's TabFM."
   jsonLd={jsonLd}
 >
-  <section class="hero">
-    <Image
-      src={memoji}
-      alt="Yash's memoji, waving"
-      width={80}
-      densities={[1, 2]}
-      format="webp"
-      quality={85}
-      loading="eager"
-      fetchpriority="high"
-    />
-    <p class="dateline">
-      <span>Gainesville, Florida</span><span aria-hidden="true">/</span>
-      <span>AI Agents Architect, UF IFAS</span><span aria-hidden="true">/</span>
-      <span>Counts synced {totals.updated}</span>
-    </p>
-    <h1 class="display-xl">Yash Raj Pandey</h1>
-    <p class="tagline">
-      I work on the layer where AI systems quietly go wrong, and&nbsp;<em>I prove it</em>.
-    </p>
-    <p class="intro">
-      I build LLM infrastructure, agent platforms, and evaluation systems. I also reproduce new model research, publish what broke, and send the fixes upstream.
-    </p>
+  <div class="wrap hero">
+    <div class="who">
+      <div class="lockup">
+        <Image
+          class="memoji"
+          src={memoji}
+          alt="Yash's memoji, waving"
+          width={140}
+          densities={[1, 2]}
+          format="webp"
+          quality={85}
+          loading="eager"
+          fetchpriority="high"
+        />
+        <h1><span>Yash Raj</span> <span>Pandey</span></h1>
+      </div>
+      <p class="position">
+        I'm an AI systems engineer at UF IFAS, where I build agent and retrieval systems that run on university
+        hardware. On my own machines I reproduce new model research, and I send fixes upstream when I find a bug.
+      </p>
+      <p class="intro">
+        I lead the AI agents work at UF IFAS. Generation runs on university GPUs, and retrieval stays on lab
+        hardware because I benchmarked both and local won. I also took over Blue Omics, the genomics platform for
+        the UF blueberry breeding program, when its lead developer left in August 2025. I publish failed
+        reproductions too, and I correct a post when my own claim turns out wrong.
+      </p>
+      <ul class="contact">
+        <li><a href="mailto:yashpn62@gmail.com">yashpn62@gmail.com</a></li>
+        <li><a href="https://github.com/devYRPauli" rel="me">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/yashrajpandeyy/" rel="me">LinkedIn</a></li>
+        <li><a href="/Resume_YashRaj.pdf">Resume</a></li>
+      </ul>
+    </div>
 
-    <ul class="record">
-      {record.map((r) => (
-        <li>
-          <a href={r.href}>
-            <span class="figure">{r.figure}</span>
-            <span class="label">{r.label}</span>
-          </a>
-        </li>
-      ))}
-    </ul>
-  </section>
+    <section class="fixes" id="open-source" aria-labelledby="open-source-h">
+      <h2 id="open-source-h">Open source</h2>
+      <ul>
+        {namedFixes.map((fix) => (
+          <li>
+            <p class="where"><b>{fix.project}</b> #{fix.number}, merged <time datetime={fix.merged}>{fix.merged}</time></p>
+            <h3><a href={fix.href}>{fix.title}</a></h3>
+            <p class="what">{fix.what}</p>
+          </li>
+        ))}
+      </ul>
+      <p class="count">
+        Since May 2026, <span class="fig">{totals.merged}</span> of my pull requests have been merged across{' '}
+        <span class="fig">{totals.projects}</span> open source projects, and almost all of them are bug fixes.
+      </p>
+      <MonthlyMerges spark />
+      <a class="all" href="/contributions/">All open source contributions</a>
+    </section>
+  </div>
 
-  <section id="work" aria-labelledby="work-h">
-    <h2 id="work-h" class="section-heading">
-      <span>Selected Work</span><span class="count">{projects.length} projects</span>
-    </h2>
-    <EntryList entries={workEntries} />
-    <a class="more" href="/work/">All work &rarr;</a>
-  </section>
+  <ModeSection id="build" title={modes.build.label} lede={modes.build.lede} more={{ href: '/work/', label: 'All work' }}>
+    <EntryList entries={featured('build')} layout="spec" />
+  </ModeSection>
 
-  <section id="writing" aria-labelledby="writing-h">
-    <h2 id="writing-h" class="section-heading">
-      <span>Writing</span><span class="count">{allPosts.length} posts</span>
-    </h2>
-    <EntryList entries={postEntries} />
-    <a class="more" href="/writing/">All writing &rarr;</a>
-  </section>
+  <ModeSection id="evaluate" title={modes.evaluate.label} lede={modes.evaluate.lede}>
+    <EntryList entries={featured('evaluate')} layout="result" />
+  </ModeSection>
 
+  <ModeSection
+    id="writing"
+    title="Writing"
+    lede="I would start with these two posts. In one I got a claim wrong, and in the other I lost two competitions the same way."
+    more={{ href: '/writing/', label: 'All writing' }}
+  >
+    <EntryList entries={posts} layout="dated" />
+  </ModeSection>
+
+  <ModeSection id="football" title={modes.football.label} lede={modes.football.lede} band>
+    <EntryList entries={featured('football', true)} layout="pair" />
+  </ModeSection>
 </BaseLayout>
 
 <style>
-  .hero { margin-top: var(--space-7); }
-  .hero img { border-radius: 18px; }
-  .dateline {
-    margin-top: var(--space-5);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0 var(--space-2);
-    font-family: var(--font-mono);
-    font-size: var(--t-micro);
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-  }
-  .hero h1 { margin-top: var(--space-2); }
-  .tagline {
-    margin-top: var(--space-4);
-    font-family: var(--font-serif);
-    font-size: var(--t-h2);
-    line-height: 1.4;
-    color: var(--ink-soft);
-    max-width: 40ch;
-    text-wrap: pretty;
-  }
-  .tagline em { color: var(--flag); font-style: italic; }
-  .intro { margin-top: var(--space-4); color: var(--ink-soft); max-width: 34rem; }
+  .hero { display: grid; gap: 3rem; padding-block: 2.25rem 3rem; }
 
-  /* The record: every figure is a link to the evidence behind it. */
-  .record {
-    list-style: none;
-    padding: var(--space-5) 0 0;
-    margin-top: var(--space-5);
-    border-top: 1px solid var(--line);
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-5) var(--space-6);
+  .lockup { display: flex; align-items: flex-end; gap: 1rem; }
+  /* The memoji is rendered by <Image>, so scoped styles need :global. */
+  .lockup :global(.memoji) {
+    width: 120px;
+    height: auto;
+    flex: none;
+    transform-origin: 50% 100%;
+    animation: wave 900ms cubic-bezier(0.37, 0, 0.32, 1) 350ms 1 both;
   }
-  .record a { text-decoration: none; display: grid; gap: 0.1rem; }
-  .record .figure {
-    font-family: var(--font-mono);
-    font-size: var(--t-figure);
-    font-weight: 500;
-    font-variant-numeric: tabular-nums;
-    color: var(--flag);
-    line-height: 1;
+  @keyframes wave {
+    0% { transform: rotate(0deg); }
+    24% { transform: rotate(-8deg); }
+    48% { transform: rotate(3deg); }
+    72% { transform: rotate(-7deg); }
+    100% { transform: rotate(0deg); }
   }
-  .record .label {
-    font-family: var(--font-mono);
-    font-size: var(--t-micro);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-  }
-  .record a:hover .label { color: var(--ink); }
+  h1 { font-size: var(--t-display); line-height: 0.95; padding-bottom: 0.3rem; }
+  h1 span { display: block; }
 
-  section:not(.hero) { margin-top: var(--space-8); }
-  .section-heading {
-    display: flex;
-    align-items: baseline;
-    gap: var(--space-3);
-    margin-bottom: var(--space-4);
-    padding-bottom: var(--space-2);
-    border-bottom: 1px solid var(--line);
+  .position { margin-top: 1.75rem; font-size: var(--t-lead); line-height: 1.38; max-width: 34rem; }
+  .intro { margin-top: 1.1rem; color: var(--ink-soft); max-width: 35rem; }
+  .contact { list-style: none; display: flex; flex-wrap: wrap; gap: 0.4rem 1.4rem; margin-top: 1.6rem; }
+  .contact a { font-weight: 560; }
+
+  .fixes h2 { font-size: var(--t-lg); }
+  .fixes ul { list-style: none; margin-top: 1.25rem; }
+  .fixes li { padding-block: 1rem; border-top: 1px solid var(--line); }
+  .where { font-size: var(--t-sm); color: var(--ink-soft); }
+  .where b { color: var(--ink); font-weight: 650; }
+  .fixes h3 { margin-top: 0.2rem; font-size: var(--t-base); font-weight: 650; line-height: 1.3; }
+  .fixes h3 a { color: var(--ink); text-decoration-color: color-mix(in srgb, var(--accent) 55%, transparent); }
+  .fixes h3 a:hover { color: var(--accent); text-decoration-color: var(--accent); }
+  .what { margin-top: 0.35rem; font-size: var(--t-ui); color: var(--ink-soft); line-height: 1.5; }
+  .count { padding-top: 1rem; border-top: 1px solid var(--line); font-size: var(--t-ui); line-height: 1.5; }
+  .all { display: inline-block; margin-top: 0.9rem; font-size: var(--t-ui); }
+
+  @media (min-width: 60rem) {
+    .hero {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: 2rem;
+      padding-block: 3.75rem 4.5rem;
+    }
+    .who { grid-column: 1 / span 7; }
+    .fixes { grid-column: 8 / -1; padding-left: 2rem; margin-left: -1rem; border-left: 1px solid var(--line); }
+    .lockup :global(.memoji) { width: 140px; }
+    .lockup { gap: 1.25rem; }
   }
-  .section-heading .count {
-    margin-left: auto;
-    font-family: var(--font-mono);
-    font-size: var(--t-micro);
-    font-weight: 500;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--ink-faint);
-  }
-  .more {
-    display: inline-block;
-    margin-top: var(--space-4);
-    font-family: var(--font-mono);
-    font-size: var(--t-meta);
-    text-decoration: none;
-  }
-  .more:hover { text-decoration: underline; }
 </style>

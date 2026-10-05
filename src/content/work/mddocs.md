@@ -16,7 +16,9 @@ stack:
 links:
   - { label: GitHub, href: https://github.com/devYRPauli/mddocs }
   - { label: npm, href: https://www.npmjs.com/package/@devyrpauli/mddocs }
+mode: build
 order: 7
+featuredOrder: 6
 ---
 
 A local-first, self-hostable Markdown editor with real-time multiplayer, inline comments, and accept-or-reject suggestions, plus an HTTP API that lets AI agents work the same document as people.

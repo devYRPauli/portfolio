@@ -13,6 +13,8 @@ const writing = defineCollection({
     updatedDate: z.coerce.date().optional(),
     tags: z.array(z.string()).default([]),
     draft: z.boolean().default(false),
+    /** Shown on the home page, in this order. */
+    featuredOrder: z.number().int().positive().optional(),
   }),
 });
 
@@ -27,7 +29,11 @@ const work = defineCollection({
     year: z.string(),
     stack: z.array(z.string()),
     links: z.array(z.object({ label: z.string(), href: z.string() })).optional(),
+    /** Which home and /work/ group it sits in. See src/lib/modes.ts. */
+    mode: z.enum(['build', 'evaluate', 'football']),
+    supersededBy: reference('work').optional(),
     order: z.number(),
+    /** Shown on the home page, in this order within its mode. */
     featuredOrder: z.number().int().positive().optional(),
   }),
 });

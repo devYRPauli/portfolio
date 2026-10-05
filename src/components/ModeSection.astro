@@ -1,0 +1,53 @@
+---
+/**
+ * One row of the bench: a heading rail on the left and its entries on the
+ * right. `band` sets the row on the raised ground, full width.
+ */
+interface Props {
+  id: string;
+  title: string;
+  lede?: string;
+  more?: { href: string; label: string };
+  band?: boolean;
+}
+const { id, title, lede, more, band = false } = Astro.props;
+---
+<section id={id} class:list={{ band }} aria-labelledby={`${id}-h`}>
+  <div class="wrap">
+    <div class="grid">
+      <div class="head">
+        <h2 id={`${id}-h`}>{title}</h2>
+        {lede && <p class="lede">{lede}</p>}
+        {more && <a class="more" href={more.href}>{more.label}</a>}
+      </div>
+      <div class="body">
+        <slot />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .band { background: var(--bg-raised); }
+  .grid {
+    display: grid;
+    gap: 1.75rem 2rem;
+    padding-block: 3rem;
+    border-top: 1px solid var(--line);
+  }
+  .band .grid { border-top: 0; }
+  section { scroll-margin-top: 1rem; }
+  h2 { font-size: var(--t-xl); line-height: 1.1; }
+  .lede { margin-top: 0.75rem; font-size: var(--t-ui); color: var(--ink-soft); max-width: 30rem; }
+  .more { display: inline-block; margin-top: 0.9rem; font-size: var(--t-ui); }
+  .body { min-width: 0; }
+  @media (min-width: 60rem) {
+    .grid {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      padding-block: 3.75rem;
+    }
+    .head { grid-column: 1 / span 4; padding-right: 1rem; }
+    .body { grid-column: 5 / -1; }
+    .lede { max-width: 17rem; }
+  }
+</style>

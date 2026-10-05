@@ -1,0 +1,78 @@
+---
+import { monthly, totals } from '../data/contributions';
+
+/** `spark` is the small version for the home page: bars and a range, no counts. */
+interface Props {
+  spark?: boolean;
+}
+const { spark = false } = Astro.props;
+
+const max = Math.max(...monthly.map((m) => m.merged));
+const last = monthly.length - 1;
+const summary = monthly.map((m) => `${m.month}: ${m.merged}`).join(', ');
+---
+{spark ? (
+  <figure class="spark">
+    <div class="cols" role="img" aria-label={`Merged pull requests per month, ${summary}. The last month is partial.`}>
+      {monthly.map((m, i) => (
+        <span class:list={['col', { partial: i === last }]} style={`--h: ${m.merged / max}`}></span>
+      ))}
+    </div>
+    <figcaption aria-hidden="true">Per month, {monthly[0].month} to {monthly[last].month}</figcaption>
+  </figure>
+) : (
+  <figure class="full">
+    <ol>
+      {monthly.map((m, i) => (
+        <li class:list={{ partial: i === last }}>
+          <time datetime={m.month}>{m.month}</time>
+          <span class="track" aria-hidden="true"><span class="bar" style={`--w: ${m.merged / max}`}></span></span>
+          <span class="n">{m.merged}<span class="sr-only"> merged{i === last && ' so far'}</span></span>
+        </li>
+      ))}
+    </ol>
+    <figcaption>
+      Merged pull requests per month. The lighter bar is the current month, counted to{' '}
+      <time datetime={totals.updated}>{totals.updated}</time>.
+    </figcaption>
+  </figure>
+)}
+
+<style>
+  .full ol { list-style: none; max-width: 36rem; }
+  .full li {
+    display: grid;
+    grid-template-columns: 4.75rem minmax(0, 1fr) 2.25rem;
+    align-items: center;
+    gap: 1rem;
+    padding-block: 0.4rem;
+    border-bottom: 1px solid var(--line);
+    font-size: var(--t-ui);
+  }
+  .full li time { color: var(--ink-soft); font-size: var(--t-sm); }
+  .bar {
+    display: block;
+    width: calc(var(--w) * 100%);
+    min-width: 2px;
+    height: 0.6rem;
+    border-radius: 1px;
+    background: var(--ink-soft);
+  }
+  .n { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .full figcaption { margin-top: 0.9rem; max-width: 36rem; font-size: var(--t-sm); color: var(--ink-soft); line-height: 1.5; }
+  .full figcaption time { white-space: nowrap; }
+
+  .spark { display: flex; align-items: flex-end; gap: 0.9rem; margin-top: 1rem; }
+  .cols { display: flex; align-items: flex-end; gap: 3px; height: 2rem; }
+  .col {
+    width: 0.4rem;
+    height: calc(var(--h) * 100%);
+    min-height: 2px;
+    border-radius: 1px;
+    background: var(--ink-soft);
+  }
+  .spark figcaption { font-size: var(--t-sm); color: var(--ink-soft); line-height: 1.2; font-variant-numeric: tabular-nums; }
+
+  .partial .bar,
+  .col.partial { background: color-mix(in srgb, var(--ink-soft) 40%, transparent); }
+</style>

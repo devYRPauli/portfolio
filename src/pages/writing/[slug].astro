@@ -1,7 +1,8 @@
 ---
 import { getCollection, getEntry, render } from 'astro:content';
 import PostLayout from '../../layouts/PostLayout.astro';
-import { wordCount, readMinutes } from '../../lib/reading';
+import { postLength } from '../../lib/reading';
+import { getWriteups, workHref } from '../../lib/entries';
 
 export async function getStaticPaths() {
   const posts = await getCollection('writing', ({ data }) => !data.draft);
@@ -9,10 +10,29 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
+// The writeup of a project is that project's only page, so it carries the project's facts and links.
 const project = post.data.project ? await getEntry(post.data.project) : undefined;
+const successor = project?.data.supersededBy ? await getEntry(project.data.supersededBy) : undefined;
+const links = [
+  ...(project?.data.links ?? []),
+  ...(successor
+    ? [{ href: workHref(successor.id, await getWriteups()), label: `Superseded by ${successor.data.title}` }]
+    : []),
+];
 
-const words = wordCount(post.body);
+const facts = [
+  { label: 'Published', value: post.data.pubDate },
+  ...(post.data.updatedDate ? [{ label: 'Updated', value: post.data.updatedDate }] : []),
+  { label: 'Length', value: postLength(post.body) },
+  ...(project
+    ? [
+        { label: 'Role', value: project.data.role },
+        { label: 'Kind', value: `${project.data.kind}, ${project.data.year}` },
+        { label: 'Stack', value: project.data.stack.join(', ') },
+      ]
+    : []),
+];
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -29,16 +49,19 @@ const jsonLd = {
 <PostLayout
   title={post.data.title}
   description={post.data.description}
+  crumb={{ href: '/writing/', label: 'Writing' }}
+  verdict={post.data.verdict}
+  facts={facts}
+  links={links}
+  headings={headings}
+  more={[{ href: '/writing/', label: 'More writing' }, ...(project ? [{ href: '/work/', label: 'More work' }] : [])]}
   date={post.data.pubDate}
   updated={post.data.updatedDate}
   tags={post.data.tags}
-  metaParts={[`${words.toLocaleString('en-US')} words`, `${readMinutes(words)} min`]}
   ogImage={`/og/writing/${post.id}.png`}
   jsonLd={jsonLd}
   transitionName={`post-${post.id}`}
-  backHref="/writing/"
-  backLabel="Writing"
+  railLabel="About this post"
 >
-  {project && <a slot="meta" href={`/work/${project.id}/`}>Project: {project.data.title}</a>}
   <Content />
 </PostLayout>

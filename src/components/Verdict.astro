@@ -1,0 +1,8 @@
+---
+interface Props {
+  verdict: { tried: string; result: string };
+  class?: string;
+}
+const { verdict, class: className } = Astro.props;
+---
+<p class:list={['verdict', className]}>{verdict.tried}{' '}<span class="to" aria-hidden="true">-&gt;</span><span class="sr-only">, then</span>{' '}<span class="out">{verdict.result}</span></p>

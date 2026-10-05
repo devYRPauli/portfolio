@@ -14,7 +14,9 @@ stack:
   - Vercel + Cron
 links:
   - { label: GitHub, href: https://github.com/devYRPauli/world-cup-2026-picks }
+mode: football
 order: 8
+featuredOrder: 9
 ---
 
 A prediction pool for small groups, built for the 2026 World Cup and run through the tournament. Members picked match outcomes and group qualifiers, and the leaderboard updated as real results landed. The pool has finished; the code and the final standings stay in the repo.

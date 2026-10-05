@@ -15,6 +15,7 @@ stack:
   - Docker
   - BLAST+
   - JBrowse2
+mode: build
 order: 1
 featuredOrder: 1
 ---

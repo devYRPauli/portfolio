@@ -3,31 +3,33 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PageHeader from '../../components/PageHeader.astro';
 import EntryList from '../../components/EntryList.astro';
-import { postMeta } from '../../lib/reading';
+import { postEntry } from '../../lib/entries';
 
-const posts = (await getCollection('writing'))
+const entries = (await getCollection('writing'))
   .filter((p) => !p.data.draft)
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
-
-const entries = posts.map((p) => ({
-  href: `/writing/${p.id}/`,
-  title: p.data.title,
-  meta: postMeta(p.data.pubDate, p.body),
-  summary: p.data.description,
-  verdict: p.data.verdict,
-  transitionName: `post-${p.id}`,
-}));
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .map((p) => postEntry(p, true));
 ---
 <BaseLayout
   title="Writing - Yash Raj Pandey"
-  description="Essays and playbooks on local-first AI, RAG, LLM evals, and systems engineering."
+  description="I write about reproducing new model research and about two competitions I lost. When a claim turns out wrong, I correct the post and mark the change."
   ogImage="/og/page/writing.png"
   ogImageAlt="Writing by Yash Raj Pandey"
 >
   <PageHeader
-    eyebrow={`${posts.length} posts`}
     title="Writing"
-    lede="Reproductions, post-mortems, and debugging stories. Every claim carries the measurement behind it, including the ones I got wrong."
+    lede="Most of these are reproductions of new model research or post-mortems of two competitions I lost. When a claim turns out wrong, I correct the post and mark the change."
   />
-  <EntryList entries={entries} />
+  <div class="wrap">
+    <div class="list">
+      <EntryList entries={entries} layout="dated" headingLevel={2} />
+    </div>
+  </div>
 </BaseLayout>
+
+<style>
+  .list { padding-block: 2.25rem 4rem; border-top: 1px solid var(--line); }
+  @media (min-width: 60rem) {
+    .list { padding-top: 3rem; }
+  }
+</style>

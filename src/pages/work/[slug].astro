@@ -1,6 +1,8 @@
 ---
-import { getCollection, render } from 'astro:content';
+import { getCollection, getEntry, render } from 'astro:content';
 import PostLayout from '../../layouts/PostLayout.astro';
+import { modes } from '../../lib/modes';
+import { getWriteups, workHref } from '../../lib/entries';
 
 export async function getStaticPaths() {
   const projects = await getCollection('work');
@@ -8,10 +10,19 @@ export async function getStaticPaths() {
 }
 
 const { project } = Astro.props;
+const writeups = await getWriteups();
+// A project with a writeup lives at the post. This page only keeps old links working.
+const writeup = writeups.get(project.id);
+if (writeup) return Astro.redirect(`/writing/${writeup.id}/`, 301);
+
 const { Content } = await render(project);
-const { role, year, stack, links } = project.data;
-const writeup = (await getCollection('writing', ({ data }) => !data.draft))
-  .find((post) => post.data.project?.id === project.id);
+const { role, kind, year, stack, links = [], mode, supersededBy } = project.data;
+const successor = supersededBy ? await getEntry(supersededBy) : undefined;
+
+const railLinks = [
+  ...links,
+  ...(successor ? [{ href: workHref(successor.id, writeups), label: `Superseded by ${successor.data.title}` }] : []),
+];
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -28,34 +39,19 @@ const jsonLd = {
 <PostLayout
   title={project.data.title}
   description={project.data.summary}
-  metaParts={[role, year]}
+  crumb={{ href: `/work/#${mode}`, label: modes[mode].label }}
+  verdict={project.data.verdict}
+  facts={[
+    { label: 'Role', value: role },
+    { label: 'Kind', value: `${kind}, ${year}` },
+    { label: 'Stack', value: stack.join(', ') },
+  ]}
+  links={railLinks}
+  more={[{ href: '/work/', label: 'More work' }]}
   ogImage={`/og/work/${project.id}.png`}
   jsonLd={jsonLd}
   transitionName={`work-${project.id}`}
-  backHref="/work/"
-  backLabel="Work"
+  railLabel="About this project"
 >
-  <p class="stack">
-    {stack.map((s) => <span>{s}</span>)}
-  </p>
-  {links && (
-    <p class="links">
-      {links.map((l) => <a href={l.href}>{l.label}</a>)}
-      {writeup && <a href={`/writing/${writeup.id}/`}>Writeup</a>}
-    </p>
-  )}
   <Content />
 </PostLayout>
-
-<style>
-  .stack { display: flex; flex-wrap: wrap; gap: 0.4rem; }
-  .links { display: flex; flex-wrap: wrap; gap: 1rem; }
-  .stack span {
-    font-family: var(--font-mono);
-    font-size: var(--t-meta);
-    border: 1px solid var(--line);
-    border-radius: 6px;
-    padding: 0.1rem 0.5rem;
-    color: var(--ink-soft);
-  }
-</style>
