@@ -16,7 +16,7 @@ tags:
 
 ## TL;DR
 
-I took TurboQuant, a KV cache compression method from a 2025 Google Research paper (ICLR 2026), and tried to make it actually work for long-context retrieval on an Apple M1 Pro with 16GB of RAM. The stock MLX implementation scored 0% on needle-in-a-haystack retrieval, and the llama.cpp forks crashed or produced garbage. After a lot of debugging, the MLX version reached 100% retrieval at 16,000 tokens. Its KV cache format is 3.6x smaller than FP16 by calculation, but I did not measure that saving. Along the way I fixed four bugs in two llama.cpp forks and changed the QJL math in the Python reference. The QJL change was merged upstream. Three of the llama.cpp fixes are in an open pull request, and the fourth was fixed upstream independently. Then I re-read the paper carefully and discovered that my own headline "bug fix" was mischaracterized. This post is the whole story, with the data.
+I took TurboQuant, a KV cache compression method from a 2025 Google Research paper (ICLR 2026), and tried to make it actually work for long-context retrieval on an Apple M1 Pro with 16GB of RAM. The stock MLX implementation scored 0% on needle-in-a-haystack retrieval, and the llama.cpp forks crashed or produced garbage. After a lot of debugging, the MLX version reached 100% retrieval at 16,000 tokens. The cache format uses 4.5 bits per element, which would be 3.4x to 3.6x smaller than FP16 with packed bits. The MLX package I used stores one byte per element, so the measured cache was only 1.29x smaller, and peak memory went up. Along the way I fixed four bugs in two llama.cpp forks and changed the QJL math in the Python reference. The QJL change was merged upstream. Three of the llama.cpp fixes are in an open pull request, and the fourth was fixed upstream independently. Then I re-read the paper carefully and discovered that my own headline "bug fix" was mischaracterized. This post is the whole story, with the data.
 
 Repo with all logs, patches, scripts, and reports: https://github.com/devYRPauli/turboquant-m1pro-evaluation
 
@@ -106,7 +106,7 @@ So what actually fixed it was a variance reduction, not a corrected formula. The
 
 This distinction matters. The wrong version is "the original authors made a mistake," which is false and a bad look. The right version is that the paper is correct in expectation, but its variance bound is loose enough that a naive implementation degenerates in practice. My change reduces that variance and fixes it. That version is true, and far more interesting.
 
-### Proving it with an ablation
+### Testing it with an ablation
 
 I did not want to just assert this. I ran a controlled ablation at 2K context, toggling each ingredient independently on the same prompt with fixed seeds:
 
@@ -115,11 +115,13 @@ I did not want to just assert this. I ran a controlled ablation at 2K context, t
 | gaussian (paper) | 1/d (paper) | 1.0 | word-loop degeneration |
 | gaussian | 1/sqrt(d) | 1.0 | collapse |
 | orthogonal | 1/d | 1.0 | word-loop degeneration |
-| orthogonal | 1/sqrt(d) | 1.0 | semi-coherent, attends to needle |
-| orthogonal | 1/sqrt(d) | 0.7 | coherent |
+| orthogonal | 1/sqrt(d) | 1.0 | semi-coherent filler text |
+| orthogonal | 1/sqrt(d) | 0.7 | cleaner filler text, some stutters |
 | gaussian (paper) | 1/d (paper) | 0.7 | word-loop degeneration |
 
-Read the table top to bottom and the story is unambiguous. Changing only the scale (row 2) or only the matrix while keeping the mismatched scale (row 3) both still fail. Only the matched pair (row 4) escapes degeneration. That is the empirical proof that it is one coupled substitution. The third ingredient, a 0.7 damping factor on the correction term, then stabilizes semi-coherent output into fully coherent output. And damping applied to the stock Gaussian config (row 6) does nothing, which confirms damping is only useful once the projection and scale are fixed.
+Read the table top to bottom and the pattern is clear. Changing only the scale (row 2) or only the matrix while keeping the mismatched scale (row 3) both still fail. Only the matched pair (row 4) escapes degeneration. That is consistent with one coupled substitution. The third ingredient, a 0.7 damping factor on the correction term, makes the text a little cleaner. And damping applied to the stock Gaussian config (row 6) does nothing, so damping only helps once the projection and scale are fixed.
+
+This ablation has limits. Each row is one greedy run on a synthetic 2K prompt with no chat template. The keys use 4 bits (3-bit MSE plus 1-bit QJL), not the 5 bits of the final configuration. No row actually answers the question. A rerun in October kept the same ordering, but none of the text matched the July run.
 
 That damping factor of 0.7, incidentally, turns out to be almost exactly the MMSE-optimal shrinkage of `2/pi = 0.6366`. The unbiased estimator inflates reconstruction energy by a factor of `pi/2`, so shrinking the correction trades a tiny bias for a real reduction in mean squared error. The upstream maintainer later formalized this in the docstring during review.
 
@@ -127,22 +129,22 @@ That damping factor of 0.7, incidentally, turns out to be almost exactly the MMS
 
 ## Keys are not values
 
-Fixing the QJL math was necessary but not sufficient. A symmetric 4-bit allocation still failed at 2K. The clue came from a clean diagnostic in the llama.cpp path:
+Fixing the QJL math was necessary but not sufficient. A symmetric 4-bit allocation still failed. With 4-bit keys (3-bit MSE plus 1-bit QJL), an early probe could not find the needle even in an 800-token prompt. The clue came from a clean diagnostic in the llama.cpp path:
 
 1. Quantize keys, keep values full precision: degenerate, repetitive output.
 2. Keep keys full precision, quantize values: coherent, correct output.
 
 Keys are far more sensitive to quantization noise than values, and the reason is structural. Attention scores are `softmax(Q K^T / sqrt(d))`. Key noise perturbs every score for every position, and in a needle task the needle's signal has to win against hundreds or thousands of filler positions. Add noise to the key inner products and the needle gets washed out. Value noise, by contrast, only affects what gets read back after attention has already decided where to look.
 
-The fix is asymmetric bit allocation, which I called **Hybrid K5/V4**: give keys 5 bits (4-bit MSE base plus the 1-bit QJL correction) and values 4 bits (MSE only). Average rate 4.5 bits per element, still roughly 3.6x smaller than FP16. This asymmetry is not in the paper; the paper treats K and V uniformly. It was the single most important configuration choice for retrieval.
+The fix is asymmetric bit allocation, which I called **Hybrid K5/V4**: give keys 5 bits (4-bit MSE base plus the 1-bit QJL correction) and values 4 bits (MSE only). The average is 4.5 bits per element. With packed bits that would be 3.4x to 3.6x smaller than FP16, depending on how the norms are stored. This asymmetry is not in the paper; the paper treats K and V uniformly. Retrieval needed it, but it was not enough on its own. The same K5/V4 bits with the paper's Gaussian QJL still scored 0% at every length, with degenerate text.
 
-With correct QJL math plus Hybrid K5/V4, the MSE improvement was measurable. The QJL correction dropped reconstruction MSE from 0.00023 to 0.000129, a 44% reduction that matches the theoretical `pi/2 - 1` for the undamped estimator. It also lifted cosine similarity to 99.7% on real activations.
+My round 1 post-mortem notes record the effect on reconstruction. With the fixes applied, the QJL correction dropped MSE from 0.00023 to 0.000129, a 44% reduction that matches the theoretical `pi/2 - 1` for the undamped estimator. The notes also record 99.7% cosine similarity on real activations. I did not keep the raw output for that measurement, so the repo cannot back these two numbers.
 
 ---
 
 ## Round 2: the llama.cpp bug hunt
 
-The MLX path proved the algorithm works. But MLX dequantization is slow Python, so I moved to two llama.cpp forks for a real C++/Metal implementation. This is where the classic systems bugs lived.
+The MLX path proved the algorithm works. But MLX dequantization runs as slow, unfused array operations, so I moved to two llama.cpp forks for a real C++/Metal implementation. This is where the classic systems bugs lived.
 
 **Bug 1: GGML context sizing crash.** One fork crashed instantly on startup with `GGML_ASSERT(obj_new) failed`, even with the GPU fully disabled. The first hypothesis was hardware: the logs mentioned the Metal Tensor API being unavailable on the M1 Pro's GPU family, which looked like a smoking gun. It was a red herring. The real cause was a metadata pre-allocation formula that counted one K and one V tensor per layer but did not account for the two shared rotation-matrix tensors the TurboQuant cache allocates. The fix was to reserve two extra tensor slots. A one-expression change. It was a software bug, not a hardware limitation, and disproving the hardware theory was half the work. (This same bug was later fixed independently upstream, which was a nice confirmation.)
 
@@ -156,38 +158,46 @@ The MLX path proved the algorithm works. But MLX dequantization is slow Python, 
 
 ## The results
 
-Here is the full memory-and-quality picture on the M1 Pro at 16K tokens, the headline configuration:
+The table below shows memory and quality at 16K tokens on the M1 Pro, the headline configuration.
 
-| Runner | Needle @ 16K | KV cache, computed | Peak MLX memory, measured | tok/s |
-|---|---|---|---|---|
-| Ollama baseline (FP16 KV) | 100% | 561 MB | - | 37.5 |
-| MLX baseline (FP16) | 100% | 561 MB | 3,077 MB | 2.0 |
-| MLX Hybrid K5/V4 TurboQuant | 100% | 158 MB | 3,304 MB | 1.1 |
+| Runner | Needle @ 16K | KV cache, stored | Peak MLX memory | Wall time | tok/s |
+|---|---|---|---|---|---|
+| Ollama baseline (FP16 KV) | 100% | - | - | 49.3 s | 37.5, decode only |
+| MLX baseline (FP16) | 100% | 563 MB | 3,077 MB | 39.9 s | 2.0, prefill included |
+| MLX Hybrid K5/V4 TurboQuant | 100% | 436 MB | 3,304 MB | 71.4 s | 1.1, prefill included |
 
-Retrieval at 16K held at 100% with the compressed cache. The two memory columns measure different things. The 561 MB and 158 MB figures come from a formula. It multiplies tokens, layers, KV heads, head size, and bits per element, then doubles that for keys and values. At 4.5 bits against 16, that is a 3.6x smaller cache format. The measured peak MLX memory went the other way. It was 3,304 MB with TurboQuant and 3,077 MB without, which is 7% higher. I have not traced where the extra memory goes, so I only claim a smaller format.
+Retrieval at 16K held at 100% with the compressed cache. The memory saving was much smaller than I first claimed. The first version of this post gave 561 MB and 158 MB for the cache. Those came from a formula that assumes packed bits. In October I measured the stored cache with the rebuilt code described below. It was 563 MB for FP16 and 436 MB for Hybrid K5/V4, only 1.29x smaller. The optiq package stores each 4-bit index and each 1-bit QJL sign in a full byte.
+
+Peak memory went the other way: 3,304 MB with TurboQuant against 3,077 MB without. The cache hands back its keys and values in float32. Attention and the residual stream then run in float32 in every layer after the first. During the 16K prefill, those float32 buffers cost more than the smaller cache saves. In the October rebuild the Hybrid peak was 3,245 MB. When I cast the keys and values back to FP16 before attention, it dropped to 2,868 MB, which is 209 MB below the FP16 baseline. With packed bits and FP16 output, the Hybrid cache would be about 3.4x smaller than FP16. Stock optiq does neither.
+
+The two tok/s numbers measure different things. Ollama reports its decode rate, which leaves out the prompt. The MLX number divides generated tokens by total time, and that includes the 16K prefill. By wall time, MLX FP16 finished the request in 39.9 seconds and Ollama in 49.3 seconds. Ollama's wall time also includes the HTTP call and any model load, so treat that as a rough comparison.
 
 Retrieval accuracy across all lengths for the fixed Hybrid config:
 
-| Context | Needle score | Note |
-|---|---|---|
-| 2K | 0.5 | recovers locus, corrupts the allele name |
-| 4K | 1.0 | both facts, allele written as "FROstblock-7" |
-| 8K | 1.0 | both facts |
-| 16K | 1.0 | both facts |
+| Context | Original run | October rebuild | Note |
+|---|---|---|---|
+| 2K | 0.5 | 0.5 | both recover the locus and corrupt the allele name |
+| 4K | 1.0 | 0.5 | original wrote "FROstblock-7", the rebuild wrote "FRstblock-7" |
+| 8K | 1.0 | 0.5 | the rebuild named only the locus |
+| 16K | 1.0 | 1.0 | both facts |
 
-I want to be honest about that 2K row, because it is the kind of thing that is tempting to round up. An earlier internal summary claimed 100% at 2K. When I went back to verify, the raw data said 0.5: the model retrieves VcMYB4 but writes "FROSTst7" instead of "FROSTBLOCK-7." Rather than trust a single old log, I rebuilt the entire environment from pinned dependency versions and re-ran it. It reproduced exactly: same 0.5, same "FROSTst7" corruption, while 4K, 8K, and 16K reproduced at 100%. So the honest headline is "100% at 4K and above," not "100% everywhere." Interestingly, retrieval is harder at 2K here than at 4K, likely a quirk of where the needle lands relative to the filler at that specific length.
+I want to be honest about that 2K row, because it is the kind of thing that is tempting to round up. An earlier internal summary claimed 100% at 2K. When I went back to verify, the raw data said 0.5: the model retrieves VcMYB4 but writes "FROSTst7" instead of "FROSTBLOCK-7." Rather than trust a single old log, I rebuilt the environment in July from pinned dependency versions and re-ran it with the modified optiq files. It reproduced exactly: same 0.5, same "FROSTst7" corruption, and 100% at 4K, 8K, and 16K.
 
-On speed: the MLX path is slow (1.1 tok/s at 16K) because dequantization is unoptimized Python doing a full 128x128 matrix multiply per block. This is not fundamental. For reference, an M5 Max running the turbo3 path in TheTom's llama.cpp fork still showed the same structural slowdown (13x to 35x slower than Q8_0 depending on model), which points to the O(d^2) dequantization, not the hardware. The obvious next step is a fast Walsh-Hadamard transform at O(d log d), but that is future work. The point of this project was to check the quality claim. On MLX it held at 4K and above. The memory saving is still a calculation, as the table above shows.
+Then I found a bigger gap. I had edited the installed optiq package in place, and those edits never made it into the repo. In October I rebuilt the changes as a small module in the repo (`benchmarks/tq_patched.py`) and ran the needle test again on macOS 27. The FP16 baseline reproduced exactly, text and peak memory included. The Hybrid 2K and 16K scores reproduced too. The 4K and 8K scores dropped to 0.5, and no Hybrid response text matched the original runs. The Hybrid peak memory also moved by up to 170 MB, so the rebuild is not an exact copy of the lost files. The OS changed as well, and these runs cannot separate the two causes. So the result that reproduces from the repo is 100% at 16K. The 4K and 8K passes rest on the original runs.
+
+On speed: the MLX TurboQuant path is slow (1.1 tok/s at 16K, against 2.0 for FP16 on the same measure). It dequantizes the full cache at every step, with 128x128 matrix multiplies in unfused MLX operations. This is not fundamental. For reference, an M5 Max running the turbo3 path in TheTom's llama.cpp fork still showed the same structural slowdown (13x to 35x slower than Q8_0 depending on model), which points to the O(d^2) dequantization, not the hardware. The obvious next step is a fast Walsh-Hadamard transform at O(d log d), but that is future work. The point of this project was to check the quality claim. On MLX it held at 16K in every run, and at 4K and 8K in the original runs. The memory saving needs packed bits and FP16 output, and stock optiq has neither.
 
 ---
 
 ## Verifying instead of trusting
 
-Two things in this project could easily have been wrong and gone unnoticed, so I built explicit checks for both:
+Three things in this project could easily have been wrong and gone unnoticed, so I built explicit checks for them:
 
-1. **The 2K number.** Reproduced from a clean, independently rebuilt environment. Same scores and the same output text. This is why the tables above say 0.5 and not 100%.
+1. **The 2K number.** Reproduced in July from a clean, rebuilt environment, with the same scores and the same output text. This is why the tables above say 0.5 and not 100%. The October rebuild kept the 0.5 but not the text, and it lost the 4K and 8K passes.
 
 2. **The QJL framing.** Ablated ingredient by ingredient, which is what let me correct my own "two bugs" story into the accurate "one coupled variance-reducing substitution" story before the wrong version stuck.
+
+3. **The memory claim.** This one I got wrong first. The first version of this post quoted a formula. When I measured it, the stored cache was only 1.29x smaller and peak memory was higher.
 
 I mention this because it is the part I am most proud of. The flashy result is 0% to 100%. The result I actually care about is catching my own mischaracterization. I re-read the source, ran a controlled experiment, and then corrected the public record. That included a clarification comment on the merged upstream pull request, whose commit message carried the wrong framing.
 
@@ -215,17 +225,19 @@ There is also a broader community discussion tracking TurboQuant work in llama.c
 
 3. **Debug the diagnosis, not just the symptom.** The GGML crash looked like a hardware incompatibility. It was a counting error in a size formula. The Metal log line was real but irrelevant. Chasing the wrong signal there would have cost days.
 
-4. **Keys and values are not interchangeable.** Asymmetric bit allocation was not in the paper and was the biggest single lever for retrieval quality.
+4. **Keys and values are not interchangeable.** Asymmetric bit allocation was not in the paper, and retrieval needed it. It only worked together with the orthogonal QJL change. The same bits with the paper's Gaussian QJL still scored 0%.
 
 5. **Re-read the source and be willing to overturn your own conclusion.** My first writeup called the fix two bugs. It was one coupled substitution, and the stock code was faithful to the paper. Catching that required going back to the math and running an ablation, and it is the difference between an accurate technical story and a wrong one that happens to sound impressive.
 
-The stock MLX implementation scored 0%. The finished configuration scores 100% at 16K on a 16GB laptop, with a KV cache format that is 3.6x smaller by calculation. The modified optiq package that produced these runs is not in the repo yet, so the repo cannot reproduce them on its own.
+The stock MLX implementation scored 0%. The finished configuration scores 100% at 16K on a 16GB laptop, and that result reproduces from the repo. The format is 4.5 bits per element, but stock optiq stores a byte per element and returns float32. On MLX the stored cache was only 1.29x smaller, and the peak went up.
 
 ---
 
 ## Update, October 5
 
 The first version of this post said TurboQuant cut KV cache memory by 3.5x to 4x, and that every number was reproducible from the repo. I had not measured the memory. The 3.6x figure is a calculation, and measured peak memory was 7% higher with TurboQuant. The repo also does not hold the modified optiq package yet. I changed the TL;DR, the results section, and the closing paragraph to match.
+
+Later the same day I finished the repo work behind those corrections. I rebuilt the lost optiq changes in `benchmarks/tq_patched.py` and reran the needle test. The 16K result reproduced, but 4K and 8K dropped to 0.5. I also measured the cache. It was only 1.29x smaller than FP16, and the higher peak comes from float32 output. The Ollama tok/s figure covers decode only, while the MLX figures include the prefill. I updated the affected sections again to match.
 
 ---
 
