@@ -138,7 +138,7 @@ Keys are far more sensitive to quantization noise than values, and the reason is
 
 The fix is asymmetric bit allocation, which I called **Hybrid K5/V4**: give keys 5 bits (4-bit MSE base plus the 1-bit QJL correction) and values 4 bits (MSE only). The average is 4.5 bits per element. With packed bits that would be 3.4x to 3.6x smaller than FP16, depending on how the norms are stored. This asymmetry is not in the paper; the paper treats K and V uniformly. Retrieval needed it, but it was not enough on its own. The same K5/V4 bits with the paper's Gaussian QJL still scored 0% at every length, with degenerate text.
 
-My round 1 post-mortem notes record the effect on reconstruction. With the fixes applied, the QJL correction dropped MSE from 0.00023 to 0.000129, a 44% reduction that matches the theoretical `pi/2 - 1` for the undamped estimator. The notes also record 99.7% cosine similarity on real activations. I did not keep the raw output for that measurement, so the repo cannot back these two numbers.
+My round 1 post-mortem notes record the effect on reconstruction. With the fixes applied, the QJL correction dropped MSE from 0.00023 to 0.000129, a 44% reduction that matches the theoretical `2 - pi/2` (about 43%) for the undamped estimator. The notes also record 99.7% cosine similarity on real activations. I did not keep the raw output for that measurement, so the repo cannot back these two numbers.
 
 ---
 
