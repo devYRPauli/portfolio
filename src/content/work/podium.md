@@ -16,7 +16,7 @@ links:
   - { label: GitHub, href: https://github.com/devYRPauli/podium }
 mode: build
 order: 3
-featuredOrder: 3
+featured: true
 ---
 
 One agent hands briefed work to a roster of bots. Every job carries an acceptance check that the runner executes, and the runner decides the verdict. Jobs outlive the session that launched them, and every settled job leaves a receipt.

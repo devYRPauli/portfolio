@@ -8,26 +8,24 @@ import MonthlyMerges from '../components/MonthlyMerges.astro';
 import memoji from '../assets/memoji.png';
 import { totals, namedFixes } from '../data/contributions';
 import { modes, type Mode } from '../lib/modes';
-import { workEntry, postEntry, getWriteups } from '../lib/entries';
+import { workEntry, postEntry, byOrder, getWriteups } from '../lib/entries';
 
 const work = await getCollection('work');
 const writeups = await getWriteups();
-const byFeatured = (a: { data: { featuredOrder?: number } }, b: { data: { featuredOrder?: number } }) =>
-  (a.data.featuredOrder ?? 0) - (b.data.featuredOrder ?? 0);
 
-/** Featured work in one mode, in the order its frontmatter asks for. */
+/** Featured work in one mode, in the same order as /work/. */
 const featured = (mode: Mode, withLinks = false) =>
   work
-    .filter((p) => p.data.mode === mode && p.data.featuredOrder !== undefined)
-    .sort(byFeatured)
+    .filter((p) => p.data.mode === mode && p.data.featured)
+    .sort(byOrder)
     .map((p) => workEntry(p, work, writeups, withLinks));
 
 // A featured project already links to its writeup, so the post is not listed twice.
-const onHome = new Set(work.filter((p) => p.data.featuredOrder !== undefined).map((p) => p.id));
+const onHome = new Set(work.filter((p) => p.data.featured).map((p) => p.id));
 const posts = (await getCollection('writing'))
   .filter((p) => !p.data.draft && p.data.featuredOrder !== undefined)
   .filter((p) => !(p.data.project && onHome.has(p.data.project.id)))
-  .sort(byFeatured)
+  .sort((a, b) => (a.data.featuredOrder ?? 0) - (b.data.featuredOrder ?? 0))
   .map((p) => postEntry(p));
 
 const jsonLd = {

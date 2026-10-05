@@ -17,5 +17,5 @@ links:
   - { label: Merged fix, href: https://github.com/google-research/tabfm/pull/42 }
 mode: evaluate
 order: 5
-featuredOrder: 5
+featured: true
 ---

@@ -33,8 +33,8 @@ const work = defineCollection({
     mode: z.enum(['build', 'evaluate', 'football']),
     supersededBy: reference('work').optional(),
     order: z.number(),
-    /** Shown on the home page, in this order within its mode. */
-    featuredOrder: z.number().int().positive().optional(),
+    /** Shown on the home page, in `order` within its mode. */
+    featured: z.boolean().default(false),
   }),
 });
 

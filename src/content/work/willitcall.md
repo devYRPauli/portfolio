@@ -17,5 +17,5 @@ links:
   - { label: Live matrix, href: https://devyrpauli.github.io/willitcall/ }
 mode: evaluate
 order: 2
-featuredOrder: 2
+featured: true
 ---

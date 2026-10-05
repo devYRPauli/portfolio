@@ -13,7 +13,7 @@ links:
   - { label: Chrome Web Store, href: https://chromewebstore.google.com/detail/applyscore/ibecekikdjelajpnjnmapejhahgcplim }
 mode: build
 order: 9
-featuredOrder: 7
+featured: true
 verdict:
   tried: "Postings hide in Shadow DOM"
   result: "8 extractors, 1 fallback"

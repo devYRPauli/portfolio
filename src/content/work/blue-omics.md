@@ -17,7 +17,7 @@ stack:
   - JBrowse2
 mode: build
 order: 1
-featuredOrder: 1
+featured: true
 ---
 
 An internal platform that gives the UF IFAS blueberry breeding program one place to search genes, run BLAST, browse assemblies, and read phenotype and metabolite data. It runs on a workstation inside the university network, so the data never leaves the building.
