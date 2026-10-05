@@ -229,6 +229,8 @@ There is also a broader community discussion tracking TurboQuant work in llama.c
 
 5. **Re-read the source and be willing to overturn your own conclusion.** My first writeup called the fix two bugs. It was one coupled substitution, and the stock code was faithful to the paper. Catching that required going back to the math and running an ablation, and it is the difference between an accurate technical story and a wrong one that happens to sound impressive.
 
+6. **Keep the code that produced the number.** I edited the installed package in place and never copied the edits out. When I later had to rebuild them, two of the four needle results did not come back.
+
 The stock MLX implementation scored 0%. The finished configuration scores 100% at 16K on a 16GB laptop, and that result reproduces from the repo. The format is 4.5 bits per element, but stock optiq stores a byte per element and returns float32. On MLX the stored cache was only 1.29x smaller, and the peak went up.
 
 ---
