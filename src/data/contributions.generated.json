@@ -1,7 +1,7 @@
 {
-  "updated": "2026-10-27",
-  "merged": 151,
-  "projects": 38,
+  "updated": "2026-10-28",
+  "merged": 153,
+  "projects": 40,
   "byRepo": {
     "infiniflow/ragflow": 34,
     "sqlfluff/sqlfluff": 12,
@@ -27,6 +27,7 @@
     "mozilla-ai/any-llm": 2,
     "steipete/bslog": 2,
     "steipete/tokentally": 2,
+    "adbar/trafilatura": 1,
     "google-research/tabfm": 1,
     "huggingface/peft": 1,
     "py-pdf/pypdf": 1,
@@ -40,7 +41,8 @@
     "steipete/sweetlink": 1,
     "steipete/TauTUI": 1,
     "steipete/vox": 1,
-    "TheTom/turboquant_plus": 1
+    "TheTom/turboquant_plus": 1,
+    "tox-dev/tox": 1
   },
   "byMonth": {
     "2026-05": 2,
@@ -48,7 +50,7 @@
     "2026-07": 14,
     "2026-08": 22,
     "2026-09": 31,
-    "2026-10": 44
+    "2026-10": 46
   },
   "ecosystem": {
     "owner": "steipete",
