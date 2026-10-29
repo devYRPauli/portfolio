@@ -1,9 +1,9 @@
 {
-  "updated": "2026-10-28",
-  "merged": 153,
+  "updated": "2026-10-29",
+  "merged": 155,
   "projects": 40,
   "byRepo": {
-    "infiniflow/ragflow": 34,
+    "infiniflow/ragflow": 35,
     "sqlfluff/sqlfluff": 12,
     "steipete/CodexBar": 11,
     "webpro-nl/knip": 9,
@@ -13,12 +13,12 @@
     "steipete/birdclaw": 5,
     "charmbracelet/crush": 4,
     "mem0ai/mem0": 4,
+    "ml-explore/mlx": 4,
     "steipete/oracle": 4,
     "steipete/RepoBar": 4,
     "BerriAI/litellm": 3,
     "docling-project/docling": 3,
     "lancedb/lancedb": 3,
-    "ml-explore/mlx": 3,
     "steipete/Markdansi": 3,
     "steipete/poltergeist": 3,
     "steipete/summarize": 3,
@@ -50,7 +50,7 @@
     "2026-07": 14,
     "2026-08": 22,
     "2026-09": 31,
-    "2026-10": 46
+    "2026-10": 48
   },
   "ecosystem": {
     "owner": "steipete",
