@@ -1,9 +1,9 @@
 {
-  "updated": "2026-11-09",
-  "merged": 157,
+  "updated": "2026-11-23",
+  "merged": 158,
   "projects": 40,
   "byRepo": {
-    "infiniflow/ragflow": 36,
+    "infiniflow/ragflow": 37,
     "sqlfluff/sqlfluff": 12,
     "steipete/CodexBar": 11,
     "webpro-nl/knip": 9,
@@ -51,7 +51,7 @@
     "2026-08": 22,
     "2026-09": 31,
     "2026-10": 48,
-    "2026-11": 2
+    "2026-11": 3
   },
   "ecosystem": {
     "owner": "steipete",
